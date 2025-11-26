@@ -1,8 +1,8 @@
+```javascript
 import { Link, useNavigate } from 'react-router-dom';
 import { useSupabase } from '../../contexts/SupabaseContext';
 import { useState } from 'react';
 import {
-    Search,
     Heart,
     MessageCircle,
     User,
@@ -26,14 +26,15 @@ export default function Navbar() {
 
     return (
         <nav className="navbar">
-            <div className="flex items-center space-x-6">
-                {/* Logo */}
-                <Link to="/" className="text-2xl font-bold text-primary-500">
-                    DEKONVI
+            <div className="navbar-container">
+
+                {/* LOGO */}
+                <Link to="/" className="navbar-logo">
+                    <span>DEKONVI</span>
                 </Link>
 
-                {/* Navigation Links - Desktop */}
-                <div className="hidden lg:flex items-center space-x-6">
+                {/* NAVIGATION PRINCIPALE (droite) */}
+                <div className="navbar-links">>
 
                     <Link to="/categories" className="navbar-link">
                         <Grid size={20} />
@@ -67,7 +68,7 @@ export default function Navbar() {
                                     <span>Mon compte</span>
                                 </button>
 
-                                <div className={`navbar-dropdown ${isDropdownOpen ? 'show' : ''}`}>
+                                <div className={`navbar - dropdown ${ isDropdownOpen ? 'show' : '' } `}>
                                     <Link to="/profile" className="navbar-dropdown-item">
                                         <User size={16} />
                                         Mon profil
