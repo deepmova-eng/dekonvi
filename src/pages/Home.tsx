@@ -128,30 +128,6 @@ export default function Home({ onProductSelect }: HomeProps) {
                             </button>
                         )}
                     </div>
-
-                    {/* Search and Filters */}
-                    <div className="max-w-7xl mx-auto px-2 sm:px-4 mt-4">
-                        <div className="flex flex-col sm:flex-row gap-3">
-                            {/* Search Bar */}
-                            <div className="flex-1 relative">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-                                <input
-                                    type="text"
-                                    placeholder="Rechercher une annonce..."
-                                    value={searchTerm}
-                                    onChange={(e) => setSearchTerm(e.target.value)}
-                                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                                />
-                            </div>
-
-                            {/* Advanced Filters */}
-                            <AdvancedFilters
-                                filters={filterValues}
-                                onChange={handleFilterChange}
-                                onReset={handleFilterReset}
-                            />
-                        </div>
-                    </div>
                 </div>
             </div>
 
