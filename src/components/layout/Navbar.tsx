@@ -153,21 +153,21 @@ export default function Navbar() {
                                 <div className="mega-menu-content">
                                     <div className="mega-menu-section">
                                         <h4>Électronique</h4>
-                                        <Link to="/categories/smartphones">Smartphones</Link>
-                                        <Link to="/categories/ordinateurs">Ordinateurs</Link>
-                                        <Link to="/categories/tv">TV & Audio</Link>
+                                        <Link to="/?category=multimedia" onClick={() => setActiveDropdown(null)}>Smartphones</Link>
+                                        <Link to="/?category=multimedia" onClick={() => setActiveDropdown(null)}>Ordinateurs</Link>
+                                        <Link to="/?category=multimedia" onClick={() => setActiveDropdown(null)}>TV & Audio</Link>
                                     </div>
                                     <div className="mega-menu-section">
                                         <h4>Mode</h4>
-                                        <Link to="/categories/vetements">Vêtements</Link>
-                                        <Link to="/categories/chaussures">Chaussures</Link>
-                                        <Link to="/categories/accessoires">Accessoires</Link>
+                                        <Link to="/?category=mode" onClick={() => setActiveDropdown(null)}>Vêtements</Link>
+                                        <Link to="/?category=mode" onClick={() => setActiveDropdown(null)}>Chaussures</Link>
+                                        <Link to="/?category=mode" onClick={() => setActiveDropdown(null)}>Accessoires</Link>
                                     </div>
                                     <div className="mega-menu-section">
                                         <h4>Maison</h4>
-                                        <Link to="/categories/meubles">Meubles</Link>
-                                        <Link to="/categories/decoration">Décoration</Link>
-                                        <Link to="/categories/electromenager">Électroménager</Link>
+                                        <Link to="/?category=maison" onClick={() => setActiveDropdown(null)}>Meubles</Link>
+                                        <Link to="/?category=maison" onClick={() => setActiveDropdown(null)}>Décoration</Link>
+                                        <Link to="/?category=maison" onClick={() => setActiveDropdown(null)}>Électroménager</Link>
                                     </div>
                                 </div>
                             </div>
