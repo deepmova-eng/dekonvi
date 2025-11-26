@@ -13,6 +13,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Messages from './pages/Messages';
 import CreateListing from './pages/CreateListing';
+import CreateListingPremium from './pages/CreateListingPremium';
 import Profile from './pages/Profile';
 import Favorites from './pages/Favorites';
 import ProductDetails from './pages/ProductDetails';
@@ -86,6 +87,14 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <CreateListing />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/create-premium"
+            element={
+              <ProtectedRoute>
+                <CreateListingPremium />
               </ProtectedRoute>
             }
           />
