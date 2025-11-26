@@ -132,7 +132,7 @@ export default function Home({ onProductSelect }: HomeProps) {
                     {/* SPACING FOR FIXED NAVBAR */}
                     <div style={{ paddingTop: '72px' }}>
                         {/* Search and Filters */}
-                        <div className="max-w-7xl mx-auto px-2 sm:px-4 mt-4">
+                        <div className="max-w-7xl mx-auto px-2 sm:px-4">
                             <div className="flex flex-col sm:flex-row gap-3">
                                 {/* Search Bar */}
                                 <div className="flex-1 relative">
