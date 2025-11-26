@@ -13,49 +13,45 @@ export default function MessageList({ messages }: MessageListProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { user: currentUser } = useSupabase();
 
+  // DEBUG: Check if messages are received
+  console.log('💬 [MessageList] Rendering, messages count:', messages?.length);
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // Group messages by sender
-  const groupedMessages: Message[][] = [];
-  let currentGroup: Message[] = [];
-
-  messages.forEach((message, index) => {
-    if (index === 0) {
-      currentGroup.push(message);
-    } else {
-      const prevMessage = messages[index - 1];
-      if (prevMessage.sender_id === message.sender_id) {
-        currentGroup.push(message);
-      } else {
-        groupedMessages.push([...currentGroup]);
-        currentGroup = [message];
-      }
-    }
-  });
-
-  if (currentGroup.length > 0) {
-    groupedMessages.push(currentGroup);
+  if (!messages || messages.length === 0) {
+    return (
+      <div className="messages-body">
+        <div className="text-center text-gray-500 py-8">
+          Aucun message pour le moment. Commencez la conversation !
+        </div>
+        <div ref={messagesEndRef} />
+      </div>
+    );
   }
 
+  // SIMPLIFIED RENDERING FOR DEBUG - No grouping
   return (
     <div className="messages-body">
-      {groupedMessages.map((group, groupIndex) => {
-        const isCurrentUser = group[0].sender_id === currentUser?.id;
+      {messages.map((message) => {
+        const isCurrentUser = message.sender_id === currentUser?.id;
 
         return (
-          <div key={groupIndex} className="flex flex-col gap-1">
-            {group.map((message) => (
-              <div
-                key={message.id}
-                className={`message ${isCurrentUser ? 'sent' : 'received'}`}
-              >
-                <div className="message-bubble">
-                  {message.content}
-                </div>
-              </div>
-            ))}
+          <div
+            key={message.id}
+            className={`message ${isCurrentUser ? 'sent' : 'received'}`}
+            style={{
+              marginBottom: '8px',
+              padding: '12px',
+              backgroundColor: isCurrentUser ? '#2DD181' : '#ffffff',
+              color: isCurrentUser ? 'white' : 'black',
+              borderRadius: '12px',
+              maxWidth: '70%',
+              alignSelf: isCurrentUser ? 'flex-end' : 'flex-start'
+            }}
+          >
+            {message.content}
           </div>
         );
       })}

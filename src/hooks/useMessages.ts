@@ -92,44 +92,54 @@ export function useMessages(conversationId: string | undefined) {
   return useQuery({
     queryKey: ['messages', conversationId],
     queryFn: async () => {
-      if (!conversationId) throw new Error('Conversation ID requis')
+      if (!conversationId) {
+        throw new Error('Conversation ID requis');
+      }
 
       // 1. Fetch messages
       const { data: messages, error: messagesError } = await supabase
         .from('messages')
         .select('*')
         .eq('conversation_id', conversationId)
-        .order('created_at', { ascending: true })
+        .order('created_at', { ascending: true });
 
-      if (messagesError) throw messagesError
+      if (messagesError) {
+        console.error('❌ [useMessages] Error:', messagesError);
+        throw messagesError;
+      }
 
-      if (!messages || messages.length === 0) return []
+      if (!messages || messages.length === 0) {
+        return [];
+      }
 
       // 2. Fetch profiles for senders
-      const senderIds = [...new Set(messages.map(m => m.sender_id))]
+      const senderIds = [...new Set(messages.map(m => m.sender_id))];
 
       const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
         .select('*')
-        .in('id', senderIds)
+        .in('id', senderIds);
 
       if (profilesError) {
-        console.error('Error fetching profiles:', profilesError)
+        console.error('⚠️ [useMessages] Profile error:', profilesError);
         // Return messages without profiles if profile fetch fails
-        return messages
+        return messages;
       }
 
       // 3. Merge data
       const enrichedMessages = messages.map(msg => ({
         ...msg,
         profiles: profiles?.find(p => p.id === msg.sender_id) || null
-      }))
+      }));
 
-      return enrichedMessages
+      return enrichedMessages;
     },
     enabled: !!conversationId,
-    staleTime: 1000 * 10, // 10 secondes
-    refetchInterval: 5000, // Polling toutes les 5 secondes
+    staleTime: 0, // Toujours fetch fresh
+    gcTime: 0, // Pas de cache
+    refetchInterval: 2000, // Polling toutes les 2 secondes (plus rapide)
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
   })
 }
 
@@ -210,17 +220,22 @@ export function useSendMessage() {
       }
       toast.error('Erreur lors de l\'envoi')
     },
-    onSuccess: (data) => {
-      queryClient.setQueryData(
-        ['messages', data.conversation_id],
-        (old: any[]) => {
-          // Replace temp message with real one
-          return old ? old.map(msg =>
-            msg.id.startsWith('temp-') ? data : msg
-          ) : [data]
+    onSuccess: (data, variables) => {
+      // Force immediate invalidation and refetch for instant display
+      queryClient.invalidateQueries({
+        queryKey: ['messages', variables.conversationId]
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['conversations']
+      });
+
+      // Auto-scroll to bottom after message is sent
+      setTimeout(() => {
+        const messagesBody = document.querySelector('.messages-body');
+        if (messagesBody) {
+          messagesBody.scrollTop = messagesBody.scrollHeight;
         }
-      )
-      queryClient.invalidateQueries({ queryKey: ['conversations'] })
+      }, 100);
     },
   })
 }
