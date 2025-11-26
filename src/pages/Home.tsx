@@ -26,6 +26,7 @@ export default function Home({ onProductSelect, searchQuery = '' }: HomeProps) {
     const { user, loading: authLoading } = useSupabase();
     const queryClient = useQueryClient();
     const [selectedCategory, setSelectedCategory] = useState('all');
+    const [selectedSubcategory, setSelectedSubcategory] = useState<string | undefined>();
     const [showLogin, setShowLogin] = useState(false);
     const [showRegister, setShowRegister] = useState(false);
     const [searchTerm, setSearchTerm] = useState(searchQuery);
@@ -33,14 +34,23 @@ export default function Home({ onProductSelect, searchQuery = '' }: HomeProps) {
     const navigate = useNavigate();
     const location = useLocation();
 
-    // Read category from URL query parameter
+    // Read category and subcategory from URL query parameters
     useEffect(() => {
         const params = new URLSearchParams(location.search);
         const categoryParam = params.get('category');
+        const subcategoryParam = params.get('subcategory');
+
         if (categoryParam) {
             setSelectedCategory(categoryParam);
-            // Remove category from URL after reading it
+        }
+        if (subcategoryParam) {
+            setSelectedSubcategory(subcategoryParam);
+        }
+
+        // Remove params from URL after reading them
+        if (categoryParam || subcategoryParam) {
             params.delete('category');
+            params.delete('subcategory');
             const newSearch = params.toString();
             navigate(newSearch ? `/?${newSearch}` : '/', { replace: true });
         }
@@ -75,6 +85,7 @@ export default function Home({ onProductSelect, searchQuery = '' }: HomeProps) {
         isLoading: loading
     } = useInfiniteListings({
         category: selectedCategory === 'all' ? undefined : selectedCategory,
+        subcategory: selectedSubcategory,
         search: debouncedSearch,
         status: 'active',
         minPrice: debouncedMinPrice,

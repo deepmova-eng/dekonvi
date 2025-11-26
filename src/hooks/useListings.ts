@@ -84,6 +84,7 @@ export function useListing(id: string | undefined) {
 export interface ListingFilters {
   status?: 'active' | 'pending' | 'rejected' | 'sold';
   category?: string;
+  subcategory?: string;
   minPrice?: number;
   maxPrice?: number;
   location?: string;
@@ -115,6 +116,11 @@ export function useInfiniteListings(filters?: ListingFilters) {
         query = query.eq('category', filters.category);
       } else {
         console.log('📦 No category filter applied');
+      }
+
+      if (filters?.subcategory) {
+        console.log('📦 Filtering by subcategory:', filters.subcategory);
+        query = query.eq('subcategory', filters.subcategory);
       }
 
       if (filters?.minPrice !== undefined) {
