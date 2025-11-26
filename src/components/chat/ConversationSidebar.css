@@ -1,0 +1,236 @@
+.conversations-sidebar {
+    background: white;
+    border-right: 1px solid #E5E7EB;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 360px;
+    flex-shrink: 0;
+}
+
+.sidebar-header {
+    padding: 24px 20px;
+    border-bottom: 1px solid #E5E7EB;
+    background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%);
+}
+
+.sidebar-header h2 {
+    margin: 0 0 4px 0;
+    font-size: 28px;
+    font-weight: 800;
+    color: #111827;
+    letter-spacing: -0.5px;
+}
+
+.conversations-count {
+    margin: 0;
+    font-size: 14px;
+    color: #6B7280;
+    font-weight: 500;
+}
+
+.conversations-list {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+/* Custom scrollbar */
+.conversations-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.conversations-list::-webkit-scrollbar-track {
+    background: #F9FAFB;
+}
+
+.conversations-list::-webkit-scrollbar-thumb {
+    background: #D1D5DB;
+    border-radius: 3px;
+}
+
+.conversations-list::-webkit-scrollbar-thumb:hover {
+    background: #9CA3AF;
+}
+
+/* No conversations state */
+.no-conversations {
+    padding: 60px 20px;
+    text-align: center;
+    color: #9CA3AF;
+}
+
+.no-conversations p {
+    font-size: 32px;
+    margin: 0 0 8px 0;
+}
+
+.no-conversations span {
+    font-size: 14px;
+    color: #6B7280;
+}
+
+/* Conversation item */
+.conversation-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 16px 20px;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    border-bottom: 1px solid #F3F4F6;
+    position: relative;
+}
+
+.conversation-item:hover {
+    background: #F9FAFB;
+}
+
+.conversation-item.active {
+    background: linear-gradient(90deg, #EEF2FF 0%, #E0E7FF 100%);
+    border-right: 3px solid #2DD181;
+}
+
+.conversation-item.active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: linear-gradient(180deg, #2DD181 0%, #26B56E 100%);
+    box-shadow: 0 0 10px rgba(45, 209, 129, 0.4);
+}
+
+/* Avatar */
+.conv-avatar {
+    flex-shrink: 0;
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s;
+}
+
+.conversation-item:hover .conv-avatar {
+    transform: scale(1.05);
+}
+
+.conv-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.avatar-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #2DD181 0%, #26B56E 100%);
+    color: white;
+    font-size: 22px;
+    font-weight: 700;
+}
+
+/* Content */
+.conv-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.conv-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 4px;
+    gap: 8px;
+}
+
+.conv-name {
+    font-weight: 700;
+    color: #111827;
+    font-size: 16px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1;
+}
+
+.conv-time {
+    font-size: 12px;
+    color: #9CA3AF;
+    font-weight: 500;
+    flex-shrink: 0;
+}
+
+.conv-listing {
+    font-size: 13px;
+    color: #6B7280;
+    margin: 0 0 4px 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-weight: 500;
+}
+
+.conv-preview {
+    font-size: 14px;
+    color: #6B7280;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.4;
+}
+
+.conversation-item.active .conv-preview {
+    color: #4B5563;
+    font-weight: 500;
+}
+
+/* Unread badge */
+.conv-badge {
+    flex-shrink: 0;
+    background: linear-gradient(135deg, #2DD181 0%, #26B56E 100%);
+    color: white;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 4px 8px;
+    border-radius: 12px;
+    min-width: 22px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(45, 209, 129, 0.3);
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.8;
+    }
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+    .conversations-sidebar {
+        width: 100%;
+        border-right: none;
+    }
+
+    .sidebar-header h2 {
+        font-size: 24px;
+    }
+
+    .conv-avatar {
+        width: 48px;
+        height: 48px;
+    }
+}

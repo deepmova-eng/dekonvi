@@ -1,0 +1,101 @@
+.message-input-container {
+    background: white;
+    border-top: 1px solid #E5E7EB;
+    padding: 16px 20px;
+    flex-shrink: 0;
+}
+
+.message-input-wrapper {
+    display: flex;
+    align-items: flex-end;
+    gap: 12px;
+    max-width: 100%;
+}
+
+.message-input-field {
+    flex: 1;
+    min-height: 44px;
+    max-height: 120px;
+    padding: 12px 16px;
+    border: 2px solid #E5E7EB;
+    border-radius: 24px;
+    font-size: 15px;
+    line-height: 1.5;
+    resize: none;
+    font-family: inherit;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow-y: auto;
+}
+
+.message-input-field:focus {
+    outline: none;
+    border-color: #2DD181;
+    box-shadow: 0 0 0 3px rgba(45, 209, 129, 0.1);
+}
+
+.message-input-field::placeholder {
+    color: #9CA3AF;
+}
+
+/* Custom scrollbar for textarea */
+.message-input-field::-webkit-scrollbar {
+    width: 6px;
+}
+
+.message-input-field::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.message-input-field::-webkit-scrollbar-thumb {
+    background: #D1D5DB;
+    border-radius: 3px;
+}
+
+.message-send-button {
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #2DD181 0%, #26B56E 100%);
+    border: none;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 8px rgba(45, 209, 129, 0.3);
+}
+
+.message-send-button:hover:not(:disabled) {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(45, 209, 129, 0.4);
+}
+
+.message-send-button:active:not(:disabled) {
+    transform: scale(0.95);
+}
+
+.message-send-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+    .message-input-container {
+        padding: 12px;
+    }
+
+    .message-input-field {
+        font-size: 16px;
+        /* Prevent zoom on iOS */
+        padding: 10px 14px;
+    }
+
+    .message-send-button {
+        width: 40px;
+        height: 40px;
+    }
+}
