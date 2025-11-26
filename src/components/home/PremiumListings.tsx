@@ -16,7 +16,7 @@ export default function PremiumListings({ listings, onProductSelect }: PremiumLi
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-lg font-bold text-gray-900">Annonces à la une</h2>
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
           {listings.map((listing) => (
             <ProductCard
               key={listing.id}

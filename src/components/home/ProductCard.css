@@ -187,37 +187,42 @@
     }
 }
 
-/* ==================== GRID LAYOUT ==================== */
+/* ==================== GRID LAYOUT (5 COLONNES COMPACT) ==================== */
 
 .products-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: var(--space-16);
+    grid-template-columns: repeat(5, 1fr);
+    /* 5 colonnes par défaut sur grand écran */
+    gap: 16px;
+    /* Gap réduit pour design compact */
     margin-top: var(--space-24);
 }
 
 /* Responsive */
-@media (min-width: 640px) {
+@media (max-width: 1280px) {
     .products-grid {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(4, 1fr);
+        gap: 14px;
     }
 }
 
-@media (min-width: 768px) {
+@media (max-width: 1024px) {
     .products-grid {
         grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
     }
 }
 
-@media (min-width: 1024px) {
+@media (max-width: 768px) {
     .products-grid {
-        grid-template-columns: repeat(4, 1fr);
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
     }
 }
 
-@media (min-width: 1280px) {
+@media (max-width: 480px) {
     .products-grid {
-        grid-template-columns: repeat(4, 1fr);
-        gap: var(--space-20);
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
     }
 }
