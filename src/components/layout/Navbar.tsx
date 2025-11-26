@@ -1,4 +1,3 @@
-```javascript
 import { Link, useNavigate } from 'react-router-dom';
 import { useSupabase } from '../../contexts/SupabaseContext';
 import { useState } from 'react';
