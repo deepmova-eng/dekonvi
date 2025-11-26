@@ -42,6 +42,14 @@ export default function ProductCard({ listing }: ProductCardProps) {
         }
     };
 
+    // Check if listing is new (< 48h)
+    const isNew = () => {
+        const createdAt = new Date(listing.createdAt);
+        const now = new Date();
+        const diffHours = (now.getTime() - createdAt.getTime()) / (1000 * 60 * 60);
+        return diffHours < 48;
+    };
+
     return (
         <Link to={`/listings/${listing.id}`} className="product-card">
             {/* Image container */}
@@ -53,10 +61,29 @@ export default function ProductCard({ listing }: ProductCardProps) {
                     loading="lazy"
                 />
 
-                {/* Badge Premium */}
-                {listing.is_premium && (
-                    <span className="product-card__badge-premium">Premium</span>
-                )}
+                {/* Badges Container */}
+                <div className="product-card__badges">
+                    {/* Badge Premium */}
+                    {listing.isPremium && (
+                        <span className="product-card__badge product-card__badge--premium">
+                            Premium
+                        </span>
+                    )}
+
+                    {/* Badge Nouveau */}
+                    {isNew() && (
+                        <span className="product-card__badge product-card__badge--new">
+                            Nouveau
+                        </span>
+                    )}
+
+                    {/* Badge Urgent */}
+                    {listing.isUrgent && (
+                        <span className="product-card__badge product-card__badge--urgent">
+                            Urgent
+                        </span>
+                    )}
+                </div>
 
                 {/* Bouton favori */}
                 <button
@@ -82,10 +109,10 @@ export default function ProductCard({ listing }: ProductCardProps) {
                 <div className="product-card__meta">
                     <span className="product-card__location">
                         <MapPin size={12} />
-                        {listing.location || listing.city || 'Lomé'}
+                        {listing.location || 'Lomé'}
                     </span>
                     <span className="product-card__timestamp">
-                        {formatTimestamp(listing.created_at)}
+                        {formatTimestamp(listing.createdAt.toString())}
                     </span>
                 </div>
             </div>

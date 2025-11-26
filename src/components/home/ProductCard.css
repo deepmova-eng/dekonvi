@@ -78,32 +78,73 @@
     /* Zoom plus prononcé */
 }
 
-/* Badge Premium */
-.product-card__badge-premium {
+/* ==================== BADGES SYSTEM ==================== */
+
+.product-card__badges {
     position: absolute;
     top: var(--space-8);
     left: var(--space-8);
-    background: linear-gradient(135deg, #2DD181 0%, #26B56E 100%);
-    color: var(--color-white);
-    padding: var(--space-4) var(--space-8);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    z-index: 2;
+}
+
+.product-card__badge {
+    display: inline-block;
+    padding: 4px 10px;
     border-radius: var(--radius-sm);
-    font-size: var(--font-xs);
+    font-size: 11px;
     font-weight: var(--font-bold);
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    box-shadow: 0 4px 12px rgba(45, 209, 129, 0.4);
-    animation: pulse-badge 2s ease-in-out infinite;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    backdrop-filter: blur(4px);
+    animation: slideInLeft 0.3s ease-out;
 }
 
-@keyframes pulse-badge {
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Badge Premium */
+.product-card__badge--premium {
+    background: linear-gradient(135deg, #2DD181 0%, #26B56E 100%);
+    color: white;
+    animation: pulse-badge 2s ease-in-out infinite, slideInLeft 0.3s ease-out;
+}
+
+/* Badge Nouveau */
+.product-card__badge--new {
+    background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+    color: white;
+    animation: slideInLeft 0.3s ease-out 0.1s both;
+}
+
+/* Badge Urgent */
+.product-card__badge--urgent {
+    background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+    color: white;
+    animation: pulse-urgent 1.5s ease-in-out infinite, slideInLeft 0.3s ease-out 0.2s both;
+}
+
+@keyframes pulse-urgent {
 
     0%,
     100% {
-        box-shadow: 0 4px 12px rgba(45, 209, 129, 0.4);
+        box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4);
     }
 
     50% {
-        box-shadow: 0 4px 20px rgba(45, 209, 129, 0.6);
+        box-shadow: 0 4px 16px rgba(239, 68, 68, 0.7);
     }
 }
 
