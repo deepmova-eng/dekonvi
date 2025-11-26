@@ -153,14 +153,14 @@ export default function Home({ onProductSelect }: HomeProps) {
 
                         {loading ? (
                             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                                    {[...Array(8)].map((_, i) => (
+                                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                                    {[...Array(10)].map((_, i) => (
                                         <ProductCardSkeleton key={i} />
                                     ))}
                                 </div>
                             </div>
                         ) : regularListings.length > 0 ? (
-                            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-4">
+                            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
                                 {regularListings.map((listing) => (
                                     <ProductCard
                                         key={listing.id}
