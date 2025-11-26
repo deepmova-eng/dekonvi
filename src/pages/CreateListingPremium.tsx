@@ -15,7 +15,6 @@ import { StepDetails } from '../components/create-listing/StepDetails'
 import { StepPhotos } from '../components/create-listing/StepPhotos'
 import { StepPricing } from '../components/create-listing/StepPricing'
 import { StepReview } from '../components/create-listing/StepReview'
-import { PreviewPane } from '../components/create-listing/PreviewPane'
 import './CreateListingPremium.css'
 
 const STEPS = [
@@ -29,7 +28,6 @@ const STEPS = [
 export default function CreateListingPremium() {
     const navigate = useNavigate()
     const [currentStep, setCurrentStep] = useState(1)
-    const [showPreview, setShowPreview] = useState(false)
 
     const [formData, setFormData] = useState({
         category: '',
@@ -71,95 +69,102 @@ export default function CreateListingPremium() {
     }
 
     return (
-        <StepReview
-            data={formData}
-            onEdit={(step) => setCurrentStep(step)}
-        />
-    )
-}
+        <div className="create-listing-page">
 
-{/* Navigation buttons */ }
-<div className="form-navigation">
-    {currentStep > 1 && (
-        <button
-            className="btn-secondary btn-large"
-            onClick={prevStep}
-        >
-            <ArrowLeft size={20} />
-            Précédent
-        </button>
-    )}
-
-    {currentStep < STEPS.length ? (
-        <button
-            className="btn-primary btn-large"
-            onClick={nextStep}
-        >
-            Suivant
-            <ArrowRight size={20} />
-        </button>
-    ) : (
-        <button
-            className="btn-primary btn-large"
-            onClick={handleSubmit}
-        <div className="create-listing-premium-container">
-            <div className="header-section">
-                <h1 className="page-title">Créer une annonce premium</h1>
-                <p className="page-subtitle">
-                    Vendez vos articles rapidement et facilement.
-                </p>
+            {/* Simple back button */}
+            <div className="simple-header">
+                <button className="back-button" onClick={() => navigate(-1)}>
+                    <ArrowLeft size={20} />
+                    Retour
+                </button>
             </div>
 
-            <div className="content-wrapper">
-                <div className="steps-indicator-section">
-                    <StepIndicator steps={STEPS} currentStep={currentStep} />
-                </div>
+            <div className="create-listing-body">
+                <div className="container-centered">
+                    <div className="form-card">
 
-                <div className="form-content-section">
-                    <div className="form-main">
-                        <div className="form-card">
-                            {renderStepContent()}
-
-                            {/* Navigation buttons */}
-                            <div className="form-navigation">
-                                {currentStep > 1 && (
-                                    <button
-                                        className="btn-secondary btn-large"
-                                        onClick={prevStep}
-                                    >
-                                        <ArrowLeft size={20} />
-                                        Précédent
-                                    </button>
-                                )}
-
-                                {currentStep < STEPS.length ? (
-                                    <button
-                                        className="btn-primary btn-large"
-                                        onClick={nextStep}
-                                    >
-                                        Suivant
-                                        <ArrowRight size={20} />
-                                    </button>
-                                ) : (
-                                    <button
-                                        className="btn-primary btn-large"
-                                        onClick={handleSubmit}
-                                    >
-                                        <CheckCircle size={20} />
-                                        Publier l'annonce
-                                    </button>
-                                )}
-                            </div>
-
-                            {/* Auto-save indicator */}
-                            <div className="auto-save-indicator">
-                                ✓ Brouillon sauvegardé automatiquement
-                            </div>
+                        {/* Step Indicator */}
+                        <div className="step-indicator-wrapper">
+                            <StepIndicator
+                                steps={STEPS}
+                                currentStep={currentStep}
+                            />
                         </div>
+
+                        {/* Step content */}
+                        {currentStep === 1 && (
+                            <StepCategory
+                                data={formData}
+                                updateData={updateFormData}
+                            />
+                        )}
+
+                        {currentStep === 2 && (
+                            <StepDetails
+                                data={formData}
+                                updateData={updateFormData}
+                            />
+                        )}
+
+                        {currentStep === 3 && (
+                            <StepPhotos
+                                data={formData}
+                                updateData={updateFormData}
+                            />
+                        )}
+
+                        {currentStep === 4 && (
+                            <StepPricing
+                                data={formData}
+                                updateData={updateFormData}
+                            />
+                        )}
+
+                        {currentStep === 5 && (
+                            <StepReview
+                                data={formData}
+                                onEdit={(step) => setCurrentStep(step)}
+                            />
+                        )}
+
+                        {/* Navigation buttons */}
+                        <div className="form-navigation">
+                            {currentStep > 1 && (
+                                <button
+                                    className="btn-secondary btn-large"
+                                    onClick={prevStep}
+                                >
+                                    <ArrowLeft size={20} />
+                                    Précédent
+                                </button>
+                            )}
+
+                            {currentStep < STEPS.length ? (
+                                <button
+                                    className="btn-primary btn-large"
+                                    onClick={nextStep}
+                                >
+                                    Suivant
+                                    <ArrowRight size={20} />
+                                </button>
+                            ) : (
+                                <button
+                                    className="btn-primary btn-large"
+                                    onClick={handleSubmit}
+                                >
+                                    <CheckCircle size={20} />
+                                    Publier l'annonce
+                                </button>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Auto-save indicator */}
+                    <div className="auto-save-indicator">
+                        ✓ Brouillon sauvegardé automatiquement
                     </div>
                 </div>
             </div>
         </div>
     )
 }
-```
