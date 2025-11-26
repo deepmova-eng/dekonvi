@@ -109,24 +109,30 @@ export default function Home({ onProductSelect }: HomeProps) {
     return (
         <div className="pb-20 lg:pb-0">
             {/* Header - Hidden on mobile, App.tsx provides mobile header */}
-            <div className="hidden lg:block bg-white border-b">
-                <div className="max-w-7xl mx-auto px-4 py-4">
-                    <div className="flex items-center justify-between mb-4">
-                        <div onClick={() => {
-                            setSearchTerm('');
-                            setSelectedCategory('all');
-                            window.scrollTo(0, 0);
-                        }} className="cursor-pointer">
-                            <h1 className="text-2xl font-bold text-primary-500">DEKONVI</h1>
+            <div className="bg-white border-b sticky top-[72px] z-50">
+                <div className="max-w-7xl mx-auto px-2 sm:px-4 py-4">
+                    <div className="flex items-center gap-4">
+                        {/* DEKONVI Title */}
+                        <h1 className="text-2xl font-bold text-gray-900">DEKONVI</h1>
+
+                        {/* Search Bar */}
+                        <div className="flex-1 relative">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                            <input
+                                type="text"
+                                placeholder="Rechercher une annonce..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                            />
                         </div>
-                        {!authLoading && !user && (
-                            <button
-                                onClick={handleLoginClick}
-                                className="bg-primary-500 text-white px-6 py-2 rounded-full hover:bg-primary-600 transition-colors"
-                            >
-                                Se connecter
-                            </button>
-                        )}
+
+                        {/* Advanced Filters Button */}
+                        <AdvancedFilters
+                            filters={filterValues}
+                            onChange={handleFilterChange}
+                            onReset={handleFilterReset}
+                        />
                     </div>
                 </div>
             </div>
