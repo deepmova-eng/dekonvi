@@ -152,13 +152,6 @@ export default function Home({ onProductSelect }: HomeProps) {
                             />
                         </div>
                     </div>
-
-                    {/* Category Filter */}
-                    <CategoryFilter
-                        selectedCategory={selectedCategory}
-                        onSelectCategory={setSelectedCategory}
-                    />
-                    <Camera className="text-gray-400 w-5 h-5" />
                 </div>
             </div>
 
@@ -180,13 +173,11 @@ export default function Home({ onProductSelect }: HomeProps) {
             {/* Advertising Slider - Hide during search */}
             {!searchTerm && <HeroSlider />}
 
-            {/* Categories - Hide during search */}
-            {!searchTerm && (
-                <CategoryFilter
-                    selectedCategory={selectedCategory}
-                    onSelectCategory={setSelectedCategory}
-                />
-            )}
+            {/* Categories - Show ONLY after slider */}
+            <CategoryFilter
+                selectedCategory={selectedCategory}
+                onSelectCategory={setSelectedCategory}
+            />
 
             {/* Premium Listings - Hide during search */}
             {!searchTerm && premiumListings.length > 0 && (
