@@ -12,7 +12,8 @@
 
 .create-listing-header {
     position: sticky;
-    top: 0;
+    top: 72px;
+    /* Hauteur de la navbar */
     z-index: 100;
     background: white;
     border-bottom: 1px solid #E5E7EB;
