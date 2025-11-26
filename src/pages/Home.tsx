@@ -128,172 +128,154 @@ export default function Home({ onProductSelect }: HomeProps) {
                             </button>
                         )}
                     </div>
-
-                    {/* SPACING FOR FIXED NAVBAR - ZERO GAP */}
-                    <div style={{ paddingTop: '72px' }}>
-                        {/* Search and Filters */}
-                        <div className="max-w-7xl mx-auto px-2 sm:px-4">
-                            <div className="flex flex-col sm:flex-row gap-3">
-                                {/* Search Bar */}
-                                <div className="flex-1 relative">
-                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-                                    <input
-                                        type="text"
-                                        placeholder="Rechercher une annonce..."
-                                        value={searchTerm}
-                                        onChange={(e) => setSearchTerm(e.target.value)}
-                                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                                    />
-                                </div>
-
-                                {/* Advanced Filters */}
-                                <AdvancedFilters
-                                    filters={filterValues}
-                                    onChange={handleFilterChange}
-                                    onReset={handleFilterReset}
+                    filters={filterValues}
+                    onChange={handleFilterChange}
+                    onReset={handleFilterReset}
                                 />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {/* Mobile Search Bar - Visible only on mobile */}
-            <div className="lg:hidden bg-white border-b px-4 py-3">
-                <div className="flex items-center bg-gray-100 rounded-lg p-3">
-                    <Search className="text-gray-400 w-5 h-5" />
-                    <input
-                        type="text"
-                        placeholder="Rechercher..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="flex-1 ml-2 bg-transparent outline-none text-gray-700 placeholder-gray-500"
-                    />
-                    <Camera className="text-gray-400 w-5 h-5" />
-                </div>
-            </div>
-
-            {/* Advertising Slider - Hide during search */}
-            {!searchTerm && <HeroSlider />}
-
-            {/* Categories - Show ONLY after slider */}
-            <CategoryFilter
-                selectedCategory={selectedCategory}
-                onSelectCategory={setSelectedCategory}
-            />
-
-            {/* Premium Listings - Hide during search */}
-            {!searchTerm && premiumListings.length > 0 && (
-                <div className="max-w-7xl mx-auto px-2 sm:px-4 mt-4">
-                    <PremiumListings
-                        listings={premiumListings}
-                        onProductSelect={onProductSelect}
-                    />
-                </div>
-            )}
-
-            {/* Main Content */}
-            <div className="bg-white py-4">
-                <div className="max-w-7xl mx-auto px-2 sm:px-4">
-                    {/* Listings */}
-                    <div>
-                        {/* Header with toggle */}
-                        <div className="mb-3 flex items-center justify-between">
-                            <h2 className="text-lg font-bold text-gray-900">
-                                {searchTerm
-                                    ? `Résultats de recherche pour "${searchTerm}"`
-                                    : selectedCategory === 'all'
-                                        ? 'Annonces récentes'
-                                        : `Annonces - ${categories.find(c => c.id === selectedCategory)?.name} `}
-                            </h2>
-
-                            {/* View Toggle */}
-                            <div className="flex items-center gap-2 bg-gray-100 rounded-lg p-1">
-                                <button
-                                    onClick={() => setViewMode('grid')}
-                                    className={`p - 2 rounded transition - all ${viewMode === 'grid'
-                                        ? 'bg-white shadow-sm text-primary'
-                                        : 'text-gray-500 hover:text-gray-700'
-                                        } `}
-                                    aria-label="Vue grille"
-                                >
-                                    <Grid3x3 size={20} />
-                                </button>
-                                <button
-                                    onClick={() => setViewMode('list')}
-                                    className={`p - 2 rounded transition - all ${viewMode === 'list'
-                                        ? 'bg-white shadow-sm text-primary'
-                                        : 'text-gray-500 hover:text-gray-700'
-                                        } `}
-                                    aria-label="Vue liste"
-                                >
-                                    <List size={20} />
-                                </button>
-                            </div>
-                        </div>
-
-                        {loading ? (
-                            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                                    {[...Array(10)].map((_, i) => (
-                                        <ProductCardSkeleton key={i} />
-                                    ))}
-                                </div>
-                            </div>
-                        ) : regularListings.length > 0 ? (
-                            <>
-                                {viewMode === 'grid' ? (
-                                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                                        {regularListings.map((listing) => (
-                                            <ProductCard
-                                                key={listing.id}
-                                                listing={listing}
-                                            />
-                                        ))}
-                                    </div>
-                                ) : (
-                                    <div className="flex flex-col gap-3">
-                                        {regularListings.map((listing) => (
-                                            <ProductListItem
-                                                key={listing.id}
-                                                listing={listing}
-                                            />
-                                        ))}
-                                    </div>
-                                )}
-
-                                {/* Infinite Scroll Sentinel */}
-                                {hasNextPage && (
-                                    <div ref={sentinelRef} className="py-4">
-                                        {isFetchingNextPage && (
-                                            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                                                {[...Array(5)].map((_, i) => (
-                                                    <ProductCardSkeleton key={`loading-${i}`} />
-                                                ))}
-                                            </div>
-                                        )}
-                                    </div>
-                                )}
-
-                                {/* End of list indicator */}
-                                {!hasNextPage && regularListings.length > 0 && (
-                                    <div className="text-center py-8 text-gray-500">
-                                        <p>Vous avez vu toutes les annonces disponibles</p>
-                                    </div>
-                                )}
-                            </>
-                        ) : (
-                            <div className="text-center py-10">
-                                <p className="text-gray-500">
-                                    {searchTerm
-                                        ? 'Aucun résultat trouvé pour votre recherche'
-                                        : 'Aucune annonce trouvée'}
-                                </p>
-                            </div>
-                        )}
-                    </div>
                 </div>
             </div>
         </div>
+                </div >
+            </div >
+
+        {/* Mobile Search Bar - Visible only on mobile */ }
+        < div className = "lg:hidden bg-white border-b px-4 py-3" >
+            <div className="flex items-center bg-gray-100 rounded-lg p-3">
+                <Search className="text-gray-400 w-5 h-5" />
+                <input
+                    type="text"
+                    placeholder="Rechercher..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="flex-1 ml-2 bg-transparent outline-none text-gray-700 placeholder-gray-500"
+                />
+                <Camera className="text-gray-400 w-5 h-5" />
+            </div>
+            </div >
+
+        {/* Advertising Slider - Hide during search */ }
+    { !searchTerm && <HeroSlider /> }
+
+    {/* Categories - Show ONLY after slider */ }
+    <CategoryFilter
+        selectedCategory={selectedCategory}
+        onSelectCategory={setSelectedCategory}
+    />
+
+    {/* Premium Listings - Hide during search */ }
+    {
+        !searchTerm && premiumListings.length > 0 && (
+            <div className="max-w-7xl mx-auto px-2 sm:px-4 mt-4">
+                <PremiumListings
+                    listings={premiumListings}
+                    onProductSelect={onProductSelect}
+                />
+            </div>
+        )
+    }
+
+    {/* Main Content */ }
+    <div className="bg-white py-4">
+        <div className="max-w-7xl mx-auto px-2 sm:px-4">
+            {/* Listings */}
+            <div>
+                {/* Header with toggle */}
+                <div className="mb-3 flex items-center justify-between">
+                    <h2 className="text-lg font-bold text-gray-900">
+                        {searchTerm
+                            ? `Résultats de recherche pour "${searchTerm}"`
+                            : selectedCategory === 'all'
+                                ? 'Annonces récentes'
+                                : `Annonces - ${categories.find(c => c.id === selectedCategory)?.name} `}
+                    </h2>
+
+                    {/* View Toggle */}
+                    <div className="flex items-center gap-2 bg-gray-100 rounded-lg p-1">
+                        <button
+                            onClick={() => setViewMode('grid')}
+                            className={`p - 2 rounded transition - all ${viewMode === 'grid'
+                                ? 'bg-white shadow-sm text-primary'
+                                : 'text-gray-500 hover:text-gray-700'
+                                } `}
+                            aria-label="Vue grille"
+                        >
+                            <Grid3x3 size={20} />
+                        </button>
+                        <button
+                            onClick={() => setViewMode('list')}
+                            className={`p - 2 rounded transition - all ${viewMode === 'list'
+                                ? 'bg-white shadow-sm text-primary'
+                                : 'text-gray-500 hover:text-gray-700'
+                                } `}
+                            aria-label="Vue liste"
+                        >
+                            <List size={20} />
+                        </button>
+                    </div>
+                </div>
+
+                {loading ? (
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                            {[...Array(10)].map((_, i) => (
+                                <ProductCardSkeleton key={i} />
+                            ))}
+                        </div>
+                    </div>
+                ) : regularListings.length > 0 ? (
+                    <>
+                        {viewMode === 'grid' ? (
+                            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                                {regularListings.map((listing) => (
+                                    <ProductCard
+                                        key={listing.id}
+                                        listing={listing}
+                                    />
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="flex flex-col gap-3">
+                                {regularListings.map((listing) => (
+                                    <ProductListItem
+                                        key={listing.id}
+                                        listing={listing}
+                                    />
+                                ))}
+                            </div>
+                        )}
+
+                        {/* Infinite Scroll Sentinel */}
+                        {hasNextPage && (
+                            <div ref={sentinelRef} className="py-4">
+                                {isFetchingNextPage && (
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                                        {[...Array(5)].map((_, i) => (
+                                            <ProductCardSkeleton key={`loading-${i}`} />
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {/* End of list indicator */}
+                        {!hasNextPage && regularListings.length > 0 && (
+                            <div className="text-center py-8 text-gray-500">
+                                <p>Vous avez vu toutes les annonces disponibles</p>
+                            </div>
+                        )}
+                    </>
+                ) : (
+                    <div className="text-center py-10">
+                        <p className="text-gray-500">
+                            {searchTerm
+                                ? 'Aucun résultat trouvé pour votre recherche'
+                                : 'Aucune annonce trouvée'}
+                        </p>
+                    </div>
+                )}
+            </div>
+        </div>
+    </div>
+        </div >
     );
 }
