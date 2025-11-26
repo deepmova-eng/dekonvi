@@ -1,0 +1,108 @@
+/* ============================================
+   STEP INDICATOR - PROGRESS CIRCLES
+   ============================================ */
+
+.step-indicator {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.step-indicator-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: relative;
+}
+
+/* Circle */
+.step-circle {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: white;
+    border: 2px solid #E5E7EB;
+    color: #9CA3AF;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    flex-shrink: 0;
+}
+
+.step-circle.current {
+    border-color: #2DD181;
+    background: linear-gradient(135deg, #2DD181 0%, #26B56E 100%);
+    color: white;
+    box-shadow: 0 4px 12px rgba(45, 209, 129, 0.3);
+    transform: scale(1.1);
+}
+
+.step-circle.completed {
+    border-color: #10B981;
+    background: #10B981;
+    color: white;
+}
+
+/* Label (desktop only) */
+.step-label {
+    display: none;
+    font-size: 14px;
+    font-weight: 600;
+    color: #6B7280;
+    white-space: nowrap;
+}
+
+@media (min-width: 768px) {
+    .step-label {
+        display: block;
+    }
+
+    .step-circle.current+.step-label {
+        color: #2DD181;
+    }
+
+    .step-circle.completed+.step-label {
+        color: #10B981;
+    }
+}
+
+/* Connector line */
+.step-connector {
+    width: 32px;
+    height: 2px;
+    background: #E5E7EB;
+    transition: all 0.3s ease;
+    display: none;
+}
+
+@media (min-width: 640px) {
+    .step-connector {
+        display: block;
+    }
+}
+
+.step-connector.completed {
+    background: #10B981;
+}
+
+/* Mobile compact */
+@media (max-width: 640px) {
+    .step-indicator {
+        gap: 4px;
+    }
+
+    .step-circle {
+        width: 32px;
+        height: 32px;
+    }
+
+    .step-circle svg {
+        width: 14px;
+        height: 14px;
+    }
+}
