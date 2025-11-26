@@ -5,19 +5,8 @@ import { Upload, X, Loader2, Truck } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useSupabase } from '../contexts/SupabaseContext';
 import { useCreateListing, useUpdateListing } from '../hooks/useListings';
+import { categories } from '../config/categories';
 import toast from 'react-hot-toast';
-
-const CATEGORIES = [
-  'Véhicules',
-  'Immobilier',
-  'Multimédia',
-  'Maison',
-  'Mode',
-  'Loisirs',
-  'Matériel Pro',
-  'Services',
-  'Autres'
-];
 
 const CONDITIONS = [
   { value: 'new', label: 'Neuf' },
@@ -32,6 +21,7 @@ interface ListingForm {
   description: string;
   price: number;
   category: string;
+  subcategory: string;
   location: string;
   condition: string;
   delivery_available: boolean;
@@ -60,6 +50,7 @@ export default function CreateListing() {
       description: editingListing?.description || '',
       price: editingListing?.price || '',
       category: editingListing?.category || '',
+      subcategory: editingListing?.subcategory || '',
       location: editingListing?.location || '',
       condition: editingListing?.condition || 'good',
       delivery_available: editingListing?.delivery_available || false,
@@ -67,6 +58,16 @@ export default function CreateListing() {
       hide_phone: editingListing?.hide_phone || false
     }
   });
+
+  const selectedCategory = watch('category');
+  const selectedCategoryObj = categories.find(c => c.id === selectedCategory);
+
+  // Reset subcategory when category changes
+  useEffect(() => {
+    if (selectedCategory && !isEditing) {
+      setValue('subcategory', '');
+    }
+  }, [selectedCategory, setValue, isEditing]);
 
   useEffect(() => {
     // Load saved draft if not editing
@@ -194,21 +195,62 @@ export default function CreateListing() {
         {/* Category */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Catégorie
+            Catégorie *
           </label>
           <select
             {...register('category', { required: 'La catégorie est requise' })}
-            className="w-full rounded-lg border-gray-300 focus:ring-primary-500 focus:border-primary-500"
+            className="w-full rounded-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
           >
             <option value="">Choisir une catégorie</option>
-            {CATEGORIES.map(cat => (
-              <option key={cat} value={cat}>{cat}</option>
+            {categories.map(cat => (
+              <option key={cat.id} value={cat.id}>{cat.name}</option>
             ))}
           </select>
           {errors.category && (
             <p className="mt-1 text-sm text-red-600">{errors.category.message}</p>
           )}
         </div>
+
+        {/* Subcategory - Cascading dropdown with animation */}
+        {selectedCategoryObj && (
+          <div
+            className="overflow-hidden transition-all duration-300 ease-out"
+            style={{
+              animation: 'slideDown 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+            }}
+          >
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Sous-catégorie *
+            </label>
+            <select
+              {...register('subcategory', { required: 'La sous-catégorie est requise' })}
+              className="w-full rounded-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all bg-gradient-to-r from-white to-gray-50"
+            >
+              <option value="">Choisir une sous-catégorie</option>
+              {selectedCategoryObj.subcategories.map(sub => (
+                <option key={sub.id} value={sub.id}>{sub.name}</option>
+              ))}
+            </select>
+            {errors.subcategory && (
+              <p className="mt-1 text-sm text-red-600">{errors.subcategory.message}</p>
+            )}
+          </div>
+        )}
+
+        <style>{`
+          @keyframes slideDown {
+            from {
+              opacity: 0;
+              transform: translateY(-10px);
+              max-height: 0;
+            }
+            to {
+              opacity: 1;
+              transform: translateY(0);
+              max-height: 100px;
+            }
+          }
+        `}</style>
 
         {/* Title */}
         <div>
