@@ -137,9 +137,6 @@ export default function Home({ onProductSelect }: HomeProps) {
                 </div>
             </div>
 
-            {/* Advertising Slider */}
-            <HeroSlider />
-
             {/* Mobile Search Bar - Visible only on mobile */}
             < div className="lg:hidden bg-white border-b px-4 py-3" >
                 <div className="flex items-center bg-gray-100 rounded-lg p-3">
