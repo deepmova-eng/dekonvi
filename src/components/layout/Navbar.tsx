@@ -17,21 +17,81 @@ import {
 } from 'lucide-react'
 import './Navbar.css'
 
+const TYPING_PHRASES = [
+    'Rechercher...',
+    'Trouver un iPhone...',
+    'Chercher une voiture...',
+    'Découvrir un appartement...',
+    'Acheter un vélo...',
+    'Trouver des vêtements...'
+]
+
 export default function Navbar() {
     const { user, signOut } = useSupabase()
     const location = useLocation()
     const [isScrolled, setIsScrolled] = useState(false)
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
     const [activeDropdown, setActiveDropdown] = useState<string | null>(null)
+    const [scrollProgress, setScrollProgress] = useState(0)
+    const [typingPlaceholder, setTypingPlaceholder] = useState('')
+    const [currentPhraseIndex, setCurrentPhraseIndex] = useState(0)
+    const [isTyping, setIsTyping] = useState(true)
 
-    // Detect scroll
+    // Detect scroll + progress bar
     useEffect(() => {
         const handleScroll = () => {
             setIsScrolled(window.scrollY > 20)
+
+            // Calculate scroll progress
+            const windowHeight = window.innerHeight
+            const documentHeight = document.documentElement.scrollHeight
+            const scrollTop = window.scrollY
+            const scrollableHeight = documentHeight - windowHeight
+            const progress = scrollableHeight > 0 ? (scrollTop / scrollableHeight) * 100 : 0
+            setScrollProgress(Math.min(progress, 100))
         }
         window.addEventListener('scroll', handleScroll)
         return () => window.removeEventListener('scroll', handleScroll)
     }, [])
+
+    // Typing placeholder animation
+    useEffect(() => {
+        const currentPhrase = TYPING_PHRASES[currentPhraseIndex]
+        let currentIndex = 0
+        let timeoutId: NodeJS.Timeout
+
+        if (isTyping) {
+            // Typing effect
+            const typeNextChar = () => {
+                if (currentIndex <= currentPhrase.length) {
+                    setTypingPlaceholder(currentPhrase.substring(0, currentIndex))
+                    currentIndex++
+                    timeoutId = setTimeout(typeNextChar, 100)
+                } else {
+                    // Pause before deleting
+                    timeoutId = setTimeout(() => setIsTyping(false), 2000)
+                }
+            }
+            typeNextChar()
+        } else {
+            // Deleting effect
+            const deleteNextChar = () => {
+                if (currentIndex >= 0) {
+                    setTypingPlaceholder(currentPhrase.substring(0, currentIndex))
+                    currentIndex--
+                    timeoutId = setTimeout(deleteNextChar, 50)
+                } else {
+                    // Move to next phrase
+                    setCurrentPhraseIndex((prev) => (prev + 1) % TYPING_PHRASES.length)
+                    setIsTyping(true)
+                }
+            }
+            currentIndex = currentPhrase.length
+            deleteNextChar()
+        }
+
+        return () => clearTimeout(timeoutId)
+    }, [currentPhraseIndex, isTyping])
 
     // Close dropdowns on outside click
     useEffect(() => {
@@ -48,6 +108,13 @@ export default function Navbar() {
 
     return (
         <nav className={`navbar-premium ${isScrolled ? 'scrolled' : ''}`}>
+            {/* Scroll Progress Bar */}
+            <div className="scroll-progress-bar">
+                <div
+                    className="scroll-progress-fill"
+                    style={{ width: `${scrollProgress}%` }}
+                />
+            </div>
             <div className="navbar-container">
 
                 {/* LOGO */}
@@ -137,7 +204,7 @@ export default function Navbar() {
                         <Search size={18} className="search-icon" />
                         <input
                             type="text"
-                            placeholder="Rechercher..."
+                            placeholder={typingPlaceholder}
                             className="search-input"
                         />
                         <kbd className="search-shortcut">⌘K</kbd>
