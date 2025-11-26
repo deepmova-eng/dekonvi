@@ -34,7 +34,7 @@ export default function Navbar() {
                 </Link>
 
                 {/* NAVIGATION PRINCIPALE (droite) */}
-                <div className="navbar-links">>
+                <div className="navbar-links">
 
                     <Link to="/categories" className="navbar-link">
                         <Grid size={20} />
