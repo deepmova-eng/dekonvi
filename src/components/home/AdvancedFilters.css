@@ -62,7 +62,8 @@
 .advanced-filters__panel {
     position: absolute;
     top: calc(100% + 8px);
-    left: 0;
+    right: 0;
+    /* Changed from left: 0 to right: 0 */
     width: 400px;
     max-width: 90vw;
     background: white;
