@@ -157,6 +157,19 @@ export default function Home({ onProductSelect }: HomeProps) {
                     <CategoryFilter
                         selectedCategory={selectedCategory}
                         onSelectCategory={setSelectedCategory}
+                    />
+                    <Camera className="text-gray-400 w-5 h-5" />
+                </div>
+            </div>
+
+            {/* Mobile Search Bar - Visible only on mobile */}
+            <div className="lg:hidden bg-white border-b px-4 py-3">
+                <div className="flex items-center bg-gray-100 rounded-lg p-3">
+                    <Search className="text-gray-400 w-5 h-5" />
+                    <input
+                        type="text"
+                        placeholder="Rechercher..."
+                        value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         className="flex-1 ml-2 bg-transparent outline-none text-gray-700 placeholder-gray-500"
                     />
