@@ -112,14 +112,10 @@ export function useInfiniteListings(filters?: ListingFilters) {
       }
 
       if (filters?.category) {
-        console.log('📦 Filtering by category:', filters.category);
         query = query.eq('category', filters.category);
-      } else {
-        console.log('📦 No category filter applied');
       }
 
       if (filters?.subcategory) {
-        console.log('📦 Filtering by subcategory:', filters.subcategory);
         query = query.eq('subcategory', filters.subcategory);
       }
 
@@ -140,8 +136,6 @@ export function useInfiniteListings(filters?: ListingFilters) {
       }
 
       const { data, error, count } = await query;
-
-      console.log('📊 Query results:', { count, dataLength: data?.length, category: filters?.category });
 
       if (error) throw error;
 
