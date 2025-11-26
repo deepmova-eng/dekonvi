@@ -4,6 +4,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { useIsFavorite, useToggleFavorite } from '../../hooks/useFavorites';
 import { useSupabase } from '../../contexts/SupabaseContext';
+import OptimizedImage from '../common/OptimizedImage';
 import type { Listing } from '../../types/listing';
 import './ProductListItem.css';
 
@@ -52,13 +53,13 @@ export default function ProductListItem({ listing }: ProductListItemProps) {
     };
 
     return (
-        <Link to={`/listings/${listing.id}`} className="product-list-item">
+        <Link to={`/ listings / ${listing.id} `} className="product-list-item">
             {/* Image */}
             <div className="product-list-item__image-container">
-                <img
+                <OptimizedImage
                     src={listing.images?.[0] || '/placeholder.png'}
                     alt={listing.title}
-                    className="product-list-item__image"
+                    aspectRatio="4/3"
                     loading="lazy"
                 />
 
@@ -84,7 +85,7 @@ export default function ProductListItem({ listing }: ProductListItemProps) {
                 {/* Bouton favori */}
                 <button
                     onClick={handleFavoriteClick}
-                    className={`product-list-item__favorite ${isFavorite ? 'active' : ''}`}
+                    className={`product - list - item__favorite ${isFavorite ? 'active' : ''} `}
                     aria-label={isFavorite ? 'Retirer des favoris' : 'Ajouter aux favoris'}
                 >
                     <Heart size={18} fill={isFavorite ? 'currentColor' : 'none'} />
