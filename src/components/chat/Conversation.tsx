@@ -4,7 +4,7 @@ import { supabase } from '../../lib/supabase';
 import { useQueryClient } from '@tanstack/react-query';
 import MessageList from './MessageList';
 import MessageInput from './MessageInput';
-import { useMessages, useSendMessage } from '../../hooks/useMessages';
+import { useSendMessage } from '../../hooks/useMessages';
 import { useNotificationsContext } from '../../contexts/NotificationsContext';
 
 interface ConversationProps {
@@ -13,10 +13,13 @@ interface ConversationProps {
 }
 
 export default function Conversation({ conversationId, onBack }: ConversationProps) {
-  const { data: messages } = useMessages(conversationId);
+  // BYPASS REACT QUERY - Direct Supabase fetch
+  const [messages, setMessages] = useState<any[]>([]);
+  const [messagesLoading, setMessagesLoading] = useState(true);
   const { mutate: sendMessage } = useSendMessage();
   const { setCurrentConversationId } = useNotificationsContext();
   const queryClient = useQueryClient();
+
   const [conversationData, setConversationData] = useState<{
     listingId?: string;
     listingTitle?: string;
@@ -28,6 +31,57 @@ export default function Conversation({ conversationId, onBack }: ConversationPro
     otherParticipantResponseTime?: number;
   } | null>(null);
   const [loading, setLoading] = useState(true);
+
+  // DIRECT FETCH: Bypass React Query and fetch messages directly
+  useEffect(() => {
+    if (!conversationId) return;
+
+    const fetchMessages = async () => {
+      setMessagesLoading(true);
+      console.log('📡 [Direct Fetch] Fetching messages for:', conversationId);
+
+      const { data, error } = await supabase
+        .from('messages')
+        .select('*')
+        .eq('conversation_id', conversationId)
+        .order('created_at', { ascending: true });
+
+      if (error) {
+        console.error('❌ [Direct Fetch] Error:', error);
+      } else {
+        console.log('✅ [Direct Fetch] Loaded messages:', data?.length);
+        setMessages(data || []);
+      }
+
+      setMessagesLoading(false);
+    };
+
+    fetchMessages();
+
+    // Realtime subscription for new messages
+    console.log('🔔 [Direct Fetch] Setting up realtime subscription');
+    const channel = supabase
+      .channel(`messages:${conversationId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'messages',
+          filter: `conversation_id=eq.${conversationId}`
+        },
+        (payload) => {
+          console.log('🔔 [Direct Fetch] New message received:', payload.new);
+          setMessages(prev => [...prev, payload.new as any]);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      console.log('🔔 [Direct Fetch] Unsubscribing');
+      supabase.removeChannel(channel);
+    };
+  }, [conversationId]);
 
   // Fonction pour marquer les messages comme lus
   const markMessagesAsRead = async () => {
@@ -166,10 +220,16 @@ export default function Conversation({ conversationId, onBack }: ConversationPro
 
             console.log('✅ [Realtime] Message marked as read automatically');
 
-            // Invalidate queries to update UI
-            queryClient.invalidateQueries({ queryKey: ['unread-messages-count'] });
-            queryClient.invalidateQueries({ queryKey: ['messages', conversationId] });
-            queryClient.invalidateQueries({ queryKey: ['conversations'] });
+            // Invalidate queries to update UI IMMEDIATELY
+            queryClient.invalidateQueries({
+              queryKey: ['messages', conversationId]
+            });
+            queryClient.invalidateQueries({
+              queryKey: ['unread-messages-count']
+            });
+            queryClient.invalidateQueries({
+              queryKey: ['conversations']
+            });
           }
         }
       )
@@ -181,7 +241,8 @@ export default function Conversation({ conversationId, onBack }: ConversationPro
     };
   }, [conversationId]);
 
-  if (loading) {
+  // Show loading while messages or conversation data is loading
+  if (loading || messagesLoading) {
     return (
       <div className="flex justify-center items-center h-full">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500"></div>
@@ -242,8 +303,25 @@ export default function Conversation({ conversationId, onBack }: ConversationPro
         </div>
       </div>
 
-      <MessageList messages={messages || []} />
-      <MessageInput onSend={(content) => sendMessage({ conversationId, content })} />
+      <MessageList messages={messages} />
+      <MessageInput onSend={async (content) => {
+        // Send message
+        sendMessage({ conversationId, content });
+
+        // Manually refetch messages after sending
+        setTimeout(async () => {
+          const { data } = await supabase
+            .from('messages')
+            .select('*')
+            .eq('conversation_id', conversationId)
+            .order('created_at', { ascending: true });
+
+          if (data) {
+            console.log('🔄 [Manual Refetch] After send:', data.length);
+            setMessages(data);
+          }
+        }, 500);
+      }} />
     </>
   );
 }
