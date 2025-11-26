@@ -4,6 +4,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { useIsFavorite, useToggleFavorite } from '../../hooks/useFavorites';
 import { useSupabase } from '../../contexts/SupabaseContext';
+import OptimizedImage from '../common/OptimizedImage';
 import type { Listing } from '../../types/listing';
 import './ProductCard.css';
 
@@ -58,7 +59,7 @@ export default function ProductCard({ listing }: ProductCardProps) {
         <Link to={`/listings/${listing.id}`} className="product-card">
             {/* Image container */}
             <div className="product-card__image-container">
-                <img
+                <OptimizedImage
                     src={listing.images?.[0] || '/placeholder.png'}
                     alt={listing.title}
                     className="product-card__image"

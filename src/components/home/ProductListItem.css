@@ -33,14 +33,11 @@
 }
 
 .product-list-item__image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    /* Styles handled by OptimizedImage component */
 }
 
 .product-list-item:hover .product-list-item__image {
-    transform: scale(1.05);
+    /* Hover handled by OptimizedImage + container */
 }
 
 /* Badges */
