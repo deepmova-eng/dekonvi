@@ -60,11 +60,13 @@
     display: flex;
     align-items: center;
     text-decoration: none;
-    transition: transform 0.2s ease;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
 }
 
 .navbar-logo:hover {
-    transform: scale(1.05);
+    transform: scale(1.05) rotateY(5deg);
+    filter: drop-shadow(0 0 12px rgba(45, 209, 129, 0.4));
 }
 
 .logo-text {
@@ -75,6 +77,20 @@
     -webkit-text-fill-color: transparent;
     background-clip: text;
     letter-spacing: -0.5px;
+    position: relative;
+    animation: logoGlow 3s ease-in-out infinite;
+}
+
+@keyframes logoGlow {
+
+    0%,
+    100% {
+        filter: brightness(1);
+    }
+
+    50% {
+        filter: brightness(1.2);
+    }
 }
 
 /* ============================================
@@ -105,6 +121,41 @@
     position: relative;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     white-space: nowrap;
+    overflow: hidden;
+}
+
+.nav-link::before {
+    content: '';
+    position: absolute;
+    bottom: 6px;
+    left: 50%;
+    right: 50%;
+    height: 2px;
+    background: linear-gradient(90deg, #2DD181, #26B56E);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    opacity: 0;
+}
+
+.nav-link:hover::before {
+    left: 16px;
+    right: 16px;
+    opacity: 1;
+}
+
+.nav-link:hover svg {
+    animation: iconBounce 0.5s ease;
+}
+
+@keyframes iconBounce {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-4px);
+    }
 }
 
 .nav-link:hover,
@@ -143,6 +194,21 @@
     font-weight: 700;
     border-radius: 10px;
     margin-left: 4px;
+    animation: badgePulse 2s ease-in-out infinite;
+}
+
+@keyframes badgePulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+    }
+
+    50% {
+        transform: scale(1.1);
+        box-shadow: 0 0 0 4px rgba(239, 68, 68, 0);
+    }
 }
 
 /* Chevron rotation */
@@ -323,17 +389,37 @@
     border-radius: 10px;
     border: none;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: 0 4px 12px rgba(45, 209, 129, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-publish::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg,
+            transparent,
+            rgba(255, 255, 255, 0.3),
+            transparent);
+    transition: left 0.5s;
+}
+
+.btn-publish:hover::before {
+    left: 100%;
 }
 
 .btn-publish:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(45, 209, 129, 0.4);
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 8px 24px rgba(45, 209, 129, 0.4);
 }
 
 .btn-publish:active {
-    transform: translateY(0);
+    transform: translateY(0) scale(0.98);
 }
 
 .btn-login {
@@ -370,14 +456,40 @@
     border: 2px solid transparent;
     background: white;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     overflow: hidden;
     padding: 0;
 }
 
+.user-avatar::before {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #2DD181, #26B56E, #2DD181);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: -1;
+    animation: rotate 3s linear infinite;
+}
+
+@keyframes rotate {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.user-avatar:hover::before {
+    opacity: 1;
+}
+
 .user-avatar:hover {
     border-color: #2DD181;
-    transform: scale(1.05);
+    transform: scale(1.1);
 }
 
 .user-avatar img {
