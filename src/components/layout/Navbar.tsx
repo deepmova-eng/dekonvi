@@ -15,6 +15,7 @@ import {
     Menu,
     X
 } from 'lucide-react'
+import { categories } from '../../config/categories'
 import './Navbar.css'
 
 const TYPING_PHRASES = [
@@ -151,24 +152,20 @@ export default function Navbar() {
                         {activeDropdown === 'categories' && (
                             <div className="mega-menu">
                                 <div className="mega-menu-content">
-                                    <div className="mega-menu-section">
-                                        <h4>Électronique</h4>
-                                        <Link to="/?category=multimedia" onClick={() => setActiveDropdown(null)}>Smartphones</Link>
-                                        <Link to="/?category=multimedia" onClick={() => setActiveDropdown(null)}>Ordinateurs</Link>
-                                        <Link to="/?category=multimedia" onClick={() => setActiveDropdown(null)}>TV & Audio</Link>
-                                    </div>
-                                    <div className="mega-menu-section">
-                                        <h4>Mode</h4>
-                                        <Link to="/?category=mode" onClick={() => setActiveDropdown(null)}>Vêtements</Link>
-                                        <Link to="/?category=mode" onClick={() => setActiveDropdown(null)}>Chaussures</Link>
-                                        <Link to="/?category=mode" onClick={() => setActiveDropdown(null)}>Accessoires</Link>
-                                    </div>
-                                    <div className="mega-menu-section">
-                                        <h4>Maison</h4>
-                                        <Link to="/?category=maison" onClick={() => setActiveDropdown(null)}>Meubles</Link>
-                                        <Link to="/?category=maison" onClick={() => setActiveDropdown(null)}>Décoration</Link>
-                                        <Link to="/?category=maison" onClick={() => setActiveDropdown(null)}>Électroménager</Link>
-                                    </div>
+                                    {categories.slice(0, 3).map((category) => (
+                                        <div key={category.id} className="mega-menu-section">
+                                            <h4>{category.name}</h4>
+                                            {category.subcategories.map((sub) => (
+                                                <Link
+                                                    key={sub.id}
+                                                    to={`/?category=${category.id}&subcategory=${sub.id}`}
+                                                    onClick={() => setActiveDropdown(null)}
+                                                >
+                                                    {sub.name}
+                                                </Link>
+                                            ))}
+                                        </div>
+                                    ))}
                                 </div>
                             </div>
                         )}
