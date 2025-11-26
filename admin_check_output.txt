@@ -1,0 +1,16 @@
+Admin Profile: [
+  {
+    "id": "4245a739-b795-40e7-8503-ebc058b493cc",
+    "name": "Admin Dekonvi",
+    "email": "admin@dekonvi.com",
+    "avatar_url": null,
+    "phone": null,
+    "location": null,
+    "role": "admin",
+    "rating": 0,
+    "total_ratings": 0,
+    "is_recommended": false,
+    "created_at": "2025-11-20T15:23:27.507871+00:00",
+    "last_seen": "2025-11-20T15:23:27.507871+00:00"
+  }
+]
