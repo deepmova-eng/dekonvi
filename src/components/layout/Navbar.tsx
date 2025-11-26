@@ -210,17 +210,10 @@ export default function Navbar() {
                     {user ? (
                         <>
                             {/* Bouton Publier */}
-                            {user ? (
-                                <Link to="/create-premium" className="btn-publish">
-                                    <Plus size={20} strokeWidth={2.5} />
-                                    <span className="btn-text">Publier</span>
-                                </Link>
-                            ) : (
-                                <button onClick={() => navigate('/login')} className="btn-publish">
-                                    <Plus size={20} strokeWidth={2.5} />
-                                    <span className="btn-text">Publier</span>
-                                </button>
-                            )}
+                            <Link to="/create-premium" className="btn-publish">
+                                <PlusCircle size={18} />
+                                <span>Publier</span>
+                            </Link>
 
                             {/* Menu utilisateur */}
                             <div className="user-menu">
