@@ -1,33 +1,50 @@
-import React, { useState, useEffect } from 'react';
-import { Search, Camera, Grid3x3, List } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Search, Camera, Grid, List } from 'lucide-react';
 import { useSupabase } from '../contexts/SupabaseContext';
 import CategoryFilter from '../components/home/CategoryFilter';
-import ProductCard from '../components/home/ProductCard';
+import ProductCard from '../components/products/ProductCard';
 import ProductListItem from '../components/home/ProductListItem';
 import HeroSlider from '../components/home/HeroSlider';
 import PremiumListings from '../components/home/PremiumListings';
 import AdvancedFilters, { type FilterValues } from '../components/home/AdvancedFilters';
-import Login from './Login';
-import Register from './Register';
+import Login from './auth/Login';
+import Register from './auth/Register';
 import { useInfiniteListings } from '../hooks/useListings';
 import { useInfiniteScroll } from '../hooks/useInfiniteScroll';
 import { useDebounce } from '../hooks/useDebounce';
 import { categories } from '../config/categories';
 import ProductCardSkeleton from '../components/ui/skeletons/ProductCardSkeleton';
 import { useQueryClient } from '@tanstack/react-query';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 interface HomeProps {
     onProductSelect: (id: string) => void;
+    searchQuery?: string;
 }
 
-export default function Home({ onProductSelect }: HomeProps) {
+export default function Home({ onProductSelect, searchQuery = '' }: HomeProps) {
     const { user, loading: authLoading } = useSupabase();
     const queryClient = useQueryClient();
     const [selectedCategory, setSelectedCategory] = useState('all');
     const [showLogin, setShowLogin] = useState(false);
     const [showRegister, setShowRegister] = useState(false);
-    const [searchTerm, setSearchTerm] = useState('');
+    const [searchTerm, setSearchTerm] = useState(searchQuery);
     const [filterValues, setFilterValues] = useState<FilterValues>({});
+    const navigate = useNavigate();
+    const location = useLocation();
+
+    // Read category from URL query parameter
+    useEffect(() => {
+        const params = new URLSearchParams(location.search);
+        const categoryParam = params.get('category');
+        if (categoryParam) {
+            setSelectedCategory(categoryParam);
+            // Remove category from URL after reading it
+            params.delete('category');
+            const newSearch = params.toString();
+            navigate(newSearch ? `/?${newSearch}` : '/', { replace: true });
+        }
+    }, [location.search, navigate]);
 
     // View mode state (grid or list) with localStorage persistence
     const [viewMode, setViewMode] = useState<'grid' | 'list'>(() => {
