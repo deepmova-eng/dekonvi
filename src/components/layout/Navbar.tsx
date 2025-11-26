@@ -26,24 +26,14 @@ export default function Navbar() {
 
     return (
         <nav className="navbar">
-            <div className="navbar-container">
-
-                {/* LOGO */}
-                <Link to="/" className="navbar-logo">
-                    <span>DEKONVI</span>
+            <div className="flex items-center space-x-6">
+                {/* Logo */}
+                <Link to="/" className="text-2xl font-bold text-primary-500">
+                    DEKONVI
                 </Link>
 
-                {/* BARRE DE RECHERCHE (centre) */}
-                <div className="navbar-search">
-                    <Search size={20} />
-                    <input
-                        type="text"
-                        placeholder="Rechercher des annonces..."
-                    />
-                </div>
-
-                {/* NAVIGATION PRINCIPALE (droite) */}
-                <div className="navbar-links">
+                {/* Navigation Links - Desktop */}
+                <div className="hidden lg:flex items-center space-x-6">
 
                     <Link to="/categories" className="navbar-link">
                         <Grid size={20} />
