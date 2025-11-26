@@ -12,4 +12,5 @@ export interface Listing {
   createdAt: Date;
   deliveryAvailable?: boolean;
   isPremium?: boolean;
+  isUrgent?: boolean; // Nouveau champ pour badge "Urgent"
 }
