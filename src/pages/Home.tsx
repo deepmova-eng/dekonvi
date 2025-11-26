@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
-import { Search, Camera } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Search, Camera, Grid3x3, List } from 'lucide-react';
 import { useSupabase } from '../contexts/SupabaseContext';
 import CategoryFilter from '../components/home/CategoryFilter';
 import ProductCard from '../components/home/ProductCard';
+import ProductListItem from '../components/home/ProductListItem';
 import HeroSlider from '../components/home/HeroSlider';
 import PremiumListings from '../components/home/PremiumListings';
 import Login from './Login';
@@ -22,6 +23,17 @@ export default function Home({ onProductSelect }: HomeProps) {
     const [showLogin, setShowLogin] = useState(false);
     const [showRegister, setShowRegister] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
+
+    // View mode state (grid or list) with localStorage persistence
+    const [viewMode, setViewMode] = useState<'grid' | 'list'>(() => {
+        const saved = localStorage.getItem('productViewMode');
+        return (saved as 'grid' | 'list') || 'grid';
+    });
+
+    // Save view mode preference
+    useEffect(() => {
+        localStorage.setItem('productViewMode', viewMode);
+    }, [viewMode]);
 
     const debouncedSearch = useDebounce(searchTerm, 300);
 
@@ -141,14 +153,39 @@ export default function Home({ onProductSelect }: HomeProps) {
                 <div className="max-w-7xl mx-auto px-2 sm:px-4">
                     {/* Listings */}
                     <div>
-                        <div className="mb-3">
+                        {/* Header with toggle */}
+                        <div className="mb-3 flex items-center justify-between">
                             <h2 className="text-lg font-bold text-gray-900">
                                 {searchTerm
                                     ? `Résultats de recherche pour "${searchTerm}"`
                                     : selectedCategory === 'all'
                                         ? 'Annonces récentes'
-                                        : `Annonces - ${categories.find(c => c.id === selectedCategory)?.name}`}
+                                        : `Annonces - ${categories.find(c => c.id === selectedCategory)?.name} `}
                             </h2>
+
+                            {/* View Toggle */}
+                            <div className="flex items-center gap-2 bg-gray-100 rounded-lg p-1">
+                                <button
+                                    onClick={() => setViewMode('grid')}
+                                    className={`p - 2 rounded transition - all ${viewMode === 'grid'
+                                            ? 'bg-white shadow-sm text-primary'
+                                            : 'text-gray-500 hover:text-gray-700'
+                                        } `}
+                                    aria-label="Vue grille"
+                                >
+                                    <Grid3x3 size={20} />
+                                </button>
+                                <button
+                                    onClick={() => setViewMode('list')}
+                                    className={`p - 2 rounded transition - all ${viewMode === 'list'
+                                            ? 'bg-white shadow-sm text-primary'
+                                            : 'text-gray-500 hover:text-gray-700'
+                                        } `}
+                                    aria-label="Vue liste"
+                                >
+                                    <List size={20} />
+                                </button>
+                            </div>
                         </div>
 
                         {loading ? (
@@ -160,14 +197,25 @@ export default function Home({ onProductSelect }: HomeProps) {
                                 </div>
                             </div>
                         ) : regularListings.length > 0 ? (
-                            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                                {regularListings.map((listing) => (
-                                    <ProductCard
-                                        key={listing.id}
-                                        listing={listing}
-                                    />
-                                ))}
-                            </div>
+                            viewMode === 'grid' ? (
+                                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                                    {regularListings.map((listing) => (
+                                        <ProductCard
+                                            key={listing.id}
+                                            listing={listing}
+                                        />
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="flex flex-col gap-3">
+                                    {regularListings.map((listing) => (
+                                        <ProductListItem
+                                            key={listing.id}
+                                            listing={listing}
+                                        />
+                                    ))}
+                                </div>
+                            )
                         ) : (
                             <div className="text-center py-10">
                                 <p className="text-gray-500">
