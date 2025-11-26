@@ -5,7 +5,7 @@ import { useNetwork } from './useNetwork';
 
 type Listing = Database['public']['Tables']['listings']['Row'];
 
-export function useSupabaseListings(category?: string, searchTerm?: string) {
+export function useSupabaseListings(category?: string, subcategory?: string, searchTerm?: string) {
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -31,6 +31,10 @@ export function useSupabaseListings(category?: string, searchTerm?: string) {
 
         if (category && category !== 'all') {
           query = query.eq('category', category);
+        }
+
+        if (subcategory) {
+          query = query.eq('subcategory', subcategory);
         }
 
         if (searchTerm) {
@@ -63,6 +67,10 @@ export function useSupabaseListings(category?: string, searchTerm?: string) {
 
             if (category && category !== 'all') {
               url += `&category=eq.${category}`;
+            }
+
+            if (subcategory) {
+              url += `&subcategory=eq.${subcategory}`;
             }
 
             if (searchTerm) {
@@ -142,7 +150,7 @@ export function useSupabaseListings(category?: string, searchTerm?: string) {
         subscription.unsubscribe();
       }
     };
-  }, [category, searchTerm, isOnline]);
+  }, [category, subcategory, searchTerm, isOnline]);
 
   return { listings, loading, error };
 }
