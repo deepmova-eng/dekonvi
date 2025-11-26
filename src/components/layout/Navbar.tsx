@@ -210,10 +210,17 @@ export default function Navbar() {
                     {user ? (
                         <>
                             {/* Bouton Publier */}
-                            <Link to="/create-listing" className="btn-publish">
-                                <PlusCircle size={18} />
-                                <span>Publier</span>
-                            </Link>
+                            {user ? (
+                                <Link to="/create-premium" className="btn-publish">
+                                    <Plus size={20} strokeWidth={2.5} />
+                                    <span className="btn-text">Publier</span>
+                                </Link>
+                            ) : (
+                                <button onClick={() => navigate('/login')} className="btn-publish">
+                                    <Plus size={20} strokeWidth={2.5} />
+                                    <span className="btn-text">Publier</span>
+                                </button>
+                            )}
 
                             {/* Menu utilisateur */}
                             <div className="user-menu">

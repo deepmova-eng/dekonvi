@@ -52,7 +52,7 @@ export default function App() {
       navigate('/login');
       return;
     }
-    navigate('/create-listing');
+    navigate('/create-premium');
   };
 
   // Determine if we should hide navigation based on current route
@@ -127,7 +127,7 @@ export default function App() {
                   onEditingListing={(listing) => {
                     if (listing) {
                       localStorage.setItem('editingListing', JSON.stringify(listing));
-                      navigate('/create-listing');
+                      navigate('/create-premium');
                     }
                   }}
                   onProductSelect={(id) => navigate(`/listings/${id}`)}
