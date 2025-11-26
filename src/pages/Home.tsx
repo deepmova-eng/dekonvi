@@ -44,6 +44,12 @@ export default function Home({ onProductSelect }: HomeProps) {
     const debouncedMinPrice = useDebounce(filterValues.minPrice, 500);
     const debouncedMaxPrice = useDebounce(filterValues.maxPrice, 500);
 
+    // Debug: Log category selection
+    console.log('🔍 CATEGORY FILTER DEBUG:', {
+        selectedCategory,
+        categoryForQuery: selectedCategory === 'all' ? undefined : selectedCategory
+    });
+
     const {
         data,
         fetchNextPage,
