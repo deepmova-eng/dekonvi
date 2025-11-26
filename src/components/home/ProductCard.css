@@ -6,15 +6,37 @@
     border: var(--border-width) solid var(--border-color);
     border-radius: var(--radius-base);
     overflow: hidden;
-    transition: all var(--duration-normal) var(--ease-standard);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     text-decoration: none;
     color: inherit;
+    position: relative;
+}
+
+.product-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: var(--radius-base);
+    padding: 2px;
+    background: linear-gradient(135deg, #2DD181 0%, #26B56E 100%);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0;
+    transition: opacity 0.3s ease;
 }
 
 .product-card:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
-    border-color: var(--color-primary);
+    transform: translateY(-6px);
+    /* Plus prononcé */
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(45, 209, 129, 0.1);
+    border-color: rgba(45, 209, 129, 0.3);
+}
+
+.product-card:hover::before {
+    opacity: 0.6;
+    /* Bordure gradient au hover */
 }
 
 /* ==================== IMAGE ==================== */
@@ -27,15 +49,33 @@
     overflow: hidden;
 }
 
+.product-card__image-container::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg,
+            transparent 0%,
+            rgba(255, 255, 255, 0.3) 50%,
+            transparent 100%);
+    transform: translateX(-100%);
+    transition: transform 0.6s ease;
+}
+
+.product-card:hover .product-card__image-container::after {
+    transform: translateX(100%);
+    /* Shimmer effect */
+}
+
 .product-card__image {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: transform var(--duration-slow) var(--ease-standard);
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .product-card:hover .product-card__image {
-    transform: scale(1.05);
+    transform: scale(1.08);
+    /* Zoom plus prononcé */
 }
 
 /* Badge Premium */
@@ -43,7 +83,7 @@
     position: absolute;
     top: var(--space-8);
     left: var(--space-8);
-    background: var(--color-primary);
+    background: linear-gradient(135deg, #2DD181 0%, #26B56E 100%);
     color: var(--color-white);
     padding: var(--space-4) var(--space-8);
     border-radius: var(--radius-sm);
@@ -51,7 +91,20 @@
     font-weight: var(--font-bold);
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    box-shadow: var(--shadow-sm);
+    box-shadow: 0 4px 12px rgba(45, 209, 129, 0.4);
+    animation: pulse-badge 2s ease-in-out infinite;
+}
+
+@keyframes pulse-badge {
+
+    0%,
+    100% {
+        box-shadow: 0 4px 12px rgba(45, 209, 129, 0.4);
+    }
+
+    50% {
+        box-shadow: 0 4px 20px rgba(45, 209, 129, 0.6);
+    }
 }
 
 /* Bouton favori */
@@ -68,20 +121,44 @@
     border: none;
     border-radius: var(--radius-full);
     color: var(--color-gray-600);
-    transition: all var(--duration-fast) var(--ease-standard);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     backdrop-filter: blur(8px);
-    box-shadow: var(--shadow-sm);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
 }
 
 .product-card__favorite:hover {
     background: var(--color-white);
-    color: var(--color-primary);
-    transform: scale(1.1);
+    color: #EF4444;
+    /* Rouge pour le hover */
+    transform: scale(1.15);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
 }
 
 .product-card__favorite.active {
-    background: var(--color-primary);
+    background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
     color: var(--color-white);
+    animation: heartbeat 0.6s ease-in-out;
+}
+
+@keyframes heartbeat {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    25% {
+        transform: scale(1.2);
+    }
+
+    50% {
+        transform: scale(1.1);
+    }
+
+    75% {
+        transform: scale(1.15);
+    }
 }
 
 /* ==================== CONTENU (COMPACT) ==================== */
@@ -152,6 +229,12 @@
     color: var(--color-primary);
     margin: 0 0 6px 0;
     /* Réduit de 8px */
+    transition: all 0.3s ease;
+}
+
+.product-card:hover .product-card__price {
+    color: #26B56E;
+    transform: scale(1.05);
 }
 
 /* Meta infos */
