@@ -132,7 +132,7 @@ export default function Home({ onProductSelect }: HomeProps) {
             </div>
 
             {/* Search and Filters - DIRECTLY AFTER NAVBAR */}
-            <div style={{ marginTop: '72px' }}>
+            <div>
                 <div className="max-w-7xl mx-auto px-2 sm:px-4 py-3 bg-white border-b">
                     <div className="flex flex-col sm:flex-row gap-3">
                         {/* Search Bar */}
