@@ -44,7 +44,11 @@ export default function ProductCard({ listing }: ProductCardProps) {
 
     // Check if listing is new (< 48h)
     const isNew = () => {
-        const createdAt = new Date(listing.createdAt);
+        // Handle both camelCase and snake_case
+        const createdAtValue = (listing as any).created_at || listing.createdAt;
+        if (!createdAtValue) return false;
+
+        const createdAt = new Date(createdAtValue);
         const now = new Date();
         const diffHours = (now.getTime() - createdAt.getTime()) / (1000 * 60 * 60);
         return diffHours < 48;
@@ -64,7 +68,7 @@ export default function ProductCard({ listing }: ProductCardProps) {
                 {/* Badges Container */}
                 <div className="product-card__badges">
                     {/* Badge Premium */}
-                    {listing.isPremium && (
+                    {((listing as any).is_premium || listing.isPremium) && (
                         <span className="product-card__badge product-card__badge--premium">
                             Premium
                         </span>
@@ -78,7 +82,7 @@ export default function ProductCard({ listing }: ProductCardProps) {
                     )}
 
                     {/* Badge Urgent */}
-                    {listing.isUrgent && (
+                    {((listing as any).is_urgent || listing.isUrgent) && (
                         <span className="product-card__badge product-card__badge--urgent">
                             Urgent
                         </span>
@@ -112,10 +116,13 @@ export default function ProductCard({ listing }: ProductCardProps) {
                         {listing.location || 'Lomé'}
                     </span>
                     <span className="product-card__timestamp">
-                        {formatTimestamp(listing.createdAt.toString())}
+                        {formatTimestamp(
+                            ((listing as any).created_at || listing.createdAt)?.toString() || new Date().toISOString()
+                        )}
                     </span>
                 </div>
             </div>
         </Link>
     );
 }
+```
