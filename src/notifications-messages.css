@@ -174,8 +174,8 @@
 .messages-page-container {
     display: grid;
     grid-template-columns: 320px 1fr;
-    height: calc(100vh - 80px);
-    /* Hauteur viewport - navbar */
+    height: calc(100vh - 152px);
+    /* Viewport - navbar (72px) - margin-top (80px) */
     overflow: hidden;
     /* CRITICAL : empêche le scroll du parent */
     position: relative;
@@ -183,6 +183,8 @@
     border-radius: var(--radius-xl);
     box-shadow: var(--shadow-lg);
     margin: var(--space-4);
+    margin-top: 80px;
+    /* Space for fixed navbar (72px) + 8px */
 }
 
 /* CONVERSATIONS SIDEBAR */
