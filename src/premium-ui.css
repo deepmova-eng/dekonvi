@@ -46,6 +46,7 @@
     max-width: 1280px;
     margin: 0 auto;
     padding: 0 var(--space-6);
+    overflow: hidden;
 }
 
 .hero-slider {
@@ -68,12 +69,14 @@
     opacity: 0;
     visibility: hidden;
     transition: opacity 1s ease-in-out, visibility 1s;
+    pointer-events: none;
 }
 
 .slide.active {
     opacity: 1;
     visibility: visible;
     z-index: 1;
+    pointer-events: auto;
 }
 
 .slide img {
