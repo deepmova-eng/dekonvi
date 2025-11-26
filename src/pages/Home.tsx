@@ -8,7 +8,8 @@ import HeroSlider from '../components/home/HeroSlider';
 import PremiumListings from '../components/home/PremiumListings';
 import Login from './Login';
 import Register from './Register';
-import { useListings } from '../hooks/useListings';
+import { useInfiniteListings } from '../hooks/useListings';
+import { useInfiniteScroll } from '../hooks/useInfiniteScroll';
 import { useDebounce } from '../hooks/useDebounce';
 import { categories } from '../config/categories';
 import ProductCardSkeleton from '../components/ui/skeletons/ProductCardSkeleton';
@@ -37,15 +38,31 @@ export default function Home({ onProductSelect }: HomeProps) {
 
     const debouncedSearch = useDebounce(searchTerm, 300);
 
-    const { data: listings = [], isLoading: loading } = useListings({
+    const {
+        data,
+        fetchNextPage,
+        hasNextPage,
+        isFetchingNextPage,
+        isLoading: loading
+    } = useInfiniteListings({
         category: selectedCategory === 'all' ? undefined : selectedCategory,
         search: debouncedSearch,
         status: 'active'
     });
 
+    // Flatten pages into single array
+    const listings = data?.pages.flatMap(page => page.data) ?? [];
+
     // Filter premium listings
     const premiumListings = listings.filter(l => l.is_premium);
     const regularListings = listings.filter(l => !l.is_premium);
+
+    // Infinite scroll sentinel
+    const sentinelRef = useInfiniteScroll({
+        onLoadMore: () => fetchNextPage(),
+        hasMore: hasNextPage ?? false,
+        isLoading: isFetchingNextPage,
+    });
 
     const handleLoginClick = () => {
         setShowLogin(true);
@@ -168,8 +185,8 @@ export default function Home({ onProductSelect }: HomeProps) {
                                 <button
                                     onClick={() => setViewMode('grid')}
                                     className={`p - 2 rounded transition - all ${viewMode === 'grid'
-                                            ? 'bg-white shadow-sm text-primary'
-                                            : 'text-gray-500 hover:text-gray-700'
+                                        ? 'bg-white shadow-sm text-primary'
+                                        : 'text-gray-500 hover:text-gray-700'
                                         } `}
                                     aria-label="Vue grille"
                                 >
@@ -178,8 +195,8 @@ export default function Home({ onProductSelect }: HomeProps) {
                                 <button
                                     onClick={() => setViewMode('list')}
                                     className={`p - 2 rounded transition - all ${viewMode === 'list'
-                                            ? 'bg-white shadow-sm text-primary'
-                                            : 'text-gray-500 hover:text-gray-700'
+                                        ? 'bg-white shadow-sm text-primary'
+                                        : 'text-gray-500 hover:text-gray-700'
                                         } `}
                                     aria-label="Vue liste"
                                 >
@@ -197,25 +214,47 @@ export default function Home({ onProductSelect }: HomeProps) {
                                 </div>
                             </div>
                         ) : regularListings.length > 0 ? (
-                            viewMode === 'grid' ? (
-                                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                                    {regularListings.map((listing) => (
-                                        <ProductCard
-                                            key={listing.id}
-                                            listing={listing}
-                                        />
-                                    ))}
-                                </div>
-                            ) : (
-                                <div className="flex flex-col gap-3">
-                                    {regularListings.map((listing) => (
-                                        <ProductListItem
-                                            key={listing.id}
-                                            listing={listing}
-                                        />
-                                    ))}
-                                </div>
-                            )
+                            <>
+                                {viewMode === 'grid' ? (
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                                        {regularListings.map((listing) => (
+                                            <ProductCard
+                                                key={listing.id}
+                                                listing={listing}
+                                            />
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="flex flex-col gap-3">
+                                        {regularListings.map((listing) => (
+                                            <ProductListItem
+                                                key={listing.id}
+                                                listing={listing}
+                                            />
+                                        ))}
+                                    </div>
+                                )}
+
+                                {/* Infinite Scroll Sentinel */}
+                                {hasNextPage && (
+                                    <div ref={sentinelRef} className="py-4">
+                                        {isFetchingNextPage && (
+                                            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                                                {[...Array(5)].map((_, i) => (
+                                                    <ProductCardSkeleton key={`loading-${i}`} />
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
+                                {/* End of list indicator */}
+                                {!hasNextPage && regularListings.length > 0 && (
+                                    <div className="text-center py-8 text-gray-500">
+                                        <p>Vous avez vu toutes les annonces disponibles</p>
+                                    </div>
+                                )}
+                            </>
                         ) : (
                             <div className="text-center py-10">
                                 <p className="text-gray-500">
