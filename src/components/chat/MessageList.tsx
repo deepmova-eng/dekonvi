@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useSupabase } from '../../contexts/SupabaseContext';
+import './MessageList.css';
 import type { Database } from '../../types/supabase';
-import '../../notifications-messages.css';
 
 type Message = Database['public']['Tables']['messages']['Row'];
 
@@ -12,9 +12,6 @@ interface MessageListProps {
 export default function MessageList({ messages }: MessageListProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { user: currentUser } = useSupabase();
-
-  // DEBUG: Check if messages are received
-  console.log('💬 [MessageList] Rendering, messages count:', messages?.length);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -31,7 +28,6 @@ export default function MessageList({ messages }: MessageListProps) {
     );
   }
 
-  // SIMPLIFIED RENDERING FOR DEBUG - No grouping
   return (
     <div className="messages-body">
       {messages.map((message) => {
@@ -41,17 +37,16 @@ export default function MessageList({ messages }: MessageListProps) {
           <div
             key={message.id}
             className={`message ${isCurrentUser ? 'sent' : 'received'}`}
-            style={{
-              marginBottom: '8px',
-              padding: '12px',
-              backgroundColor: isCurrentUser ? '#2DD181' : '#ffffff',
-              color: isCurrentUser ? 'white' : 'black',
-              borderRadius: '12px',
-              maxWidth: '70%',
-              alignSelf: isCurrentUser ? 'flex-end' : 'flex-start'
-            }}
           >
-            {message.content}
+            <div className="message-bubble">
+              <p className="message-text">{message.content}</p>
+              <span className="message-time">
+                {new Date(message.created_at).toLocaleTimeString('fr-FR', {
+                  hour: '2-digit',
+                  minute: '2-digit'
+                })}
+              </span>
+            </div>
           </div>
         );
       })}

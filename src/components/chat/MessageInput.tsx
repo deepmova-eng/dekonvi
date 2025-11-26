@@ -1,39 +1,48 @@
-import React, { useState } from 'react';
+import { useState, KeyboardEvent } from 'react';
 import { Send } from 'lucide-react';
-import '../../notifications-messages.css';
+import './MessageInput.css';
 
 interface MessageInputProps {
-  onSend: (message: string) => void;
-  disabled?: boolean;
+  onSend: (content: string) => void;
 }
 
-export default function MessageInput({ onSend, disabled }: MessageInputProps) {
+export default function MessageInput({ onSend }: MessageInputProps) {
   const [message, setMessage] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (message.trim() && !disabled) {
-      onSend(message);
+  const handleSend = () => {
+    if (message.trim()) {
+      onSend(message.trim());
       setMessage('');
     }
   };
 
+  const handleKeyPress = (e: KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
+  };
+
   return (
-    <form onSubmit={handleSubmit} className="messages-input">
-      <input
-        type="text"
-        value={message}
-        onChange={(e) => setMessage(e.target.value)}
-        placeholder="Écrivez votre message..."
-        disabled={disabled}
-      />
-      <button
-        type="submit"
-        disabled={!message.trim() || disabled}
-        className="send-btn"
-      >
-        <Send />
-      </button>
-    </form>
+    <div className="message-input-container">
+      <div className="message-input-wrapper">
+        <textarea
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          onKeyPress={handleKeyPress}
+          placeholder="Écrivez un message..."
+          className="message-input-field"
+          rows={1}
+        />
+        <button
+          onClick={handleSend}
+          disabled={!message.trim()}
+          className="message-send-button"
+          aria-label="Envoyer"
+        >
+          <Send size={20} />
+        </button>
+      </div>
+    </div>
   );
 }

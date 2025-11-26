@@ -198,6 +198,8 @@
 
 .conversations-header {
     padding: var(--space-5);
+    padding-left: 20px;
+    /* Fix pour éviter que le M soit coupé */
     border-bottom: 1px solid var(--neutral-200);
     flex-shrink: 0;
 }
