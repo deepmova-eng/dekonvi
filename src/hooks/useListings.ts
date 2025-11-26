@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
 import { toast } from 'react-hot-toast'
 import type { Database } from '../types/supabase'
@@ -77,6 +77,77 @@ export function useListing(id: string | undefined) {
     queryFn: () => fetchListing(id!),
     enabled: !!id,
     staleTime: 1000 * 60 * 10, // 10 minutes pour un listing individuel
+  })
+}
+
+// Interface for listing filters
+export interface ListingFilters {
+  status?: 'active' | 'pending' | 'rejected' | 'sold';
+  category?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  location?: string;
+  search?: string;
+}
+
+// Hook pour récupérer les annonces avec infinite scroll
+const LISTINGS_PER_PAGE = 20;
+
+export function useInfiniteListings(filters?: ListingFilters) {
+  return useInfiniteQuery({
+    queryKey: ['listings', 'infinite', filters],
+    queryFn: async ({ pageParam = 0 }) => {
+      let query = supabase
+        .from('listings')
+        .select('*, profiles(*)', { count: 'exact' })
+        .order('created_at', { ascending: false })
+        .range(pageParam, pageParam + LISTINGS_PER_PAGE - 1);
+
+      // Apply filters
+      if (filters?.status) {
+        query = query.eq('status', filters.status);
+      } else {
+        query = query.eq('status', 'active');
+      }
+
+      if (filters?.category) {
+        query = query.eq('category', filters.category);
+      }
+
+      if (filters?.minPrice !== undefined) {
+        query = query.gte('price', filters.minPrice);
+      }
+
+      if (filters?.maxPrice !== undefined) {
+        query = query.lte('price', filters.maxPrice);
+      }
+
+      if (filters?.location) {
+        query = query.ilike('location', `%${filters.location}%`);
+      }
+
+      if (filters?.search) {
+        query = query.or(`title.ilike.%${filters.search}%,description.ilike.%${filters.search}%`);
+      }
+
+      const { data, error, count } = await query;
+
+      if (error) throw error;
+
+      return {
+        data: data as Listing[],
+        count: count || 0,
+      };
+    },
+    getNextPageParam: (lastPage, allPages) => {
+      const loadedCount = allPages.reduce((acc, page) => acc + page.data.length, 0);
+      if (loadedCount >= lastPage.count) {
+        return undefined; // No more pages
+      }
+      return loadedCount; // Next offset
+    },
+    initialPageParam: 0,
+    staleTime: 1000 * 60 * 3, // 3 minutes
   })
 }
 
