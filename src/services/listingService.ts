@@ -8,6 +8,7 @@ export interface CreateListingData {
     description: string
     price: number
     category: string
+    subcategory?: string
     images: string[]
     location: string
     condition: Condition
