@@ -1,5 +1,5 @@
 // Placeholder component - will be implemented in Phase 2
-export function Step Details({ data, updateData }: any) {
+export function StepDetails({ data, updateData }: any) {
     return (
         <div className="step-details">
             <div className="step-header">
