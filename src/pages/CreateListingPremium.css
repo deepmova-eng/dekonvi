@@ -6,101 +6,65 @@
 .create-listing-page {
     min-height: 100vh;
     background: linear-gradient(135deg, #F9FAFB 0%, #F3F4F6 100%);
-    padding-top: 80px;
-    /* Compense la hauteur de la navbar sticky */
+    padding-top: 72px;
+    /* Navbar height */
 }
 
-.create-listing-header {
-    position: sticky;
-    top: 72px;
-    /* Hauteur de la navbar */
-    z-index: 100;
-    background: white;
-    border-bottom: 1px solid #E5E7EB;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+/* Simple header with back button */
+.simple-header {
+    padding: 20px 0;
 }
 
-.create-listing-header .container {
-    max-width: 1200px;
+.simple-header .container {
+    max-width: 800px;
     margin: 0 auto;
-    padding: 20px 24px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 24px;
+    padding: 0 24px;
 }
 
 .back-button {
-    display: flex;
+    display: inline-flex;
     align-items: center;
     gap: 8px;
     padding: 10px 16px;
-    background: transparent;
-    border: none;
+    background: white;
+    border: 1px solid #E5E7EB;
     border-radius: 8px;
     font-size: 15px;
     font-weight: 600;
     color: #6B7280;
     cursor: pointer;
     transition: all 0.2s ease;
-    white-space: nowrap;
 }
 
 .back-button:hover {
-    background: #F3F4F6;
+    background: #F9FAFB;
+    border-color: #D1D5DB;
     color: #111827;
 }
 
-.preview-toggle {
-    display: none;
-    /* Hidden on mobile */
-    padding: 10px 20px;
-    background: white;
-    border: 2px solid #E5E7EB;
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: 600;
-    color: #374151;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    white-space: nowrap;
-}
-
-.preview-toggle:hover {
-    border-color: #2DD181;
-    color: #2DD181;
-}
-
-@media (min-width: 1024px) {
-    .preview-toggle {
-        display: block;
-    }
-}
-
 /* ============================================
-   BODY & LAYOUT
+   BODY & LAYOUT - CENTERED
    ============================================ */
 
 .create-listing-body {
-    padding: 40px 0;
+    padding: 20px 0 60px 0;
 }
 
-.create-listing-body .container {
-    max-width: 1200px;
+.container-centered {
+    max-width: 800px;
     margin: 0 auto;
     padding: 0 24px;
 }
 
 .create-listing-layout {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 32px;
+    /* Single column centered layout */
 }
 
-@media (min-width: 1024px) {
-    .create-listing-layout {
-        grid-template-columns: 1.5fr 1fr;
-    }
+/* Step Indicator Wrapper */
+.step-indicator-wrapper {
+    margin-bottom: 48px;
+    padding-bottom: 32px;
+    border-bottom: 2px solid #F3F4F6;
 }
 
 /* ============================================

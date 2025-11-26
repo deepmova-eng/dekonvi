@@ -71,104 +71,84 @@ export default function CreateListingPremium() {
     }
 
     return (
-        <div className="create-listing-page">
+        <StepReview
+            data={formData}
+            onEdit={(step) => setCurrentStep(step)}
+        />
+    )
+}
 
-            {/* Header avec progress */}
-            <div className="create-listing-header">
-                <div className="container">
-                    <button className="back-button" onClick={() => navigate(-1)}>
-                        <ArrowLeft size={20} />
-                        Retour
-                    </button>
+{/* Navigation buttons */ }
+<div className="form-navigation">
+    {currentStep > 1 && (
+        <button
+            className="btn-secondary btn-large"
+            onClick={prevStep}
+        >
+            <ArrowLeft size={20} />
+            Précédent
+        </button>
+    )}
 
-                    <StepIndicator
-                        steps={STEPS}
-                        currentStep={currentStep}
-                    />
-
-                    <button
-                        className="preview-toggle"
-                        onClick={() => setShowPreview(!showPreview)}
-                    >
-                        {showPreview ? 'Masquer' : 'Aperçu'}
-                    </button>
-                </div>
+    {currentStep < STEPS.length ? (
+        <button
+            className="btn-primary btn-large"
+            onClick={nextStep}
+        >
+            Suivant
+            <ArrowRight size={20} />
+        </button>
+    ) : (
+        <button
+            className="btn-primary btn-large"
+            onClick={handleSubmit}
+        <div className="create-listing-premium-container">
+            <div className="header-section">
+                <h1 className="page-title">Créer une annonce premium</h1>
+                <p className="page-subtitle">
+                    Vendez vos articles rapidement et facilement.
+                </p>
             </div>
 
-            <div className="create-listing-body">
-                <div className="container">
-                    <div className="create-listing-layout">
+            <div className="content-wrapper">
+                <div className="steps-indicator-section">
+                    <StepIndicator steps={STEPS} currentStep={currentStep} />
+                </div>
 
-                        {/* Formulaire principal */}
-                        <div className="form-section">
-                            <div className="form-card">
+                <div className="form-content-section">
+                    <div className="form-main">
+                        <div className="form-card">
+                            {renderStepContent()}
 
-                                {/* Step content */}
-                                {currentStep === 1 && (
-                                    <StepCategory
-                                        data={formData}
-                                        updateData={updateFormData}
-                                    />
+                            {/* Navigation buttons */}
+                            <div className="form-navigation">
+                                {currentStep > 1 && (
+                                    <button
+                                        className="btn-secondary btn-large"
+                                        onClick={prevStep}
+                                    >
+                                        <ArrowLeft size={20} />
+                                        Précédent
+                                    </button>
                                 )}
 
-                                {currentStep === 2 && (
-                                    <StepDetails
-                                        data={formData}
-                                        updateData={updateFormData}
-                                    />
+                                {currentStep < STEPS.length ? (
+                                    <button
+                                        className="btn-primary btn-large"
+                                        onClick={nextStep}
+                                    >
+                                        Suivant
+                                        <ArrowRight size={20} />
+                                    </button>
+                                ) : (
+                                    <button
+                                        className="btn-primary btn-large"
+                                        onClick={handleSubmit}
+                                    >
+                                        <CheckCircle size={20} />
+                                        Publier l'annonce
+                                    </button>
                                 )}
-
-                                {currentStep === 3 && (
-                                    <StepPhotos
-                                        data={formData}
-                                        updateData={updateFormData}
-                                    />
-                                )}
-
-                                {currentStep === 4 && (
-                                    <StepPricing
-                                        data={formData}
-                                        updateData={updateFormData}
-                                    />
-                                )}
-
-                                {currentStep === 5 && (
-                                    <StepReview
-                                        data={formData}
-                                        onEdit={(step) => setCurrentStep(step)}
-                                    />
-                                )}
-
-                                {/* Navigation buttons */}
-                                <div className="form-navigation">
-                                    {currentStep > 1 && (
-                                        <button
-                                            className="btn-secondary btn-large"
-                                            onClick={prevStep}
-                                        >
-                                            <ArrowLeft size={20} />
-                                            Précédent
-                                        </button>
-                                    )}
-
-                                    {currentStep < STEPS.length ? (
-                                        <button
-                                            className="btn-primary btn-large"
-                                            onClick={nextStep}
-                                        >
-                                            Suivant
-                                            <ArrowRight size={20} />
-                                        </button>
-                                    ) : (
-                                        <button
-                                            className="btn-primary btn-large"
-                                            onClick={handleSubmit}
-                                        >
-                                            <CheckCircle size={20} />
-                                            Publier l'annonce
-                                        </button>
-                                    )}
-                                </div>
                             </div>
 
                             {/* Auto-save indicator */}
@@ -176,19 +156,10 @@ export default function CreateListingPremium() {
                                 ✓ Brouillon sauvegardé automatiquement
                             </div>
                         </div>
-
-                        {/* Preview pane (sticky) */}
-                        {showPreview && (
-                            <div className="preview-section">
-                                <div className="preview-sticky">
-                                    <h3>Aperçu de votre annonce</h3>
-                                    <PreviewPane data={formData} />
-                                </div>
-                            </div>
-                        )}
                     </div>
                 </div>
             </div>
         </div>
     )
 }
+```
