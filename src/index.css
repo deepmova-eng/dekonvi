@@ -4,6 +4,22 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Prevent horizontal scroll globally */
+html,
+body {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
 /* Custom scrollbar hiding */
 .scrollbar-hide {
   -ms-overflow-style: none;
