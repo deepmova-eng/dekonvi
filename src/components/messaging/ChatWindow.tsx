@@ -67,20 +67,37 @@ export function ChatWindow({ conversationId, currentUserId }: Props) {
     }, [conversationId, currentUserId])
 
     // Setup realtime subscription
+    // Setup realtime subscription
     useEffect(() => {
-        if (!conversationId) return
+        if (!conversationId) {
+            console.log('❌ No conversationId, skipping subscription')
+            return
+        }
 
         // Cleanup previous subscription
         if (subscriptionRef.current) {
             console.log('🧹 Cleaning up old subscription')
-            subscriptionRef.current.unsubscribe()
+            try {
+                subscriptionRef.current.unsubscribe()
+            } catch (e) {
+                console.error('Error unsubscribing:', e)
+            }
+            subscriptionRef.current = null
         }
 
-        console.log('🔌 Setting up realtime for:', conversationId)
+        console.log('========================================')
+        console.log('🔌 SETTING UP REALTIME SUBSCRIPTION')
+        console.log('Conversation ID:', conversationId)
+        console.log('Current User ID:', currentUserId)
+        console.log('========================================')
 
         // Create new subscription
         const channel = supabase
-            .channel(`messages_${conversationId}`)
+            .channel(`messages:${conversationId}`, {
+                config: {
+                    broadcast: { self: false }, // N'écoute pas ses propres broadcasts
+                },
+            })
             .on(
                 'postgres_changes',
                 {
@@ -90,33 +107,77 @@ export function ChatWindow({ conversationId, currentUserId }: Props) {
                     filter: `conversation_id=eq.${conversationId}`,
                 },
                 (payload) => {
-                    console.log('🆕 New message received:', payload.new)
-                    setMessages((prev) => {
-                        // Évite les doublons
-                        const exists = prev.find(m => m.id === payload.new.id)
-                        if (exists) return prev
-                        return [...prev, payload.new]
-                    })
+                    console.log('========================================')
+                    console.log('🆕 REALTIME MESSAGE RECEIVED!')
+                    console.log('From sender:', payload.new.sender_id)
+                    console.log('Current user:', currentUserId)
+                    console.log('Message:', payload.new.content)
+                    console.log('Full payload:', payload.new)
+                    console.log('========================================')
+
+                    // Ajoute le message seulement si ce n'est pas le sien
+                    // (le sien est déjà ajouté par optimistic update)
+                    if (payload.new.sender_id !== currentUserId) {
+                        console.log('✅ Adding message from OTHER user to state')
+                        setMessages((prev) => {
+                            // Évite les doublons
+                            const exists = prev.find(m => m.id === payload.new.id)
+                            if (exists) {
+                                console.log('⚠️ Message already exists, skipping')
+                                return prev
+                            }
+                            console.log('✅ Message added to state')
+                            return [...prev, payload.new]
+                        })
+                    } else {
+                        console.log('ℹ️ Message from SELF, skipping (already in optimistic update)')
+                    }
                 }
             )
-            .subscribe((status) => {
-                console.log('📡 Subscription status:', status)
+            .subscribe((status, err) => {
+                console.log('========================================')
+                console.log('📡 SUBSCRIPTION STATUS CHANGED')
+                console.log('Status:', status)
+                if (err) {
+                    console.error('❌ Subscription error:', err)
+                }
+                console.log('========================================')
+
+                if (status === 'SUBSCRIBED') {
+                    console.log('✅ SUCCESSFULLY SUBSCRIBED TO REALTIME')
+                } else if (status === 'CHANNEL_ERROR') {
+                    console.error('❌ REALTIME CHANNEL ERROR - Check Supabase Dashboard')
+                } else if (status === 'TIMED_OUT') {
+                    console.error('⏱️ REALTIME SUBSCRIPTION TIMED OUT - Retrying...')
+                    // Retry after 2 seconds
+                    setTimeout(() => {
+                        console.log('🔄 Retrying subscription...')
+                        fetchMessages()
+                        fetchOtherUser()
+                    }, 2000)
+                }
             })
 
         subscriptionRef.current = channel
 
         // Fetch initial data
+        console.log('📥 Fetching initial messages...')
         fetchMessages()
         fetchOtherUser()
 
         // Cleanup on unmount
         return () => {
-            console.log('🔌 Unsubscribing from:', conversationId)
+            console.log('🔌 Component unmounting, unsubscribing from:', conversationId)
             if (subscriptionRef.current) {
-                subscriptionRef.current.unsubscribe()
+                try {
+                    subscriptionRef.current.unsubscribe()
+                } catch (e) {
+                    console.error('Error during cleanup:', e)
+                }
+                subscriptionRef.current = null
             }
         }
-    }, [conversationId, fetchMessages, fetchOtherUser])
+    }, [conversationId, currentUserId, fetchMessages, fetchOtherUser])
 
     // Scroll to bottom when messages change
     useEffect(() => {
