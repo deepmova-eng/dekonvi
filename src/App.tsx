@@ -22,6 +22,7 @@ import AdminPanel from './pages/AdminPanel';
 import MonitoringDashboard from './pages/admin/Monitoring';
 import Categories from './pages/Categories';
 import CategoryListings from './pages/CategoryListings';
+import CategoryPage from './pages/CategoryPage';
 
 export default function App() {
   const { user } = useSupabase();
@@ -78,6 +79,7 @@ export default function App() {
           <Route path="/register" element={<Register onBack={() => navigate(-1)} onLoginClick={() => navigate('/login')} />} />
           <Route path="/categories" element={<Categories />} />
           <Route path="/categories/:slug" element={<CategoryListings />} />
+          <Route path="/category/:categoryId" element={<CategoryPage />} />
           <Route path="/listings/:id" element={<ProductDetails />} />
           <Route path="/profile/:userId" element={<SellerProfile />} />
 
