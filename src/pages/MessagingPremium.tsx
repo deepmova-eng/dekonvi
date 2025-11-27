@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useSupabase } from '../contexts/SupabaseContext'
 import { supabase } from '../lib/supabase'
 import { ConversationSidebar } from '../components/messaging/ConversationSidebar'
@@ -11,14 +11,7 @@ export default function MessagingPremium() {
     const [activeConversationId, setActiveConversationId] = useState<string | null>(null)
     const [loading, setLoading] = useState(true)
 
-    useEffect(() => {
-        if (user) {
-            fetchConversations()
-            subscribeToConversations()
-        }
-    }, [user])
-
-    const fetchConversations = async () => {
+    const fetchConversations = useCallback(async () => {
         try {
             console.log('🔍 Fetching conversations for user:', user?.id)
             // Récupérer toutes les conversations de l'utilisateur
@@ -78,9 +71,9 @@ export default function MessagingPremium() {
         } finally {
             setLoading(false)
         }
-    }
+    }, [user?.id, activeConversationId])
 
-    const subscribeToConversations = () => {
+    const subscribeToConversations = useCallback(() => {
         const subscription = supabase
             .channel('conversations_changes')
             .on(
@@ -99,7 +92,15 @@ export default function MessagingPremium() {
         return () => {
             subscription.unsubscribe()
         }
-    }
+    }, [fetchConversations])
+
+    useEffect(() => {
+        if (user) {
+            fetchConversations()
+            const cleanup = subscribeToConversations()
+            return cleanup
+        }
+    }, [user, fetchConversations, subscribeToConversations])
 
     if (loading) {
         return (
