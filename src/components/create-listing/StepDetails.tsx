@@ -1,4 +1,6 @@
 import { FileText, AlertCircle } from 'lucide-react'
+import { DynamicFields } from './DynamicFields'
+import { DYNAMIC_FIELDS } from '../../config/dynamicFields'
 import './StepDetails.css'
 
 interface Props {
@@ -101,6 +103,18 @@ export function StepDetails({ data, updateData }: Props) {
                     💡 Une description complète augmente vos chances de vente de 60%
                 </p>
             </div>
+
+            {/* Champs dynamiques selon catégorie */}
+            {data.category && DYNAMIC_FIELDS[data.category] && (
+                <DynamicFields
+                    fields={DYNAMIC_FIELDS[data.category]}
+                    values={data.dynamic_fields || {}}
+                    onChange={(name, value) => {
+                        const current = data.dynamic_fields || {}
+                        updateData('dynamic_fields', { ...current, [name]: value })
+                    }}
+                />
+            )}
         </div>
     )
 }

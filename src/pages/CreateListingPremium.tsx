@@ -46,6 +46,7 @@ export default function CreateListingPremium() {
         shipping_available: false,
         city: '',
         location: '',
+        dynamic_fields: {},
     })
 
     const updateFormData = (field: string, value: any) => {
@@ -172,6 +173,7 @@ export default function CreateListingPremium() {
                     status: 'active',
                     is_premium: false,
                     hide_phone: false,
+                    dynamic_fields: formData.dynamic_fields || {},
                 })
                 .select()
                 .single()
