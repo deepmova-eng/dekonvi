@@ -20,23 +20,50 @@ export default function MessagingPremium() {
 
     const fetchConversations = async () => {
         try {
-            const { data, error } = await supabase
+            // Récupérer toutes les conversations de l'utilisateur
+            const { data: convs, error } = await supabase
                 .from('conversations')
-                .select(`
-          *,
-          other_user:profiles!conversations_user1_id_fkey(*),
-          last_message:messages(content, created_at, sender_id)
-        `)
+                .select('*')
                 .or(`user1_id.eq.${user?.id},user2_id.eq.${user?.id}`)
                 .order('updated_at', { ascending: false })
 
             if (error) throw error
 
-            setConversations(data || [])
+            // Pour chaque conversation, récupérer l'autre utilisateur et le dernier message
+            const conversationsWithDetails = await Promise.all(
+                (convs || []).map(async (conv) => {
+                    // Déterminer l'ID de l'autre utilisateur
+                    const otherUserId = conv.user1_id === user?.id ? conv.user2_id : conv.user1_id
+
+                    // Récupérer le profil de l'autre utilisateur
+                    const { data: profile } = await supabase
+                        .from('profiles')
+                        .select('*')
+                        .eq('id', otherUserId)
+                        .single()
+
+                    // Récupérer le dernier message
+                    const { data: lastMsg } = await supabase
+                        .from('messages')
+                        .select('*')
+                        .eq('conversation_id', conv.id)
+                        .order('created_at', { ascending: false })
+                        .limit(1)
+                        .single()
+
+                    return {
+                        ...conv,
+                        other_user: profile,
+                        last_message: lastMsg ? [lastMsg] : [],
+                    }
+                })
+            )
+
+            setConversations(conversationsWithDetails)
 
             // Sélectionne la première conversation par défaut
-            if (data && data.length > 0 && !activeConversationId) {
-                setActiveConversationId(data[0].id)
+            if (conversationsWithDetails && conversationsWithDetails.length > 0 && !activeConversationId) {
+                setActiveConversationId(conversationsWithDetails[0].id)
             }
         } catch (error) {
             console.error('Error fetching conversations:', error)
