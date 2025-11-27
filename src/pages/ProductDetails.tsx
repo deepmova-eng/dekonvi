@@ -84,7 +84,6 @@ export default function ProductDetails() {
 
   const handleSendMessage = async () => {
     if (!user) {
-      // TODO: Show login modal
       alert('Veuillez vous connecter pour envoyer un message');
       navigate('/login');
       return;
@@ -96,33 +95,28 @@ export default function ProductDetails() {
     }
 
     try {
-      // Import supabase
       const { supabase } = await import('../lib/supabase');
 
       // Vérifier si une conversation existe déjà
       const { data: existingConv } = await supabase
         .from('conversations')
         .select('id')
-        .or(`and(user1_id.eq.${user.id},user2_id.eq.${listing.seller_id}),and(user1_id.eq.${listing.seller_id},user2_id.eq.${user.id})`)
+        .eq('listing_id', listing.id)
+        .contains('participants', [user.id])
         .single();
 
       if (existingConv) {
-        // Conversation existe, rediriger
         navigate(`/messages`);
       } else {
-        // Créer nouvelle conversation
-        const { data: newConv, error } = await supabase
+        // Créer nouvelle conversation avec participants array
+        const { error } = await supabase
           .from('conversations')
           .insert({
-            user1_id: user.id,
-            user2_id: listing.seller_id,
             listing_id: listing.id,
-          })
-          .select()
-          .single();
+            participants: [user.id, listing.seller_id],
+          });
 
         if (error) throw error;
-
         navigate(`/messages`);
       }
     } catch (error) {
