@@ -55,7 +55,59 @@ export default function CreateListingPremium() {
         localStorage.setItem('draft_listing', JSON.stringify({ ...formData, [field]: value }))
     }
 
+
+    const validateStep = (): { valid: boolean; message?: string } => {
+        switch (currentStep) {
+            case 1: // Catégorie
+                if (!formData.category) {
+                    return { valid: false, message: '📋 Veuillez sélectionner une catégorie' }
+                }
+                if (!formData.subcategory) {
+                    return { valid: false, message: '📋 Veuillez sélectionner une sous-catégorie' }
+                }
+                return { valid: true }
+
+            case 2: // Détails
+                if (!formData.title || formData.title.length < 10) {
+                    return { valid: false, message: '✏️ Le titre doit contenir au moins 10 caractères' }
+                }
+                if (!formData.description || formData.description.length < 20) {
+                    return { valid: false, message: '📝 La description doit contenir au moins 20 caractères pour être publiée' }
+                }
+                if (!formData.condition) {
+                    return { valid: false, message: '🏷️ Veuillez sélectionner l\'état du produit' }
+                }
+                return { valid: true }
+
+            case 3: // Photos
+                if (formData.images.length === 0) {
+                    return { valid: false, message: '📸 Ajoutez au moins une photo de votre article' }
+                }
+                return { valid: true }
+
+            case 4: // Prix
+                if (!formData.price || parseFloat(formData.price) <= 0) {
+                    return { valid: false, message: '💰 Veuillez indiquer un prix valide' }
+                }
+                if (!formData.city || formData.city.trim().length === 0) {
+                    return { valid: false, message: '📍 Veuillez indiquer votre ville' }
+                }
+                return { valid: true }
+
+            default:
+                return { valid: true }
+        }
+    }
+
     const nextStep = () => {
+        // Valider avant de passer à l'étape suivante
+        const validation = validateStep()
+
+        if (!validation.valid) {
+            alert(validation.message)
+            return
+        }
+
         if (currentStep < STEPS.length) {
             setCurrentStep(currentStep + 1)
             window.scrollTo({ top: 0, behavior: 'smooth' })
