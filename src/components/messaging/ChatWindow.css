@@ -310,3 +310,11 @@
         transform: rotate(360deg);
     }
 }
+/* Message en cours d'envoi */
+.message-wrapper.sending .message-bubble {
+  opacity: 0.6;
+}
+
+.message-wrapper.own.sending .message-bubble {
+  background: linear-gradient(135deg, #9CA3AF 0%, #6B7280 100%);
+}
