@@ -75,6 +75,8 @@ export function ChatWindow({ conversationId, currentUserId }: Props) {
     }
 
     const subscribeToMessages = () => {
+        console.log('🔌 Setting up realtime subscription for conversation:', conversationId)
+
         const subscription = supabase
             .channel(`messages_${conversationId}`)
             .on(
@@ -86,19 +88,26 @@ export function ChatWindow({ conversationId, currentUserId }: Props) {
                     filter: `conversation_id=eq.${conversationId}`,
                 },
                 (payload) => {
-                    console.log('📨 New message received:', payload.new)
+                    console.log('📨 New message received via realtime:', payload.new)
                     setMessages((prev) => {
                         // Éviter les doublons
                         if (prev.find((m: any) => m.id === payload.new.id)) {
+                            console.log('⚠️ Duplicate message detected, skipping')
                             return prev
                         }
+                        console.log('✅ Adding new message to state')
                         return [...prev, payload.new]
                     })
                 }
             )
-            .subscribe()
+            .subscribe((status) => {
+                console.log('📡 Subscription status:', status)
+            })
+
+        console.log('✅ Subscription created:', subscription)
 
         return () => {
+            console.log('🔌 Unsubscribing from messages channel')
             subscription.unsubscribe()
         }
     }
@@ -108,18 +117,21 @@ export function ChatWindow({ conversationId, currentUserId }: Props) {
 
         try {
             setSending(true)
+            console.log('📤 Sending message:', newMessage.trim())
 
-            const { error } = await supabase.from('messages').insert({
+            const { data, error } = await supabase.from('messages').insert({
                 conversation_id: conversationId,
                 sender_id: currentUserId,
                 content: newMessage.trim(),
-            })
+            }).select()
+
+            console.log('📬 Message sent:', data, 'Error:', error)
 
             if (error) throw error
 
             setNewMessage('')
         } catch (error) {
-            console.error('Error sending message:', error)
+            console.error('❌ Error sending message:', error)
             alert('Erreur lors de l\'envoi')
         } finally {
             setSending(false)
