@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { supabase } from '../../lib/supabase'
-import { Send, Smile, Paperclip, MoreVertical, ArrowLeft } from 'lucide-react'
+import { Send, Smile, Paperclip, MoreVertical, ArrowLeft, X } from 'lucide-react'
 import { ChatHeaderMenu } from './ChatHeaderMenu'
+import { uploadMessageImage, validateImage } from '../../lib/imageUpload'
 import './ChatWindow.css'
 
 interface Props {
@@ -17,8 +18,12 @@ export function ChatWindow({ conversationId, currentUserId, onMobileBack }: Prop
     const [otherUser, setOtherUser] = useState<any>(null)
     const [listing, setListing] = useState<any>(null)
     const [showMenu, setShowMenu] = useState(false)
+    const [selectedImages, setSelectedImages] = useState<File[]>([])
+    const [previewUrls, setPreviewUrls] = useState<string[]>([])
+    const [uploading, setUploading] = useState(false)
     const messagesEndRef = useRef<HTMLDivElement>(null)
     const subscriptionRef = useRef<any>(null)
+    const fileInputRef = useRef<HTMLInputElement>(null)
 
     // Fetch messages
     const fetchMessages = useCallback(async () => {
@@ -209,36 +214,63 @@ export function ChatWindow({ conversationId, currentUserId, onMobileBack }: Prop
     }
 
     const handleSend = async () => {
-        if (!newMessage.trim() || sending || !conversationId) return
+        if ((!newMessage.trim() && selectedImages.length === 0) || sending || !conversationId) return
 
         const messageContent = newMessage.trim()
         const tempId = `temp-${Date.now()}`
 
         try {
             setSending(true)
+            setUploading(true)
 
-            // 1. OPTIMISTIC UPDATE - Ajoute le message immédiatement
+            // 1. Upload images if any
+            let imageUrls: string[] = []
+            if (selectedImages.length > 0) {
+                console.log(`📸 Uploading ${selectedImages.length} images...`)
+
+                const uploadPromises = selectedImages.map((file) =>
+                    uploadMessageImage(file, currentUserId)
+                )
+
+                const uploadResults = await Promise.all(uploadPromises)
+                imageUrls = uploadResults
+                    .filter((result) => result !== null)
+                    .map((result) => result!.url)
+
+                if (imageUrls.length !== selectedImages.length) {
+                    throw new Error('Certaines images n\'ont pas pu être uploadées')
+                }
+
+                console.log('✅ Images uploaded:', imageUrls)
+            }
+
+            // 2. OPTIMISTIC UPDATE - Ajoute le message immédiatement
             const optimisticMessage = {
                 id: tempId,
                 conversation_id: conversationId,
                 sender_id: currentUserId,
                 content: messageContent,
+                images: imageUrls,
                 created_at: new Date().toISOString(),
-                is_sending: true, // Flag pour styling différent
+                is_sending: true,
             }
 
             console.log('⚡ Optimistic update:', optimisticMessage)
             setMessages((prev) => [...prev, optimisticMessage])
-            setNewMessage('') // Clear input immédiatement
+            setNewMessage('')
+            setSelectedImages([])
+            setPreviewUrls([])
+            setUploading(false)
 
-            // 2. Envoie le vrai message à Supabase
+            // 3. Envoie le vrai message à Supabase
             console.log('📤 Sending to Supabase...')
             const { data, error } = await supabase
                 .from('messages')
                 .insert({
                     conversation_id: conversationId,
                     sender_id: currentUserId,
-                    content: messageContent,
+                    content: messageContent || '📷 Image', // Message par défaut si vide
+                    images: imageUrls,
                 })
                 .select()
                 .single()
@@ -247,12 +279,12 @@ export function ChatWindow({ conversationId, currentUserId, onMobileBack }: Prop
 
             console.log('✅ Message sent:', data)
 
-            // 3. Remplace le message temporaire par le vrai
+            // 4. Remplace le message temporaire par le vrai
             setMessages((prev) =>
                 prev.map((msg) => (msg.id === tempId ? data : msg))
             )
 
-            // 4. Update conversation updated_at
+            // 5. Update conversation updated_at
             await supabase
                 .from('conversations')
                 .update({ updated_at: new Date().toISOString() })
@@ -272,6 +304,49 @@ export function ChatWindow({ conversationId, currentUserId, onMobileBack }: Prop
             setSending(false)
         }
     }
+
+    // Gestion des images
+    const handleImageSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const files = event.target.files
+        if (!files || files.length === 0) return
+
+        const validFiles: File[] = []
+        const newPreviewUrls: string[] = []
+
+        Array.from(files).forEach((file) => {
+            const error = validateImage(file)
+            if (error) {
+                alert(error.message)
+                return
+            }
+
+            validFiles.push(file)
+            newPreviewUrls.push(URL.createObjectURL(file))
+        })
+
+        setSelectedImages((prev) => [...prev, ...validFiles])
+        setPreviewUrls((prev) => [...prev, ...newPreviewUrls])
+
+        // Reset input
+        if (fileInputRef.current) {
+            fileInputRef.current.value = ''
+        }
+    }
+
+    const removeImage = (index: number) => {
+        // Libérer l'URL de preview
+        URL.revokeObjectURL(previewUrls[index])
+
+        setSelectedImages((prev) => prev.filter((_, i) => i !== index))
+        setPreviewUrls((prev) => prev.filter((_, i) => i !== index))
+    }
+
+    // Nettoyer les URLs de preview au démontage
+    useEffect(() => {
+        return () => {
+            previewUrls.forEach((url) => URL.revokeObjectURL(url))
+        }
+    }, [previewUrls])
 
     const getTimeDisplay = (date: string) => {
         return new Date(date).toLocaleTimeString('fr-FR', {
@@ -385,7 +460,24 @@ export function ChatWindow({ conversationId, currentUserId, onMobileBack }: Prop
                                 {!isOwn && !showAvatar && <div className="message-avatar-spacer" />}
 
                                 <div className="message-bubble">
-                                    <p className="message-text">{message.content}</p>
+                                    {/* Images si présentes */}
+                                    {message.images && message.images.length > 0 && (
+                                        <div className="message-images">
+                                            {message.images.map((imageUrl: string, idx: number) => (
+                                                <img
+                                                    key={idx}
+                                                    src={imageUrl}
+                                                    alt={`Image ${idx + 1}`}
+                                                    className="message-image"
+                                                    onClick={() => window.open(imageUrl, '_blank')}
+                                                />
+                                            ))}
+                                        </div>
+                                    )}
+
+                                    {message.content && message.content !== '📷 Image' && (
+                                        <p className="message-text">{message.content}</p>
+                                    )}
                                     <div className="message-meta">
                                         <span className="message-time">{getTimeDisplay(message.created_at)}</span>
                                         {isOwn && !isSending && <span className="message-status">✓✓</span>}
@@ -401,7 +493,40 @@ export function ChatWindow({ conversationId, currentUserId, onMobileBack }: Prop
 
             {/* Input */}
             <div className="message-input-container">
-                <button className="input-action-btn">
+                {/* Input file caché */}
+                <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/jpeg,image/png,image/gif,image/webp"
+                    multiple
+                    onChange={handleImageSelect}
+                    style={{ display: 'none' }}
+                />
+
+                {/* Image previews */}
+                {previewUrls.length > 0 && (
+                    <div className="image-preview-container">
+                        {previewUrls.map((url, index) => (
+                            <div key={index} className="image-preview-item">
+                                <img src={url} alt={`Preview ${index + 1}`} />
+                                <button
+                                    className="remove-preview-btn"
+                                    onClick={() => removeImage(index)}
+                                    type="button"
+                                >
+                                    <X size={16} />
+                                </button>
+                            </div>
+                        ))}
+                    </div>
+                )}
+
+                <button
+                    className="input-action-btn"
+                    onClick={() => fileInputRef.current?.click()}
+                    type="button"
+                    disabled={uploading}
+                >
                     <Paperclip size={20} />
                 </button>
 
@@ -413,9 +538,9 @@ export function ChatWindow({ conversationId, currentUserId, onMobileBack }: Prop
                         onChange={(e) => setNewMessage(e.target.value)}
                         onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && handleSend()}
                         className="message-input"
-                        disabled={sending}
+                        disabled={sending || uploading}
                     />
-                    <button className="input-action-btn">
+                    <button className="input-action-btn" disabled={uploading}>
                         <Smile size={20} />
                     </button>
                 </div>
@@ -423,9 +548,11 @@ export function ChatWindow({ conversationId, currentUserId, onMobileBack }: Prop
                 <button
                     className="send-btn"
                     onClick={handleSend}
-                    disabled={!newMessage.trim() || sending}
+                    disabled={(!newMessage.trim() && selectedImages.length === 0) || sending || uploading}
                 >
-                    {sending ? (
+                    {uploading ? (
+                        <div className="spinner-small" />
+                    ) : sending ? (
                         <div className="spinner-small" />
                     ) : (
                         <Send size={20} />
