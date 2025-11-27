@@ -1,4 +1,3 @@
-```javascript
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { supabase } from '../../lib/supabase'
 import { Send, Smile, Paperclip, MoreVertical, Phone, Video } from 'lucide-react'
