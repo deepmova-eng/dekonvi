@@ -46,15 +46,15 @@ export function ChatWindow({ conversationId, currentUserId }: Props) {
         try {
             const { data: conv, error } = await supabase
                 .from('conversations')
-                .select('participants')
+                .select('user1_id, user2_id')
                 .eq('id', conversationId)
                 .single()
 
             if (error) throw error
 
             if (conv) {
-                // Déterminer l'autre utilisateur depuis participants array
-                const otherUserId = conv.participants.find((id: string) => id !== currentUserId)
+                // Déterminer l'autre utilisateur
+                const otherUserId = conv.user1_id === currentUserId ? conv.user2_id : conv.user1_id
 
                 const { data: profile } = await supabase
                     .from('profiles')
