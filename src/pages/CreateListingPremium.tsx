@@ -91,18 +91,18 @@ export default function CreateListingPremium() {
             const locationString = formData.city + (formData.location ? `, ${formData.location}` : '')
 
             // Créer l'annonce dans Supabase
+            // NOTE: Seuls les champs existants dans le schéma sont utilisés
             const { data: listing, error } = await supabase
                 .from('listings')
                 .insert({
-                    user_id: user.id,
                     seller_id: user.id,
                     category: formData.category,
-                    subcategory: formData.subcategory || null,
+                    // subcategory n'existe pas dans la table
                     title: formData.title,
                     description: formData.description,
-                    condition: formData.condition,
+                    condition: formData.condition as 'new' | 'like-new' | 'good' | 'fair' | 'poor',
                     price: parseFloat(formData.price),
-                    negotiable: formData.negotiable,
+                    // negotiable n'existe pas dans la table
                     delivery_available: formData.shipping_available,
                     location: locationString,
                     images: imageUrls,
