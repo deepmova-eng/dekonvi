@@ -436,3 +436,54 @@
         max-width: 120px;
     }
 }
+
+/* Bouton retour mobile */
+.mobile-back-button {
+    display: none;
+    /* Caché sur desktop */
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: transparent;
+    border: none;
+    color: #2DD181;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-radius: 8px;
+    position: relative;
+    z-index: 1000;
+    /* Au-dessus de tout */
+    pointer-events: auto;
+    /* Toujours cliquable */
+}
+
+.mobile-back-button:hover {
+    background: #F3F4F6;
+}
+
+.mobile-back-button:active {
+    transform: scale(0.95);
+}
+
+@media (max-width: 1024px) {
+    .mobile-back-button {
+        display: flex;
+        /* Visible sur mobile */
+    }
+
+    .chat-header {
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    .mobile-back-button {
+        width: 100%;
+        justify-content: flex-start;
+        padding: 12px 16px;
+        border-bottom: 1px solid #E5E7EB;
+        margin: -16px -24px 12px -24px;
+        padding: 16px 24px;
+    }
+}

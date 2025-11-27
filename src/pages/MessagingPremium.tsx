@@ -10,6 +10,8 @@ export default function MessagingPremium() {
     const [conversations, setConversations] = useState<any[]>([])
     const [activeConversationId, setActiveConversationId] = useState<string | null>(null)
     const [loading, setLoading] = useState(true)
+    const [showChatOnMobile, setShowChatOnMobile] = useState(false)
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 1024)
 
     const fetchConversations = useCallback(async () => {
         try {
@@ -102,6 +104,30 @@ export default function MessagingPremium() {
         }
     }, [user, fetchConversations, subscribeToConversations])
 
+    // Détecte la taille d'écran pour mobile
+    useEffect(() => {
+        const handleResize = () => {
+            setIsMobile(window.innerWidth < 1024)
+        }
+
+        window.addEventListener('resize', handleResize)
+        return () => window.removeEventListener('resize', handleResize)
+    }, [])
+
+    // Gère la sélection de conversation
+    const handleSelectConversation = (id: string) => {
+        console.log('🎯 handleSelectConversation called:', { id, isMobile, showChatOnMobile })
+        setActiveConversationId(id)
+
+        // Sur mobile, affiche le chat et cache la sidebar
+        if (isMobile) {
+            console.log('📱 Setting showChatOnMobile to TRUE')
+            setShowChatOnMobile(true)
+        } else {
+            console.log('💻 Desktop mode - not changing showChatOnMobile')
+        }
+    }
+
     if (loading) {
         return (
             <div className="messaging-premium">
@@ -116,21 +142,31 @@ export default function MessagingPremium() {
     return (
         <div className="messaging-premium">
 
-            {/* Sidebar conversations */}
-            <ConversationSidebar
-                conversations={conversations}
-                activeId={activeConversationId}
-                onSelect={setActiveConversationId}
-                currentUserId={user?.id || ''}
-            />
-
-            {/* Zone de chat */}
-            {activeConversationId && (
-                <ChatWindow
-                    key={activeConversationId}
-                    conversationId={activeConversationId}
+            {/* Sidebar - Cachée sur mobile si chat ouvert */}
+            <div className={`sidebar-wrapper ${showChatOnMobile && isMobile ? 'mobile-hidden' : ''}`}>
+                <ConversationSidebar
+                    conversations={conversations}
+                    activeId={activeConversationId}
+                    onSelect={handleSelectConversation}
                     currentUserId={user?.id || ''}
                 />
+            </div>
+
+            {/* Chat - Caché sur mobile si pas de conversation sélectionnée */}
+            {activeConversationId && (
+                <div className={`chat-wrapper ${!showChatOnMobile && isMobile ? 'mobile-hidden' : ''}`}>
+                    <ChatWindow
+                        key={activeConversationId}
+                        conversationId={activeConversationId}
+                        currentUserId={user?.id || ''}
+                        onBack={() => {
+                            console.log('📱 onBack called - Before:', { showChatOnMobile, isMobile })
+                            setShowChatOnMobile(false)
+                            console.log('📱 onBack called - After setShowChatOnMobile(false)')
+                            // Ne pas changer activeConversationId pour garder la conversation en mémoire
+                        }}
+                    />
+                </div>
             )}
         </div>
     )
