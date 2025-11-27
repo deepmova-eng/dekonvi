@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef } from 'react'
+```javascript
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { supabase } from '../../lib/supabase'
 import { Send, Smile, Paperclip, MoreVertical, Phone, Video } from 'lucide-react'
 import './ChatWindow.css'
@@ -17,6 +18,47 @@ export function ChatWindow({ conversationId, currentUserId }: Props) {
     const [otherUser, setOtherUser] = useState<any>(null)
     const messagesEndRef = useRef<HTMLDivElement>(null)
 
+    // Stabiliser subscribeToMessages avec useCallback
+    const subscribeToMessages = useCallback(() => {
+        if (!conversationId) return () => {}
+        
+        console.log('🔌 Setting up realtime subscription for conversation:', conversationId)
+
+        const subscription = supabase
+            .channel(`messages_${ conversationId } `)
+            .on(
+                'postgres_changes',
+                {
+                    event: 'INSERT',
+                    schema: 'public',
+                    table: 'messages',
+                    filter: `conversation_id = eq.${ conversationId } `,
+                },
+                (payload) => {
+                    console.log('📨 New message received via realtime:', payload.new)
+                    setMessages((prev) => {
+                        // Éviter les doublons
+                        if (prev.find((m: any) => m.id === payload.new.id)) {
+                            console.log('⚠️ Duplicate message detected, skipping')
+                            return prev
+                        }
+                        console.log('✅ Adding new message to state')
+                        return [...prev, payload.new]
+                    })
+                }
+            )
+            .subscribe((status) => {
+                console.log('📡 Subscription status:', status)
+            })
+
+        console.log('✅ Subscription created:', subscription)
+
+        return () => {
+            console.log('🔌 Unsubscribing from messages channel')
+            subscription.unsubscribe()
+        }
+    }, [conversationId])
+
     useEffect(() => {
         console.log('🔄 useEffect triggered, conversationId:', conversationId)
         if (conversationId) {
@@ -29,7 +71,7 @@ export function ChatWindow({ conversationId, currentUserId }: Props) {
             // Cleanup lors du démontage ou changement de conversation
             return cleanup
         }
-    }, [conversationId])
+    }, [conversationId, subscribeToMessages])
 
     useEffect(() => {
         scrollToBottom()
@@ -86,14 +128,14 @@ export function ChatWindow({ conversationId, currentUserId }: Props) {
         console.log('🔌 Setting up realtime subscription for conversation:', conversationId)
 
         const subscription = supabase
-            .channel(`messages_${conversationId}`)
+            .channel(`messages_${ conversationId } `)
             .on(
                 'postgres_changes',
                 {
                     event: 'INSERT',
                     schema: 'public',
                     table: 'messages',
-                    filter: `conversation_id=eq.${conversationId}`,
+                    filter: `conversation_id = eq.${ conversationId } `,
                 },
                 (payload) => {
                     console.log('📨 New message received via realtime:', payload.new)
@@ -209,7 +251,7 @@ export function ChatWindow({ conversationId, currentUserId }: Props) {
                         return (
                             <div
                                 key={message.id}
-                                className={`message-wrapper ${isOwn ? 'own' : 'other'}`}
+                                className={`message - wrapper ${ isOwn ? 'own' : 'other' } `}
                             >
                                 {!isOwn && showAvatar && (
                                     <img
