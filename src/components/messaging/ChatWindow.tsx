@@ -7,10 +7,10 @@ import './ChatWindow.css'
 interface Props {
     conversationId: string | null
     currentUserId: string
-    onBack?: () => void
+    onMobileBack?: () => void
 }
 
-export function ChatWindow({ conversationId, currentUserId, onBack }: Props) {
+export function ChatWindow({ conversationId, currentUserId, onMobileBack }: Props) {
     const [messages, setMessages] = useState<any[]>([])
     const [newMessage, setNewMessage] = useState('')
     const [sending, setSending] = useState(false)
@@ -301,12 +301,7 @@ export function ChatWindow({ conversationId, currentUserId, onBack }: Props) {
                 {/* Bouton retour mobile */}
                 <button
                     className="mobile-back-button"
-                    onClick={(e) => {
-                        e.stopPropagation()
-                        e.preventDefault()
-                        console.log('🔙 Back button clicked - deselecting conversation')
-                        onBack?.()
-                    }}
+                    onClick={onMobileBack}
                 >
                     <ArrowLeft size={20} />
                     <span>Retour</span>

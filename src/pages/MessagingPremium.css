@@ -88,3 +88,13 @@
     pointer-events: none;
   }
 }
+/* Fix mobile - affichage conditionnel simple */
+@media (max-width: 1024px) {
+  .messaging-premium.mobile-viewing-chat .conversation-sidebar {
+    display: none;
+  }
+  
+  .messaging-premium:not(.mobile-viewing-chat) .chat-wrapper {
+    display: none;
+  }
+}
