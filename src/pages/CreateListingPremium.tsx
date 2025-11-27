@@ -87,11 +87,15 @@ export default function CreateListingPremium() {
             // Préparer les URLs d'images (temporaire pour Phase 1)
             const imageUrls = formData.images.map((img: any) => img.preview)
 
+            // Combiner city et location en un seul champ location
+            const locationString = formData.city + (formData.location ? `, ${formData.location}` : '')
+
             // Créer l'annonce dans Supabase
             const { data: listing, error } = await supabase
                 .from('listings')
                 .insert({
                     user_id: user.id,
+                    seller_id: user.id,
                     category: formData.category,
                     subcategory: formData.subcategory || null,
                     title: formData.title,
@@ -99,11 +103,12 @@ export default function CreateListingPremium() {
                     condition: formData.condition,
                     price: parseFloat(formData.price),
                     negotiable: formData.negotiable,
-                    shipping_available: formData.shipping_available,
-                    city: formData.city,
-                    location: formData.location || null,
+                    delivery_available: formData.shipping_available,
+                    location: locationString,
                     images: imageUrls,
                     status: 'active',
+                    is_premium: false,
+                    hide_phone: false,
                 })
                 .select()
                 .single()
@@ -112,122 +117,122 @@ export default function CreateListingPremium() {
 
             // Succès : clear draft et redirection
             localStorage.removeItem('draft_listing')
-            navigate(`/ listings / ${ listing.id } `)
+            navigate(`/ listings / ${listing.id} `)
 
         } catch (error: any) {
             console.error('Error creating listing:', error)
             alert(`Erreur lors de la création de l'annonce: ${error.message || 'Erreur inconnue'}`)
         } finally {
-    setIsLoading(false)
-}
+            setIsLoading(false)
+        }
     }
 
-return (
-    <div className="create-listing-page">
+    return (
+        <div className="create-listing-page">
 
-        {/* Simple back button */}
-        <div className="simple-header">
-            <button className="back-button" onClick={() => navigate(-1)}>
-                <ArrowLeft size={20} />
-                Retour
-            </button>
-        </div>
+            {/* Simple back button */}
+            <div className="simple-header">
+                <button className="back-button" onClick={() => navigate(-1)}>
+                    <ArrowLeft size={20} />
+                    Retour
+                </button>
+            </div>
 
-        <div className="create-listing-body">
-            <div className="container-centered">
-                <div className="form-card">
+            <div className="create-listing-body">
+                <div className="container-centered">
+                    <div className="form-card">
 
-                    {/* Step Indicator */}
-                    <div className="step-indicator-wrapper">
-                        <StepIndicator
-                            steps={STEPS}
-                            currentStep={currentStep}
-                        />
-                    </div>
+                        {/* Step Indicator */}
+                        <div className="step-indicator-wrapper">
+                            <StepIndicator
+                                steps={STEPS}
+                                currentStep={currentStep}
+                            />
+                        </div>
 
-                    {/* Step content */}
-                    {currentStep === 1 && (
-                        <StepCategory
-                            data={formData}
-                            updateData={updateFormData}
-                        />
-                    )}
-
-                    {currentStep === 2 && (
-                        <StepDetails
-                            data={formData}
-                            updateData={updateFormData}
-                        />
-                    )}
-
-                    {currentStep === 3 && (
-                        <StepPhotos
-                            data={formData}
-                            updateData={updateFormData}
-                        />
-                    )}
-
-                    {currentStep === 4 && (
-                        <StepPricing
-                            data={formData}
-                            updateData={updateFormData}
-                        />
-                    )}
-
-                    {currentStep === 5 && (
-                        <StepReview
-                            data={formData}
-                            onEdit={(step) => setCurrentStep(step)}
-                        />
-                    )}
-
-                    {/* Navigation buttons */}
-                    <div className="form-navigation">
-                        {currentStep > 1 && (
-                            <button
-                                className="btn-secondary btn-large"
-                                onClick={prevStep}
-                            >
-                                <ArrowLeft size={20} />
-                                Précédent
-                            </button>
+                        {/* Step content */}
+                        {currentStep === 1 && (
+                            <StepCategory
+                                data={formData}
+                                updateData={updateFormData}
+                            />
                         )}
 
-                        {currentStep < STEPS.length ? (
-                            <button
-                                className="btn-primary btn-large"
-                                onClick={nextStep}
-                            >
-                                Suivant
-                                <ArrowRight size={20} />
-                            </button>
-                        ) : (
-                            <button
-                                className="btn-primary btn-large"
-                                onClick={handleSubmit}
-                                disabled={isLoading}
-                            >
-                                {isLoading ? (
-                                    <>
-                                        <span>Publication...</span>
-                                    </>
-                                ) : (
-                                    <>
-                                        <CheckCircle size={20} />
-                                        Publier l'annonce
-                                    </>
-                                )}
-                            </button>
+                        {currentStep === 2 && (
+                            <StepDetails
+                                data={formData}
+                                updateData={updateFormData}
+                            />
                         )}
-                    </div>
-                </div>
 
-                {/* Auto-save indicator */}
-                <div className="auto-save-indicator">
-                    ✓ Brouillon sauvegardé automatiquement
+                        {currentStep === 3 && (
+                            <StepPhotos
+                                data={formData}
+                                updateData={updateFormData}
+                            />
+                        )}
+
+                        {currentStep === 4 && (
+                            <StepPricing
+                                data={formData}
+                                updateData={updateFormData}
+                            />
+                        )}
+
+                        {currentStep === 5 && (
+                            <StepReview
+                                data={formData}
+                                onEdit={(step) => setCurrentStep(step)}
+                            />
+                        )}
+
+                        {/* Navigation buttons */}
+                        <div className="form-navigation">
+                            {currentStep > 1 && (
+                                <button
+                                    className="btn-secondary btn-large"
+                                    onClick={prevStep}
+                                >
+                                    <ArrowLeft size={20} />
+                                    Précédent
+                                </button>
+                            )}
+
+                            {currentStep < STEPS.length ? (
+                                <button
+                                    className="btn-primary btn-large"
+                                    onClick={nextStep}
+                                >
+                                    Suivant
+                                    <ArrowRight size={20} />
+                                </button>
+                            ) : (
+                                <button
+                                    className="btn-primary btn-large"
+                                    onClick={handleSubmit}
+                                    disabled={isLoading}
+                                >
+                                    {isLoading ? (
+                                        <>
+                                            <span>Publication...</span>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <CheckCircle size={20} />
+                                            Publier l'annonce
+                                        </>
+                                    )}
+                                </button>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Auto-save indicator */}
+                    <div className="auto-save-indicator">
+                        ✓ Brouillon sauvegardé automatiquement
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-)
+    )
 }
