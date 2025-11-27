@@ -1,0 +1,181 @@
+/* Dynamic Fields Premium */
+.dynamic-fields {
+    margin-top: 40px;
+    padding-top: 32px;
+    border-top: 2px solid #E5E7EB;
+    animation: slideInUp 0.5s ease;
+}
+
+.dynamic-fields-header {
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+.dynamic-fields-header h4 {
+    font-size: 20px;
+    font-weight: 700;
+    color: #111827;
+    margin: 0 0 8px 0;
+}
+
+.dynamic-fields-header p {
+    font-size: 14px;
+    color: #6B7280;
+    margin: 0;
+}
+
+.dynamic-fields-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+}
+
+@media (min-width: 768px) {
+    .dynamic-fields-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Field container */
+.dynamic-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    animation: fadeInScale 0.4s ease;
+}
+
+/* Label */
+.field-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #374151;
+}
+
+.required {
+    color: #EF4444;
+    margin-left: 4px;
+}
+
+/* Input text/number */
+.field-input {
+    padding: 12px 16px;
+    border: 2px solid #E5E7EB;
+    border-radius: 10px;
+    font-size: 15px;
+    color: #111827;
+    transition: all 0.2s ease;
+    background: white;
+}
+
+.field-input:focus {
+    outline: none;
+    border-color: #2DD181;
+    box-shadow: 0 0 0 4px rgba(45, 209, 129, 0.1);
+}
+
+.field-input::placeholder {
+    color: #9CA3AF;
+}
+
+/* Number with unit */
+.field-with-unit {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.field-with-unit .field-input {
+    flex: 1;
+}
+
+.field-unit {
+    font-size: 14px;
+    font-weight: 600;
+    color: #6B7280;
+    white-space: nowrap;
+}
+
+/* Select */
+.field-select {
+    padding: 12px 16px;
+    border: 2px solid #E5E7EB;
+    border-radius: 10px;
+    font-size: 15px;
+    color: #111827;
+    background: white;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.field-select:focus {
+    outline: none;
+    border-color: #2DD181;
+    box-shadow: 0 0 0 4px rgba(45, 209, 129, 0.1);
+}
+
+/* Radio group */
+.field-radio-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.radio-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border: 2px solid #E5E7EB;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: white;
+}
+
+.radio-label:hover {
+    border-color: #2DD181;
+    background: rgba(45, 209, 129, 0.05);
+}
+
+.radio-label input[type="radio"] {
+    width: 18px;
+    height: 18px;
+    accent-color: #2DD181;
+    cursor: pointer;
+}
+
+.radio-label input[type="radio"]:checked+.radio-text {
+    color: #2DD181;
+    font-weight: 600;
+}
+
+.radio-text {
+    font-size: 14px;
+    color: #374151;
+    transition: all 0.2s ease;
+}
+
+/* Animations */
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
