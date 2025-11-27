@@ -1,10 +1,13 @@
-/* Messaging Premium Layout */
+/* Container principal de la messagerie */
 .messaging-premium {
     display: grid;
     grid-template-columns: 360px 1fr;
     height: calc(100vh - 72px);
-    background: #F9FAFB;
+    /* 72px = hauteur du header Dekonvi */
+    overflow: hidden;
+    /* CRITIQUE : Empêche le scroll global */
     margin-top: 72px;
+    background: #F9FAFB;
 }
 
 @media (max-width: 1024px) {
