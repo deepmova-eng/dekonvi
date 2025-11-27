@@ -124,10 +124,13 @@ export default function MessagingPremium() {
             />
 
             {/* Zone de chat */}
-            <ChatWindow
-                conversationId={activeConversationId}
-                currentUserId={user?.id || ''}
-            />
+            {activeConversationId && (
+                <ChatWindow
+                    key={activeConversationId}
+                    conversationId={activeConversationId}
+                    currentUserId={user?.id || ''}
+                />
+            )}
         </div>
     )
 }
