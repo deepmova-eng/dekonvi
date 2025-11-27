@@ -86,7 +86,14 @@ export function ChatWindow({ conversationId, currentUserId }: Props) {
                     filter: `conversation_id=eq.${conversationId}`,
                 },
                 (payload) => {
-                    setMessages((prev) => [...prev, payload.new])
+                    console.log('📨 New message received:', payload.new)
+                    setMessages((prev) => {
+                        // Éviter les doublons
+                        if (prev.find((m: any) => m.id === payload.new.id)) {
+                            return prev
+                        }
+                        return [...prev, payload.new]
+                    })
                 }
             )
             .subscribe()
