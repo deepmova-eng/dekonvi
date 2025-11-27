@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { supabase } from '../../lib/supabase'
-import { Send, Smile, Paperclip, MoreVertical, Phone, Video } from 'lucide-react'
+import { Send, Smile, Paperclip, MoreVertical } from 'lucide-react'
 import './ChatWindow.css'
 
 interface Props {
@@ -13,6 +13,7 @@ export function ChatWindow({ conversationId, currentUserId }: Props) {
     const [newMessage, setNewMessage] = useState('')
     const [sending, setSending] = useState(false)
     const [otherUser, setOtherUser] = useState<any>(null)
+    const [listing, setListing] = useState<any>(null)
     const messagesEndRef = useRef<HTMLDivElement>(null)
     const subscriptionRef = useRef<any>(null)
 
@@ -37,18 +38,29 @@ export function ChatWindow({ conversationId, currentUserId }: Props) {
         }
     }, [conversationId])
 
-    // Fetch other user
+    // Fetch other user and listing
     const fetchOtherUser = useCallback(async () => {
         if (!conversationId || !currentUserId) return
 
         try {
+            // Récupère la conversation avec l'annonce liée
             const { data: conv, error: convError } = await supabase
                 .from('conversations')
-                .select('user1_id, user2_id')
+                .select(`
+                    *,
+                    listing:listings(
+                        id,
+                        title,
+                        price,
+                        images
+                    )
+                `)
                 .eq('id', conversationId)
                 .single()
 
             if (convError) throw convError
+
+            console.log('📦 Conversation with listing:', conv)
 
             const otherUserId = conv.user1_id === currentUserId ? conv.user2_id : conv.user1_id
 
@@ -61,6 +73,11 @@ export function ChatWindow({ conversationId, currentUserId }: Props) {
             if (profileError) throw profileError
 
             setOtherUser(profile)
+
+            // Sauvegarde l'annonce dans le state
+            if (conv.listing) {
+                setListing(conv.listing)
+            }
         } catch (error) {
             console.error('❌ Error fetching user:', error)
         }
@@ -290,12 +307,27 @@ export function ChatWindow({ conversationId, currentUserId }: Props) {
                 </div>
 
                 <div className="header-actions">
-                    <button className="action-btn">
-                        <Phone size={20} />
-                    </button>
-                    <button className="action-btn">
-                        <Video size={20} />
-                    </button>
+                    {/* Annonce liée */}
+                    {listing ? (
+                        <div
+                            className="chat-listing-info"
+                            onClick={() => window.location.href = `/listings/${listing.id}`}
+                        >
+                            <img
+                                src={listing.images?.[0] || '/placeholder.png'}
+                                alt={listing.title}
+                                className="listing-thumbnail"
+                            />
+                            <div className="listing-details">
+                                <h4 className="listing-title">{listing.title}</h4>
+                                <p className="listing-price">{listing.price?.toLocaleString()} FCFA</p>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="no-listing">Annonce supprimée</div>
+                    )}
+
+                    {/* Menu 3 points */}
                     <button className="action-btn">
                         <MoreVertical size={20} />
                     </button>

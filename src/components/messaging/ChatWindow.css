@@ -365,3 +365,71 @@
 .message-wrapper.own.sending .message-bubble {
     background: linear-gradient(135deg, #9CA3AF 0%, #6B7280 100%);
 }
+/* Annonce liée dans le header */
+.chat-listing-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  background: #F9FAFB;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 2px solid transparent;
+}
+
+.chat-listing-info:hover {
+  background: #F3F4F6;
+  border-color: #2DD181;
+}
+
+.listing-thumbnail {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.listing-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.listing-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.listing-price {
+  font-size: 13px;
+  color: #2DD181;
+  font-weight: 600;
+  margin: 0;
+}
+
+.no-listing {
+  font-size: 13px;
+  color: #9CA3AF;
+  font-style: italic;
+  padding: 8px 12px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .chat-listing-info {
+    max-width: 180px;
+  }
+
+  .listing-title {
+    max-width: 120px;
+  }
+}
