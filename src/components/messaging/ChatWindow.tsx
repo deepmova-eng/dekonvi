@@ -44,14 +44,16 @@ export function ChatWindow({ conversationId, currentUserId }: Props) {
 
     const fetchOtherUser = async () => {
         try {
-            const { data: conv } = await supabase
+            const { data: conv, error } = await supabase
                 .from('conversations')
-                .select('user1_id, user2_id, profiles!conversations_user1_id_fkey(*)')
+                .select('user1_id, user2_id')
                 .eq('id', conversationId)
                 .single()
 
+            if (error) throw error
+
             if (conv) {
-                // Determine l'autre utilisateur
+                // Déterminer l'autre utilisateur
                 const otherUserId = conv.user1_id === currentUserId ? conv.user2_id : conv.user1_id
 
                 const { data: profile } = await supabase
