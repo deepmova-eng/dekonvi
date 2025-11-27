@@ -268,11 +268,11 @@ export function ChatWindow({ conversationId, currentUserId }: Props) {
                     ) : (
                         <Send size={20} />
                     )}
-
-// Mémoiser le composant pour éviter les re-renders inutiles
-                    export default React.memo(ChatWindow)
                 </button>
             </div>
         </div>
     )
 }
+
+// Mémoiser le composant pour éviter les re-renders inutiles
+export default React.memo(ChatWindow)
