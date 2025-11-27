@@ -17,6 +17,7 @@ import { StepDetails } from '../components/create-listing/StepDetails'
 import { StepPhotos } from '../components/create-listing/StepPhotos'
 import { StepPricing } from '../components/create-listing/StepPricing'
 import { StepReview } from '../components/create-listing/StepReview'
+import { uploadImages } from '../utils/uploadImages'
 import './CreateListingPremium.css'
 
 const STEPS = [
@@ -101,6 +102,32 @@ export default function CreateListingPremium() {
         try {
             setIsLoading(true)
 
+            // Message de progression pendant upload
+            const loadingMessage = document.createElement('div')
+            loadingMessage.id = 'upload-progress'
+            loadingMessage.style.cssText = `
+              position: fixed;
+              top: 50%;
+              left: 50%;
+              transform: translate(-50%, -50%);
+              background: white;
+              padding: 32px 48px;
+              border-radius: 16px;
+              box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+              z-index: 9999;
+              text-align: center;
+            `
+            loadingMessage.innerHTML = `
+              <div style="font-size: 48px; margin-bottom: 16px;">📤</div>
+              <div style="font-size: 18px; font-weight: 600; color: #111827; margin-bottom: 8px;">
+                Upload des photos en cours...
+              </div>
+              <div style="font-size: 14px; color: #6B7280;">
+                Envoi de ${formData.images.length} photo(s) vers le serveur
+              </div>
+            `
+            document.body.appendChild(loadingMessage)
+
             // Vérifier authentification
             if (!user) {
                 alert('Vous devez être connecté pour publier une annonce')
@@ -114,8 +141,10 @@ export default function CreateListingPremium() {
                 return
             }
 
-            // Préparer les URLs d'images (temporaire pour Phase 1)
-            const imageUrls = formData.images.map((img: any) => img.preview)
+            // Upload des images vers Supabase Storage
+            console.log('📤 Upload de', formData.images.length, 'images vers Supabase...')
+            const imageUrls = await uploadImages(formData.images, user.id)
+            console.log('✅ Toutes les images uploadées:', imageUrls)
 
             // Combiner city et location en un seul champ location
             const locationString = formData.city + (formData.location ? `, ${formData.location}` : '')
@@ -158,6 +187,9 @@ export default function CreateListingPremium() {
             alert(`Erreur lors de la création de l'annonce: ${error.message || 'Erreur inconnue'}`)
         } finally {
             setIsLoading(false)
+            // Supprime le message de progression
+            const msg = document.getElementById('upload-progress')
+            if (msg) msg.remove()
         }
     }
 
