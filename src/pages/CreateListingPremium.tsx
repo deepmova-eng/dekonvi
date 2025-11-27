@@ -70,11 +70,21 @@ export default function CreateListingPremium() {
     // Mapping des valeurs du formulaire vers les valeurs de la base de données
     const mapCategoryToDb = (category: string): string => {
         const mapping: Record<string, string> = {
+            // StepCategory IDs → Database values
+            'electronics': 'high-tech',
+            'fashion': 'mode',
+            'home': 'maison',
+            'vehicles': 'vehicules',
+            'books': 'loisirs',
+            'other': 'autres',
+            // Fallback for config/categories.ts values
             'multimedia': 'high-tech',
             'emploi': 'emploi-services',
             'professionnel': 'materiel-pro',
         }
-        return mapping[category] || category
+        const mapped = mapping[category] || category
+        console.log(`Category mapping: ${category} → ${mapped}`)
+        return mapped
     }
 
     const mapConditionToDb = (condition: string): string => {
@@ -111,17 +121,28 @@ export default function CreateListingPremium() {
             // Combiner city et location en un seul champ location
             const locationString = formData.city + (formData.location ? `, ${formData.location}` : '')
 
+            // Map category and condition
+            const dbCategory = mapCategoryToDb(formData.category)
+            const dbCondition = mapConditionToDb(formData.condition)
+
+            // DEBUG: Log valeurs avant insertion
+            console.log('=== DEBUG INSERTION ===')
+            console.log('Form category:', formData.category, '→ DB:', dbCategory)
+            console.log('Form condition:', formData.condition, '→ DB:', dbCondition)
+            console.log('Location:', locationString)
+            console.log('======================')
+
             // Créer l'annonce dans Supabase
             // NOTE: Seuls les champs existants dans le schéma sont utilisés
             const { data: listing, error } = await supabase
                 .from('listings')
                 .insert({
                     seller_id: user.id,
-                    category: mapCategoryToDb(formData.category),
+                    category: dbCategory,
                     // subcategory n'existe pas dans la table
                     title: formData.title,
                     description: formData.description,
-                    condition: mapConditionToDb(formData.condition) as any, // Values in French
+                    condition: dbCondition as any, // Values in French
                     price: parseFloat(formData.price),
                     // negotiable n'existe pas dans la table
                     delivery_available: formData.shipping_available,
