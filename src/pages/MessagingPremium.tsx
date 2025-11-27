@@ -24,16 +24,16 @@ export default function MessagingPremium() {
             const { data: convs, error } = await supabase
                 .from('conversations')
                 .select('*')
-                .contains('participants', [user?.id])
+                .or(`user1_id.eq.${user?.id},user2_id.eq.${user?.id}`)
                 .order('created_at', { ascending: false })
 
             if (error) throw error
 
             // Pour chaque conversation, récupérer l'autre utilisateur et le dernier message
             const conversationsWithDetails = await Promise.all(
-                (convs || []).map(async (conv) => {
+                (convs || []).map(async (conv: any) => {
                     // Déterminer l'ID de l'autre utilisateur
-                    const otherUserId = conv.participants.find((id: string) => id !== user?.id)
+                    const otherUserId = conv.user1_id === user?.id ? conv.user2_id : conv.user1_id
 
                     // Récupérer le profil de l'autre utilisateur
                     const { data: profile } = await supabase
@@ -49,7 +49,7 @@ export default function MessagingPremium() {
                         .eq('conversation_id', conv.id)
                         .order('created_at', { ascending: false })
                         .limit(1)
-                        .single()
+                        .maybeSingle()
 
                     return {
                         ...conv,
