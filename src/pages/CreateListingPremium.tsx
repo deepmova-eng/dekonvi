@@ -67,6 +67,27 @@ export default function CreateListingPremium() {
         }
     }
 
+    // Mapping des valeurs du formulaire vers les valeurs de la base de données
+    const mapCategoryToDb = (category: string): string => {
+        const mapping: Record<string, string> = {
+            'multimedia': 'high-tech',
+            'emploi': 'emploi-services',
+            'professionnel': 'materiel-pro',
+        }
+        return mapping[category] || category
+    }
+
+    const mapConditionToDb = (condition: string): string => {
+        const mapping: Record<string, string> = {
+            'new': 'neuf',
+            'like-new': 'comme-neuf',
+            'good': 'bon-etat',
+            'fair': 'etat-correct',
+            'poor': 'a-renover',
+        }
+        return mapping[condition] || condition
+    }
+
     const handleSubmit = async () => {
         try {
             setIsLoading(true)
@@ -96,11 +117,11 @@ export default function CreateListingPremium() {
                 .from('listings')
                 .insert({
                     seller_id: user.id,
-                    category: formData.category,
+                    category: mapCategoryToDb(formData.category),
                     // subcategory n'existe pas dans la table
                     title: formData.title,
                     description: formData.description,
-                    condition: formData.condition as 'new' | 'like-new' | 'good' | 'fair' | 'poor',
+                    condition: mapConditionToDb(formData.condition) as 'neuf' | 'comme-neuf' | 'bon-etat' | 'etat-correct' | 'a-renover',
                     price: parseFloat(formData.price),
                     // negotiable n'existe pas dans la table
                     delivery_available: formData.shipping_available,
