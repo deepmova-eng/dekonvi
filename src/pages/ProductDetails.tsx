@@ -82,6 +82,55 @@ export default function ProductDetails() {
     );
   };
 
+  const handleSendMessage = async () => {
+    if (!user) {
+      // TODO: Show login modal
+      alert('Veuillez vous connecter pour envoyer un message');
+      navigate('/login');
+      return;
+    }
+
+    if (user.id === listing.seller_id) {
+      alert('Vous ne pouvez pas envoyer un message à vous-même');
+      return;
+    }
+
+    try {
+      // Import supabase
+      const { supabase } = await import('../lib/supabase');
+
+      // Vérifier si une conversation existe déjà
+      const { data: existingConv } = await supabase
+        .from('conversations')
+        .select('id')
+        .or(`and(user1_id.eq.${user.id},user2_id.eq.${listing.seller_id}),and(user1_id.eq.${listing.seller_id},user2_id.eq.${user.id})`)
+        .single();
+
+      if (existingConv) {
+        // Conversation existe, rediriger
+        navigate(`/messages`);
+      } else {
+        // Créer nouvelle conversation
+        const { data: newConv, error } = await supabase
+          .from('conversations')
+          .insert({
+            user1_id: user.id,
+            user2_id: listing.seller_id,
+            listing_id: listing.id,
+          })
+          .select()
+          .single();
+
+        if (error) throw error;
+
+        navigate(`/messages`);
+      }
+    } catch (error) {
+      console.error('Error creating conversation:', error);
+      alert('Erreur lors de la création de la conversation');
+    }
+  };
+
   return (
     <div className="product-details-page">
       <div className="container">
@@ -177,7 +226,10 @@ export default function ProductDetails() {
 
               {/* Actions principales */}
               <div className="product-actions">
-                <button className="btn btn--primary btn--large">
+                <button
+                  className="btn btn--primary btn--large"
+                  onClick={handleSendMessage}
+                >
                   <MessageCircle size={20} />
                   Envoyer un message
                 </button>
