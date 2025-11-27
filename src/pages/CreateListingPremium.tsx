@@ -83,7 +83,6 @@ export default function CreateListingPremium() {
             'professionnel': 'materiel-pro',
         }
         const mapped = mapping[category] || category
-        console.log(`Category mapping: ${category} → ${mapped}`)
         return mapped
     }
 
@@ -124,13 +123,6 @@ export default function CreateListingPremium() {
             // Map category and condition
             const dbCategory = mapCategoryToDb(formData.category)
             const dbCondition = mapConditionToDb(formData.condition)
-
-            // DEBUG: Log valeurs avant insertion
-            console.log('=== DEBUG INSERTION ===')
-            console.log('Form category:', formData.category, '→ DB:', dbCategory)
-            console.log('Form condition:', formData.condition, '→ DB:', dbCondition)
-            console.log('Location:', locationString)
-            console.log('======================')
 
             // Créer l'annonce dans Supabase
             // NOTE: Seuls les champs existants dans le schéma sont utilisés
