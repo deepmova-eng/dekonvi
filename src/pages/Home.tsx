@@ -187,12 +187,6 @@ export default function Home({ onProductSelect, searchQuery = '' }: HomeProps) {
             {/* Category Cards Premium - Show after slider, hide during search */}
             {!searchTerm && <CategoriesSection />}
 
-            {/* Categories Filter - Show ONLY after slider */}
-            <CategoryFilter
-                selectedCategory={selectedCategory}
-                onSelectCategory={setSelectedCategory}
-            />
-
             {/* Premium Listings - Hide during search */}
             {
                 !searchTerm && premiumListings.length > 0 && (
