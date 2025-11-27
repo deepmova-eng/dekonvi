@@ -19,7 +19,12 @@ export function ChatWindow({ conversationId, currentUserId }: Props) {
         if (conversationId) {
             fetchMessages()
             fetchOtherUser()
-            subscribeToMessages()
+
+            // Initialiser la subscription realtime
+            const cleanup = subscribeToMessages()
+
+            // Cleanup lors du démontage ou changement de conversation
+            return cleanup
         }
     }, [conversationId])
 
