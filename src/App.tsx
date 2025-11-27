@@ -12,6 +12,7 @@ import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Messages from './pages/Messages';
+import MessagingPremium from './pages/MessagingPremium';
 import CreateListing from './pages/CreateListing';
 import CreateListingPremium from './pages/CreateListingPremium';
 import Profile from './pages/Profile';
@@ -104,11 +105,7 @@ export default function App() {
             path="/messages"
             element={
               <ProtectedRoute>
-                <Messages
-                  selectedConversationId={selectedConversationId}
-                  onConversationSelect={setSelectedConversationId}
-                  onBack={() => navigate('/')}
-                />
+                <MessagingPremium />
               </ProtectedRoute>
             }
           />
