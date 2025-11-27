@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { supabase } from '../../lib/supabase'
 import { Send, Smile, Paperclip, MoreVertical, Phone, Video } from 'lucide-react'
 import './ChatWindow.css'
@@ -9,39 +9,92 @@ interface Props {
 }
 
 export function ChatWindow({ conversationId, currentUserId }: Props) {
-    console.log('🪟 ChatWindow mounted with conversationId:', conversationId, 'currentUserId:', currentUserId)
-
     const [messages, setMessages] = useState<any[]>([])
     const [newMessage, setNewMessage] = useState('')
     const [sending, setSending] = useState(false)
     const [otherUser, setOtherUser] = useState<any>(null)
     const messagesEndRef = useRef<HTMLDivElement>(null)
+    const subscriptionRef = useRef<any>(null)
 
-    // Stabiliser subscribeToMessages avec useCallback
-    const subscribeToMessages = useCallback(() => {
-        if (!conversationId) return () => { }
+    // Fetch messages
+    const fetchMessages = useCallback(async () => {
+        if (!conversationId) return
 
-        console.log('🔌 Setting up realtime subscription for conversation:', conversationId)
+        try {
+            console.log('📥 Fetching messages for:', conversationId)
+            const { data, error } = await supabase
+                .from('messages')
+                .select('*')
+                .eq('conversation_id', conversationId)
+                .order('created_at', { ascending: true })
 
-        const subscription = supabase
-            .channel(`messages_${conversationId} `)
+            if (error) throw error
+
+            console.log('✅ Messages loaded:', data?.length)
+            setMessages(data || [])
+        } catch (error) {
+            console.error('❌ Error fetching messages:', error)
+        }
+    }, [conversationId])
+
+    // Fetch other user
+    const fetchOtherUser = useCallback(async () => {
+        if (!conversationId || !currentUserId) return
+
+        try {
+            const { data: conv, error: convError } = await supabase
+                .from('conversations')
+                .select('user1_id, user2_id')
+                .eq('id', conversationId)
+                .single()
+
+            if (convError) throw convError
+
+            const otherUserId = conv.user1_id === currentUserId ? conv.user2_id : conv.user1_id
+
+            const { data: profile, error: profileError } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', otherUserId)
+                .single()
+
+            if (profileError) throw profileError
+
+            setOtherUser(profile)
+        } catch (error) {
+            console.error('❌ Error fetching user:', error)
+        }
+    }, [conversationId, currentUserId])
+
+    // Setup realtime subscription
+    useEffect(() => {
+        if (!conversationId) return
+
+        // Cleanup previous subscription
+        if (subscriptionRef.current) {
+            console.log('🧹 Cleaning up old subscription')
+            subscriptionRef.current.unsubscribe()
+        }
+
+        console.log('🔌 Setting up realtime for:', conversationId)
+
+        // Create new subscription
+        const channel = supabase
+            .channel(`messages_${conversationId}`)
             .on(
                 'postgres_changes',
                 {
                     event: 'INSERT',
                     schema: 'public',
                     table: 'messages',
-                    filter: `conversation_id = eq.${conversationId} `,
+                    filter: `conversation_id=eq.${conversationId}`,
                 },
                 (payload) => {
-                    console.log('📨 New message received via realtime:', payload.new)
+                    console.log('🆕 New message received:', payload.new)
                     setMessages((prev) => {
-                        // Éviter les doublons
-                        if (prev.find((m: any) => m.id === payload.new.id)) {
-                            console.log('⚠️ Duplicate message detected, skipping')
-                            return prev
-                        }
-                        console.log('✅ Adding new message to state')
+                        // Évite les doublons
+                        const exists = prev.find(m => m.id === payload.new.id)
+                        if (exists) return prev
                         return [...prev, payload.new]
                     })
                 }
@@ -50,107 +103,93 @@ export function ChatWindow({ conversationId, currentUserId }: Props) {
                 console.log('📡 Subscription status:', status)
             })
 
-        console.log('✅ Subscription created:', subscription)
+        subscriptionRef.current = channel
 
+        // Fetch initial data
+        fetchMessages()
+        fetchOtherUser()
+
+        // Cleanup on unmount
         return () => {
-            console.log('🔌 Unsubscribing from messages channel')
-            subscription.unsubscribe()
+            console.log('🔌 Unsubscribing from:', conversationId)
+            if (subscriptionRef.current) {
+                subscriptionRef.current.unsubscribe()
+            }
         }
-    }, [conversationId])
+    }, [conversationId, fetchMessages, fetchOtherUser])
 
-    useEffect(() => {
-        console.log('🔄 useEffect triggered, conversationId:', conversationId)
-        if (conversationId) {
-            fetchMessages()
-            fetchOtherUser()
-
-            // Initialiser la subscription realtime
-            const cleanup = subscribeToMessages()
-
-            // Cleanup lors du démontage ou changement de conversation
-            return cleanup
-        }
-    }, [conversationId, subscribeToMessages])
-
+    // Scroll to bottom when messages change
     useEffect(() => {
         scrollToBottom()
     }, [messages])
 
-    const fetchMessages = async () => {
-        try {
-            const { data, error } = await supabase
-                .from('messages')
-                .select('*')
-                .eq('conversation_id', conversationId)
-                .order('created_at', { ascending: true })
-
-            if (error) throw error
-            setMessages(data || [])
-        } catch (error) {
-            console.error('Error fetching messages:', error)
-        }
-    }
-
-    const fetchOtherUser = async () => {
-        try {
-            console.log('👤 Fetching other user for conversation:', conversationId)
-            const { data: conv, error } = await supabase
-                .from('conversations')
-                .select('user1_id, user2_id')
-                .eq('id', conversationId)
-                .single()
-
-            console.log('📦 Conversation data:', conv, 'Error:', error)
-
-            if (error) throw error
-
-            if (conv) {
-                // Déterminer l'autre utilisateur
-                const otherUserId = conv.user1_id === currentUserId ? conv.user2_id : conv.user1_id
-                console.log('🎯 Other user ID:', otherUserId, 'Current user:', currentUserId)
-
-                const { data: profile } = await supabase
-                    .from('profiles')
-                    .select('*')
-                    .eq('id', otherUserId)
-                    .single()
-
-                console.log('✅ Profile loaded:', profile)
-                setOtherUser(profile)
-            }
-        } catch (error) {
-            console.error('❌ Error fetching user:', error)
-        }
+    const scrollToBottom = () => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
     }
 
     const handleSend = async () => {
-        if (!newMessage.trim() || sending) return
+        if (!newMessage.trim() || sending || !conversationId) return
+
+        const messageContent = newMessage.trim()
+        const tempId = `temp-${Date.now()}`
 
         try {
             setSending(true)
-            console.log('📤 Sending message:', newMessage.trim())
 
-            const { data, error } = await supabase.from('messages').insert({
+            // 1. OPTIMISTIC UPDATE - Ajoute le message immédiatement
+            const optimisticMessage = {
+                id: tempId,
                 conversation_id: conversationId,
                 sender_id: currentUserId,
-                content: newMessage.trim(),
-            }).select()
+                content: messageContent,
+                created_at: new Date().toISOString(),
+                is_sending: true, // Flag pour styling différent
+            }
 
-            console.log('📬 Message sent:', data, 'Error:', error)
+            console.log('⚡ Optimistic update:', optimisticMessage)
+            setMessages((prev) => [...prev, optimisticMessage])
+            setNewMessage('') // Clear input immédiatement
+
+            // 2. Envoie le vrai message à Supabase
+            console.log('📤 Sending to Supabase...')
+            const { data, error } = await supabase
+                .from('messages')
+                .insert({
+                    conversation_id: conversationId,
+                    sender_id: currentUserId,
+                    content: messageContent,
+                })
+                .select()
+                .single()
 
             if (error) throw error
 
-            setNewMessage('')
+            console.log('✅ Message sent:', data)
+
+            // 3. Remplace le message temporaire par le vrai
+            setMessages((prev) =>
+                prev.map((msg) => (msg.id === tempId ? data : msg))
+            )
+
+            // 4. Update conversation updated_at
+            await supabase
+                .from('conversations')
+                .update({ updated_at: new Date().toISOString() })
+                .eq('id', conversationId)
+
         } catch (error) {
             console.error('❌ Error sending message:', error)
-            alert('Erreur lors de l\'envoi')
+
+            // Supprime le message temporaire en cas d'erreur
+            setMessages((prev) => prev.filter((msg) => msg.id !== tempId))
+
+            alert('Erreur lors de l\'envoi du message')
+
+            // Restore le texte dans l'input
+            setNewMessage(messageContent)
         } finally {
             setSending(false)
         }
-    }
-
-    const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
     }
 
     const getTimeDisplay = (date: string) => {
@@ -208,11 +247,12 @@ export function ChatWindow({ conversationId, currentUserId }: Props) {
                     {messages.map((message, index) => {
                         const isOwn = message.sender_id === currentUserId
                         const showAvatar = index === 0 || messages[index - 1].sender_id !== message.sender_id
+                        const isSending = message.is_sending
 
                         return (
                             <div
                                 key={message.id}
-                                className={`message - wrapper ${isOwn ? 'own' : 'other'} `}
+                                className={`message-wrapper ${isOwn ? 'own' : 'other'} ${isSending ? 'sending' : ''}`}
                             >
                                 {!isOwn && showAvatar && (
                                     <img
@@ -227,7 +267,8 @@ export function ChatWindow({ conversationId, currentUserId }: Props) {
                                     <p className="message-text">{message.content}</p>
                                     <div className="message-meta">
                                         <span className="message-time">{getTimeDisplay(message.created_at)}</span>
-                                        {isOwn && <span className="message-status">✓✓</span>}
+                                        {isOwn && !isSending && <span className="message-status">✓✓</span>}
+                                        {isSending && <span className="message-status">⏱</span>}
                                     </div>
                                 </div>
                             </div>
@@ -249,7 +290,7 @@ export function ChatWindow({ conversationId, currentUserId }: Props) {
                         placeholder="Écrivez votre message..."
                         value={newMessage}
                         onChange={(e) => setNewMessage(e.target.value)}
-                        onKeyPress={(e) => e.key === 'Enter' && handleSend()}
+                        onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && handleSend()}
                         className="message-input"
                         disabled={sending}
                     />
@@ -274,5 +315,4 @@ export function ChatWindow({ conversationId, currentUserId }: Props) {
     )
 }
 
-// Mémoiser le composant pour éviter les re-renders inutiles
-export default React.memo(ChatWindow)
+export default ChatWindow
