@@ -29,7 +29,6 @@ export function SidebarMenu({ onClose, conversationCount }: Props) {
 
     const handleMarkAllRead = async () => {
         try {
-            console.log('✅ Marking all as read...')
             // TODO: Implémenter mark all as read dans Supabase
             alert(`${conversationCount} conversations marquées comme lues`)
             onClose()

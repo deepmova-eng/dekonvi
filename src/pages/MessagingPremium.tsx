@@ -14,7 +14,6 @@ export default function MessagingPremium() {
 
     const fetchConversations = useCallback(async () => {
         try {
-            console.log('🔍 Fetching conversations for user:', user?.id)
             // Récupérer toutes les conversations de l'utilisateur
             const { data: convs, error } = await supabase
                 .from('conversations')
@@ -22,7 +21,6 @@ export default function MessagingPremium() {
                 .or(`user1_id.eq.${user?.id},user2_id.eq.${user?.id}`)
                 .order('created_at', { ascending: false })
 
-            console.log('📦 Raw conversations:', convs, 'Error:', error)
 
             if (error) throw error
 
@@ -31,7 +29,6 @@ export default function MessagingPremium() {
                 (convs || []).map(async (conv: any) => {
                     // Déterminer l'ID de l'autre utilisateur
                     const otherUserId = conv.user1_id === user?.id ? conv.user2_id : conv.user1_id
-                    console.log('👤 Other user ID:', otherUserId, 'for conv:', conv.id)
 
                     // Récupérer le profil de l'autre utilisateur
                     const { data: profile } = await supabase
@@ -40,7 +37,6 @@ export default function MessagingPremium() {
                         .eq('id', otherUserId)
                         .single()
 
-                    console.log('👨 Profile fetched:', profile)
 
                     // Récupérer le dernier message
                     const { data: lastMsg } = await supabase
@@ -59,13 +55,11 @@ export default function MessagingPremium() {
                 })
             )
 
-            console.log('✅ Conversations with details:', conversationsWithDetails)
             setConversations(conversationsWithDetails)
 
             // Sélectionne la première conversation par défaut
             if (conversationsWithDetails && conversationsWithDetails.length > 0 && !activeConversationId) {
                 setActiveConversationId(conversationsWithDetails[0].id)
-                console.log('📌 Active conversation set to:', conversationsWithDetails[0].id)
             }
         } catch (error) {
             console.error('❌ Error fetching conversations:', error)
