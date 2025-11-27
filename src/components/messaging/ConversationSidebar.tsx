@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Search, MoreVertical } from 'lucide-react'
+import { SidebarMenu } from './SidebarMenu'
 import './ConversationSidebar.css'
 
 interface Props {
@@ -11,6 +12,7 @@ interface Props {
 
 export function ConversationSidebar({ conversations, activeId, onSelect, currentUserId }: Props) {
     const [searchQuery, setSearchQuery] = useState('')
+    const [showMenu, setShowMenu] = useState(false)
 
     const filteredConversations = conversations.filter(conv => {
         const otherUser = conv.other_user
@@ -39,9 +41,20 @@ export function ConversationSidebar({ conversations, activeId, onSelect, current
             {/* Header */}
             <div className="sidebar-header">
                 <h2>Messages</h2>
-                <button className="header-menu-btn">
+                <button
+                    className="header-menu-btn"
+                    onClick={() => setShowMenu(!showMenu)}
+                >
                     <MoreVertical size={20} />
                 </button>
+
+                {/* Menu dropdown */}
+                {showMenu && (
+                    <SidebarMenu
+                        onClose={() => setShowMenu(false)}
+                        conversationCount={conversations.length}
+                    />
+                )}
             </div>
 
             {/* Search */}

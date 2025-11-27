@@ -1,15 +1,16 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { supabase } from '../../lib/supabase'
-import { Send, Smile, Paperclip, MoreVertical } from 'lucide-react'
+import { Send, Smile, Paperclip, MoreVertical, ArrowLeft } from 'lucide-react'
 import { ChatHeaderMenu } from './ChatHeaderMenu'
 import './ChatWindow.css'
 
 interface Props {
     conversationId: string | null
     currentUserId: string
+    onBack?: () => void
 }
 
-export function ChatWindow({ conversationId, currentUserId }: Props) {
+export function ChatWindow({ conversationId, currentUserId, onBack }: Props) {
     const [messages, setMessages] = useState<any[]>([])
     const [newMessage, setNewMessage] = useState('')
     const [sending, setSending] = useState(false)
@@ -296,6 +297,22 @@ export function ChatWindow({ conversationId, currentUserId }: Props) {
 
             {/* Header */}
             <div className="chat-header">
+
+                {/* Bouton retour mobile */}
+                <button
+                    className="mobile-back-button"
+                    onClick={(e) => {
+                        e.stopPropagation()
+                        e.preventDefault()
+                        console.log('🔙 Back button clicked - deselecting conversation')
+                        onBack?.()
+                    }}
+                >
+                    <ArrowLeft size={20} />
+                    <span>Retour</span>
+                </button>
+
+                {/* Reste du header existant */}
                 <div className="header-user">
                     <img
                         src={otherUser?.avatar_url || '/default-avatar.png'}
