@@ -121,7 +121,7 @@ export default function CreateListingPremium() {
                     // subcategory n'existe pas dans la table
                     title: formData.title,
                     description: formData.description,
-                    condition: mapConditionToDb(formData.condition) as 'neuf' | 'comme-neuf' | 'bon-etat' | 'etat-correct' | 'a-renover',
+                    condition: mapConditionToDb(formData.condition) as any, // Values in French
                     price: parseFloat(formData.price),
                     // negotiable n'existe pas dans la table
                     delivery_available: formData.shipping_available,
