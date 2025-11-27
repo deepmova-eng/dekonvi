@@ -19,19 +19,19 @@ export function ChatWindow({ conversationId, currentUserId }: Props) {
 
     // Stabiliser subscribeToMessages avec useCallback
     const subscribeToMessages = useCallback(() => {
-        if (!conversationId) return () => {}
-        
+        if (!conversationId) return () => { }
+
         console.log('🔌 Setting up realtime subscription for conversation:', conversationId)
 
         const subscription = supabase
-            .channel(`messages_${ conversationId } `)
+            .channel(`messages_${conversationId} `)
             .on(
                 'postgres_changes',
                 {
                     event: 'INSERT',
                     schema: 'public',
                     table: 'messages',
-                    filter: `conversation_id = eq.${ conversationId } `,
+                    filter: `conversation_id = eq.${conversationId} `,
                 },
                 (payload) => {
                     console.log('📨 New message received via realtime:', payload.new)
@@ -120,44 +120,6 @@ export function ChatWindow({ conversationId, currentUserId }: Props) {
             }
         } catch (error) {
             console.error('❌ Error fetching user:', error)
-        }
-    }
-
-    const subscribeToMessages = () => {
-        console.log('🔌 Setting up realtime subscription for conversation:', conversationId)
-
-        const subscription = supabase
-            .channel(`messages_${ conversationId } `)
-            .on(
-                'postgres_changes',
-                {
-                    event: 'INSERT',
-                    schema: 'public',
-                    table: 'messages',
-                    filter: `conversation_id = eq.${ conversationId } `,
-                },
-                (payload) => {
-                    console.log('📨 New message received via realtime:', payload.new)
-                    setMessages((prev) => {
-                        // Éviter les doublons
-                        if (prev.find((m: any) => m.id === payload.new.id)) {
-                            console.log('⚠️ Duplicate message detected, skipping')
-                            return prev
-                        }
-                        console.log('✅ Adding new message to state')
-                        return [...prev, payload.new]
-                    })
-                }
-            )
-            .subscribe((status) => {
-                console.log('📡 Subscription status:', status)
-            })
-
-        console.log('✅ Subscription created:', subscription)
-
-        return () => {
-            console.log('🔌 Unsubscribing from messages channel')
-            subscription.unsubscribe()
         }
     }
 
@@ -250,7 +212,7 @@ export function ChatWindow({ conversationId, currentUserId }: Props) {
                         return (
                             <div
                                 key={message.id}
-                                className={`message - wrapper ${ isOwn ? 'own' : 'other' } `}
+                                className={`message - wrapper ${isOwn ? 'own' : 'other'} `}
                             >
                                 {!isOwn && showAvatar && (
                                     <img
