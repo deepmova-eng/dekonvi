@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Search, Camera, Grid3x3, List } from 'lucide-react';
 import { useSupabase } from '../contexts/SupabaseContext';
 import CategoryFilter from '../components/home/CategoryFilter';
+import { CategoriesSection } from '../components/home/CategoriesSection';
 import ProductCard from '../components/home/ProductCard';
 import ProductListItem from '../components/home/ProductListItem';
 import HeroSlider from '../components/home/HeroSlider';
@@ -183,7 +184,10 @@ export default function Home({ onProductSelect, searchQuery = '' }: HomeProps) {
             {/* Advertising Slider - Hide during search */}
             {!searchTerm && <HeroSlider />}
 
-            {/* Categories - Show ONLY after slider */}
+            {/* Category Cards Premium - Show after slider, hide during search */}
+            {!searchTerm && <CategoriesSection />}
+
+            {/* Categories Filter - Show ONLY after slider */}
             <CategoryFilter
                 selectedCategory={selectedCategory}
                 onSelectCategory={setSelectedCategory}
