@@ -24,8 +24,8 @@ export default function MessagingPremium() {
             const { data: convs, error } = await supabase
                 .from('conversations')
                 .select('*')
-                .or(`user1_id.eq.${user?.id},user2_id.eq.${user?.id}`)
-                .order('updated_at', { ascending: false })
+                .contains('participants', [user?.id])
+                .order('created_at', { ascending: false })
 
             if (error) throw error
 
@@ -33,7 +33,7 @@ export default function MessagingPremium() {
             const conversationsWithDetails = await Promise.all(
                 (convs || []).map(async (conv) => {
                     // Déterminer l'ID de l'autre utilisateur
-                    const otherUserId = conv.user1_id === user?.id ? conv.user2_id : conv.user1_id
+                    const otherUserId = conv.participants.find((id: string) => id !== user?.id)
 
                     // Récupérer le profil de l'autre utilisateur
                     const { data: profile } = await supabase
