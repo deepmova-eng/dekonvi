@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { supabase } from '../../lib/supabase'
 import { Send, Smile, Paperclip, MoreVertical } from 'lucide-react'
+import { ChatHeaderMenu } from './ChatHeaderMenu'
 import './ChatWindow.css'
 
 interface Props {
@@ -14,6 +15,7 @@ export function ChatWindow({ conversationId, currentUserId }: Props) {
     const [sending, setSending] = useState(false)
     const [otherUser, setOtherUser] = useState<any>(null)
     const [listing, setListing] = useState<any>(null)
+    const [showMenu, setShowMenu] = useState(false)
     const messagesEndRef = useRef<HTMLDivElement>(null)
     const subscriptionRef = useRef<any>(null)
 
@@ -327,10 +329,24 @@ export function ChatWindow({ conversationId, currentUserId }: Props) {
                         <div className="no-listing">Annonce supprimée</div>
                     )}
 
+
                     {/* Menu 3 points */}
-                    <button className="action-btn">
+                    <button
+                        className="action-btn"
+                        onClick={() => setShowMenu(!showMenu)}
+                    >
                         <MoreVertical size={20} />
                     </button>
+
+                    {/* Menu dropdown */}
+                    {showMenu && (
+                        <ChatHeaderMenu
+                            listingId={listing?.id || null}
+                            otherUserId={otherUser?.id}
+                            conversationId={conversationId || ''}
+                            onClose={() => setShowMenu(false)}
+                        />
+                    )}
                 </div>
             </div>
 
