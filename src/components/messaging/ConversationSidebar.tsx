@@ -14,7 +14,7 @@ export function ConversationSidebar({ conversations, activeId, onSelect, current
 
     const filteredConversations = conversations.filter(conv => {
         const otherUser = conv.other_user
-        return otherUser?.full_name?.toLowerCase().includes(searchQuery.toLowerCase())
+        return otherUser?.name?.toLowerCase().includes(searchQuery.toLowerCase())
     })
 
     const getTimeAgo = (date: string) => {
@@ -79,7 +79,7 @@ export function ConversationSidebar({ conversations, activeId, onSelect, current
                                 <div className="conv-avatar-wrapper">
                                     <img
                                         src={otherUser?.avatar_url || '/default-avatar.png'}
-                                        alt={otherUser?.full_name}
+                                        alt={otherUser?.name}
                                         className="conv-avatar"
                                     />
                                     <div className="online-status" />
@@ -88,7 +88,7 @@ export function ConversationSidebar({ conversations, activeId, onSelect, current
                                 {/* Content */}
                                 <div className="conv-content">
                                     <div className="conv-header">
-                                        <span className="conv-name">{otherUser?.full_name || 'Utilisateur'}</span>
+                                        <span className="conv-name">{otherUser?.name || 'Utilisateur'}</span>
                                         {lastMessage && (
                                             <span className="conv-time">{getTimeAgo(lastMessage.created_at)}</span>
                                         )}
