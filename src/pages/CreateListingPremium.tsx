@@ -1,6 +1,8 @@
+```javascript
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useSupabase } from '../contexts/SupabaseContext'
+import { supabase } from '../lib/supabase'
 import {
     Package,
     FileText,
@@ -28,7 +30,7 @@ const STEPS = [
 
 export default function CreateListingPremium() {
     const navigate = useNavigate()
-    const { supabase, user } = useSupabase()
+    const { user } = useSupabase()
     const [currentStep, setCurrentStep] = useState(1)
     const [isLoading, setIsLoading] = useState(false)
 
@@ -111,122 +113,122 @@ export default function CreateListingPremium() {
 
             // Succès : clear draft et redirection
             localStorage.removeItem('draft_listing')
-            navigate(`/listings/${listing.id}`)
+            navigate(`/ listings / ${ listing.id } `)
 
         } catch (error: any) {
             console.error('Error creating listing:', error)
             alert(`Erreur lors de la création de l'annonce: ${error.message || 'Erreur inconnue'}`)
         } finally {
-            setIsLoading(false)
-        }
+    setIsLoading(false)
+}
     }
 
-    return (
-        <div className="create-listing-page">
+return (
+    <div className="create-listing-page">
 
-            {/* Simple back button */}
-            <div className="simple-header">
-                <button className="back-button" onClick={() => navigate(-1)}>
-                    <ArrowLeft size={20} />
-                    Retour
-                </button>
-            </div>
+        {/* Simple back button */}
+        <div className="simple-header">
+            <button className="back-button" onClick={() => navigate(-1)}>
+                <ArrowLeft size={20} />
+                Retour
+            </button>
+        </div>
 
-            <div className="create-listing-body">
-                <div className="container-centered">
-                    <div className="form-card">
+        <div className="create-listing-body">
+            <div className="container-centered">
+                <div className="form-card">
 
-                        {/* Step Indicator */}
-                        <div className="step-indicator-wrapper">
-                            <StepIndicator
-                                steps={STEPS}
-                                currentStep={currentStep}
-                            />
-                        </div>
-
-                        {/* Step content */}
-                        {currentStep === 1 && (
-                            <StepCategory
-                                data={formData}
-                                updateData={updateFormData}
-                            />
-                        )}
-
-                        {currentStep === 2 && (
-                            <StepDetails
-                                data={formData}
-                                updateData={updateFormData}
-                            />
-                        )}
-
-                        {currentStep === 3 && (
-                            <StepPhotos
-                                data={formData}
-                                updateData={updateFormData}
-                            />
-                        )}
-
-                        {currentStep === 4 && (
-                            <StepPricing
-                                data={formData}
-                                updateData={updateFormData}
-                            />
-                        )}
-
-                        {currentStep === 5 && (
-                            <StepReview
-                                data={formData}
-                                onEdit={(step) => setCurrentStep(step)}
-                            />
-                        )}
-
-                        {/* Navigation buttons */}
-                        <div className="form-navigation">
-                            {currentStep > 1 && (
-                                <button
-                                    className="btn-secondary btn-large"
-                                    onClick={prevStep}
-                                >
-                                    <ArrowLeft size={20} />
-                                    Précédent
-                                </button>
-                            )}
-
-                            {currentStep < STEPS.length ? (
-                                <button
-                                    className="btn-primary btn-large"
-                                    onClick={nextStep}
-                                >
-                                    Suivant
-                                    <ArrowRight size={20} />
-                                </button>
-                            ) : (
-                                <button
-                                    className="btn-primary btn-large"
-                                    onClick={handleSubmit}
-                                    disabled={isLoading}
-                                >
-                                    {isLoading ? (
-                                        <>
-                                            <span>Publication...</span>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <CheckCircle size={20} />
-                                            Publier l'annonce
-                                        </>
-                                    )}
-                                </button>
-                            )}
-                        </div>
+                    {/* Step Indicator */}
+                    <div className="step-indicator-wrapper">
+                        <StepIndicator
+                            steps={STEPS}
+                            currentStep={currentStep}
+                        />
                     </div>
 
-                    {/* Auto-save indicator */}
-                    <div className="auto-save-indicator">
-                        ✓ Brouillon sauvegardé automatiquement
+                    {/* Step content */}
+                    {currentStep === 1 && (
+                        <StepCategory
+                            data={formData}
+                            updateData={updateFormData}
+                        />
+                    )}
+
+                    {currentStep === 2 && (
+                        <StepDetails
+                            data={formData}
+                            updateData={updateFormData}
+                        />
+                    )}
+
+                    {currentStep === 3 && (
+                        <StepPhotos
+                            data={formData}
+                            updateData={updateFormData}
+                        />
+                    )}
+
+                    {currentStep === 4 && (
+                        <StepPricing
+                            data={formData}
+                            updateData={updateFormData}
+                        />
+                    )}
+
+                    {currentStep === 5 && (
+                        <StepReview
+                            data={formData}
+                            onEdit={(step) => setCurrentStep(step)}
+                        />
+                    )}
+
+                    {/* Navigation buttons */}
+                    <div className="form-navigation">
+                        {currentStep > 1 && (
+                            <button
+                                className="btn-secondary btn-large"
+                                onClick={prevStep}
+                            >
+                                <ArrowLeft size={20} />
+                                Précédent
+                            </button>
+                        )}
+
+                        {currentStep < STEPS.length ? (
+                            <button
+                                className="btn-primary btn-large"
+                                onClick={nextStep}
+                            >
+                                Suivant
+                                <ArrowRight size={20} />
+                            </button>
+                        ) : (
+                            <button
+                                className="btn-primary btn-large"
+                                onClick={handleSubmit}
+                                disabled={isLoading}
+                            >
+                                {isLoading ? (
+                                    <>
+                                        <span>Publication...</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <CheckCircle size={20} />
+                                        Publier l'annonce
+                                    </>
+                                )}
+                            </button>
+                        )}
                     </div>
+                </div>
+
+                {/* Auto-save indicator */}
+                <div className="auto-save-indicator">
+                    ✓ Brouillon sauvegardé automatiquement
                 </div>
             </div>
         </div>
-    )
+    </div>
+)
 }
