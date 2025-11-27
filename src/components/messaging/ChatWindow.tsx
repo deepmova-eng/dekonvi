@@ -30,7 +30,6 @@ export function ChatWindow({ conversationId, currentUserId, onMobileBack }: Prop
         if (!conversationId) return
 
         try {
-            console.log('📥 Fetching messages for:', conversationId)
             const { data, error } = await supabase
                 .from('messages')
                 .select('*')
@@ -39,7 +38,6 @@ export function ChatWindow({ conversationId, currentUserId, onMobileBack }: Prop
 
             if (error) throw error
 
-            console.log('✅ Messages loaded:', data?.length)
             setMessages(data || [])
         } catch (error) {
             console.error('❌ Error fetching messages:', error)
@@ -68,7 +66,6 @@ export function ChatWindow({ conversationId, currentUserId, onMobileBack }: Prop
 
             if (convError) throw convError
 
-            console.log('📦 Conversation with listing:', conv)
 
             const otherUserId = conv.user1_id === currentUserId ? conv.user2_id : conv.user1_id
 
@@ -95,13 +92,11 @@ export function ChatWindow({ conversationId, currentUserId, onMobileBack }: Prop
     // Setup realtime subscription
     useEffect(() => {
         if (!conversationId) {
-            console.log('❌ No conversationId, skipping subscription')
             return
         }
 
         // Cleanup previous subscription
         if (subscriptionRef.current) {
-            console.log('🧹 Cleaning up old subscription')
             try {
                 subscriptionRef.current.unsubscribe()
             } catch (e) {
@@ -110,11 +105,6 @@ export function ChatWindow({ conversationId, currentUserId, onMobileBack }: Prop
             subscriptionRef.current = null
         }
 
-        console.log('========================================')
-        console.log('🔌 SETTING UP REALTIME SUBSCRIPTION')
-        console.log('Conversation ID:', conversationId)
-        console.log('Current User ID:', currentUserId)
-        console.log('========================================')
 
         // Create new subscription
         const channel = supabase
@@ -132,51 +122,34 @@ export function ChatWindow({ conversationId, currentUserId, onMobileBack }: Prop
                     filter: `conversation_id=eq.${conversationId}`,
                 },
                 (payload) => {
-                    console.log('========================================')
-                    console.log('🆕 REALTIME MESSAGE RECEIVED!')
-                    console.log('From sender:', payload.new.sender_id)
-                    console.log('Current user:', currentUserId)
-                    console.log('Message:', payload.new.content)
-                    console.log('Full payload:', payload.new)
-                    console.log('========================================')
 
                     // Ajoute le message seulement si ce n'est pas le sien
                     // (le sien est déjà ajouté par optimistic update)
                     if (payload.new.sender_id !== currentUserId) {
-                        console.log('✅ Adding message from OTHER user to state')
                         setMessages((prev) => {
                             // Évite les doublons
                             const exists = prev.find(m => m.id === payload.new.id)
                             if (exists) {
-                                console.log('⚠️ Message already exists, skipping')
                                 return prev
                             }
-                            console.log('✅ Message added to state')
                             return [...prev, payload.new]
                         })
                     } else {
-                        console.log('ℹ️ Message from SELF, skipping (already in optimistic update)')
                     }
                 }
             )
             .subscribe((status, err) => {
-                console.log('========================================')
-                console.log('📡 SUBSCRIPTION STATUS CHANGED')
-                console.log('Status:', status)
                 if (err) {
                     console.error('❌ Subscription error:', err)
                 }
-                console.log('========================================')
 
                 if (status === 'SUBSCRIBED') {
-                    console.log('✅ SUCCESSFULLY SUBSCRIBED TO REALTIME')
                 } else if (status === 'CHANNEL_ERROR') {
                     console.error('❌ REALTIME CHANNEL ERROR - Check Supabase Dashboard')
                 } else if (status === 'TIMED_OUT') {
                     console.error('⏱️ REALTIME SUBSCRIPTION TIMED OUT - Retrying...')
                     // Retry after 2 seconds
                     setTimeout(() => {
-                        console.log('🔄 Retrying subscription...')
                         fetchMessages()
                         fetchOtherUser()
                     }, 2000)
@@ -186,13 +159,11 @@ export function ChatWindow({ conversationId, currentUserId, onMobileBack }: Prop
         subscriptionRef.current = channel
 
         // Fetch initial data
-        console.log('📥 Fetching initial messages...')
         fetchMessages()
         fetchOtherUser()
 
         // Cleanup on unmount
         return () => {
-            console.log('🔌 Component unmounting, unsubscribing from:', conversationId)
             if (subscriptionRef.current) {
                 try {
                     subscriptionRef.current.unsubscribe()
@@ -226,7 +197,6 @@ export function ChatWindow({ conversationId, currentUserId, onMobileBack }: Prop
             // 1. Upload images if any
             let imageUrls: string[] = []
             if (selectedImages.length > 0) {
-                console.log(`📸 Uploading ${selectedImages.length} images...`)
 
                 const uploadPromises = selectedImages.map((file) =>
                     uploadMessageImage(file, currentUserId)
@@ -241,7 +211,6 @@ export function ChatWindow({ conversationId, currentUserId, onMobileBack }: Prop
                     throw new Error('Certaines images n\'ont pas pu être uploadées')
                 }
 
-                console.log('✅ Images uploaded:', imageUrls)
             }
 
             // 2. OPTIMISTIC UPDATE - Ajoute le message immédiatement
@@ -255,7 +224,6 @@ export function ChatWindow({ conversationId, currentUserId, onMobileBack }: Prop
                 is_sending: true,
             }
 
-            console.log('⚡ Optimistic update:', optimisticMessage)
             setMessages((prev) => [...prev, optimisticMessage])
             setNewMessage('')
             setSelectedImages([])
@@ -263,7 +231,6 @@ export function ChatWindow({ conversationId, currentUserId, onMobileBack }: Prop
             setUploading(false)
 
             // 3. Envoie le vrai message à Supabase
-            console.log('📤 Sending to Supabase...')
             const { data, error } = await supabase
                 .from('messages')
                 .insert({
@@ -277,7 +244,6 @@ export function ChatWindow({ conversationId, currentUserId, onMobileBack }: Prop
 
             if (error) throw error
 
-            console.log('✅ Message sent:', data)
 
             // 4. Remplace le message temporaire par le vrai
             setMessages((prev) =>

@@ -45,7 +45,6 @@ export function ChatHeaderMenu({ listingId, otherUserId, conversationId, onClose
 
         try {
             // TODO: Implémenter le blocage dans Supabase
-            console.log('🚫 Blocking user:', otherUserId)
             alert('Utilisateur bloqué (fonctionnalité à implémenter)')
             onClose()
         } catch (error) {
@@ -61,7 +60,6 @@ export function ChatHeaderMenu({ listingId, otherUserId, conversationId, onClose
         if (!confirm) return
 
         try {
-            console.log('🗑️ Deleting conversation:', conversationId)
             // TODO: Implémenter la suppression
             alert('Conversation supprimée (fonctionnalité à implémenter)')
             window.location.href = '/messages'
