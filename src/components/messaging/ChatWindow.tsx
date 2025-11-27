@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { supabase } from '../../lib/supabase'
 import { Send, Smile, Paperclip, MoreVertical, Phone, Video } from 'lucide-react'
 import './ChatWindow.css'
@@ -268,6 +268,9 @@ export function ChatWindow({ conversationId, currentUserId }: Props) {
                     ) : (
                         <Send size={20} />
                     )}
+
+// Mémoiser le composant pour éviter les re-renders inutiles
+                    export default React.memo(ChatWindow)
                 </button>
             </div>
         </div>
