@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useSupabase } from '../contexts/SupabaseContext'
 import {
     Package,
     FileText,
@@ -27,7 +28,9 @@ const STEPS = [
 
 export default function CreateListingPremium() {
     const navigate = useNavigate()
+    const { supabase, user } = useSupabase()
     const [currentStep, setCurrentStep] = useState(1)
+    const [isLoading, setIsLoading] = useState(false)
 
     const [formData, setFormData] = useState({
         category: '',
@@ -64,8 +67,58 @@ export default function CreateListingPremium() {
     }
 
     const handleSubmit = async () => {
-        // Logique de soumission
-        console.log('Submit:', formData)
+        try {
+            setIsLoading(true)
+
+            // Vérifier authentification
+            if (!user) {
+                alert('Vous devez être connecté pour publier une annonce')
+                navigate('/login')
+                return
+            }
+
+            // Validation basique
+            if (!formData.category || !formData.title || !formData.price) {
+                alert('Veuillez remplir tous les champs obligatoires')
+                return
+            }
+
+            // Préparer les URLs d'images (temporaire pour Phase 1)
+            const imageUrls = formData.images.map((img: any) => img.preview)
+
+            // Créer l'annonce dans Supabase
+            const { data: listing, error } = await supabase
+                .from('listings')
+                .insert({
+                    user_id: user.id,
+                    category: formData.category,
+                    subcategory: formData.subcategory || null,
+                    title: formData.title,
+                    description: formData.description,
+                    condition: formData.condition,
+                    price: parseFloat(formData.price),
+                    negotiable: formData.negotiable,
+                    shipping_available: formData.shipping_available,
+                    city: formData.city,
+                    location: formData.location || null,
+                    images: imageUrls,
+                    status: 'active',
+                })
+                .select()
+                .single()
+
+            if (error) throw error
+
+            // Succès : clear draft et redirection
+            localStorage.removeItem('draft_listing')
+            navigate(`/listings/${listing.id}`)
+
+        } catch (error: any) {
+            console.error('Error creating listing:', error)
+            alert(`Erreur lors de la création de l'annonce: ${error.message || 'Erreur inconnue'}`)
+        } finally {
+            setIsLoading(false)
+        }
     }
 
     return (
@@ -151,9 +204,18 @@ export default function CreateListingPremium() {
                                 <button
                                     className="btn-primary btn-large"
                                     onClick={handleSubmit}
+                                    disabled={isLoading}
                                 >
-                                    <CheckCircle size={20} />
-                                    Publier l'annonce
+                                    {isLoading ? (
+                                        <>
+                                            <span>Publication...</span>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <CheckCircle size={20} />
+                                            Publier l'annonce
+                                        </>
+                                    )}
                                 </button>
                             )}
                         </div>
