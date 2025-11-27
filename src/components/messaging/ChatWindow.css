@@ -1,9 +1,12 @@
-/* Chat Window Premium */
+/* Zone de chat - Layout vertical */
 .chat-window {
     display: flex;
     flex-direction: column;
-    height: 100%;
+    height: calc(100vh - 72px);
+    /* Même hauteur que le container */
     background: white;
+    overflow: hidden;
+    /* Le container ne scroll pas */
 }
 
 .chat-window.empty {
@@ -38,8 +41,10 @@
     margin: 0;
 }
 
-/* Header */
+/* Header du chat - FIXE EN HAUT */
 .chat-header {
+    flex-shrink: 0;
+    /* Ne rétrécit jamais */
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -104,10 +109,13 @@
     color: #111827;
 }
 
-/* Messages */
+/* Zone des messages - SEULE PARTIE QUI SCROLL */
 .messages-container {
     flex: 1;
+    /* Prend tout l'espace disponible */
     overflow-y: auto;
+    /* SEULE CETTE PARTIE SCROLL */
+    overflow-x: hidden;
     background: linear-gradient(180deg, #F9FAFB 0%, white 100%);
 }
 
@@ -116,6 +124,26 @@
     display: flex;
     flex-direction: column;
     gap: 12px;
+    min-height: 100%;
+    /* Important pour que le scroll fonctionne bien */
+}
+
+/* Scrollbar personnalisée pour messages */
+.messages-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+.messages-container::-webkit-scrollbar-track {
+    background: #F9FAFB;
+}
+
+.messages-container::-webkit-scrollbar-thumb {
+    background: #D1D5DB;
+    border-radius: 3px;
+}
+
+.messages-container::-webkit-scrollbar-thumb:hover {
+    background: #9CA3AF;
 }
 
 .message-wrapper {
@@ -138,12 +166,12 @@
 }
 
 .message-wrapper.own {
-    margin-left: auto;
+    align-self: flex-end;
     flex-direction: row-reverse;
 }
 
 .message-wrapper.other {
-    margin-right: auto;
+    align-self: flex-start;
 }
 
 .message-avatar {
@@ -224,8 +252,10 @@
     opacity: 0.8;
 }
 
-/* Input */
+/* Input en bas - FIXE EN BAS */
 .message-input-container {
+    flex-shrink: 0;
+    /* Ne rétrécit jamais */
     display: flex;
     align-items: center;
     gap: 12px;

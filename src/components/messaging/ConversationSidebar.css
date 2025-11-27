@@ -1,14 +1,21 @@
-/* Conversation Sidebar Premium */
+/* Sidebar conversations - RESTE FIXE */
 .conversation-sidebar {
     background: white;
     border-right: 1px solid #E5E7EB;
     display: flex;
     flex-direction: column;
-    height: 100%;
+    height: calc(100vh - 72px);
+    /* Même hauteur que le container */
+    overflow: hidden;
+    /* Le container ne scroll pas */
+    position: relative;
+    /* Important pour le positionnement */
 }
 
-/* Header */
+/* Header de la sidebar - Fixe en haut */
 .sidebar-header {
+    flex-shrink: 0;
+    /* Ne rétrécit jamais */
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -42,8 +49,10 @@
     color: #111827;
 }
 
-/* Search */
+/* Search - Fixe sous le header */
 .sidebar-search {
+    flex-shrink: 0;
+    /* Ne rétrécit jamais */
     padding: 16px 24px;
     border-bottom: 1px solid #F3F4F6;
     display: flex;
@@ -70,10 +79,31 @@
     color: #9CA3AF;
 }
 
-/* Conversations list */
+/* Liste des conversations - SEULE PARTIE QUI SCROLL */
 .conversations-list {
     flex: 1;
+    /* Prend tout l'espace restant */
     overflow-y: auto;
+    /* SEULE CETTE PARTIE SCROLL */
+    overflow-x: hidden;
+}
+
+/* Scrollbar personnalisée (optionnel) */
+.conversations-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.conversations-list::-webkit-scrollbar-track {
+    background: #F9FAFB;
+}
+
+.conversations-list::-webkit-scrollbar-thumb {
+    background: #D1D5DB;
+    border-radius: 3px;
+}
+
+.conversations-list::-webkit-scrollbar-thumb:hover {
+    background: #9CA3AF;
 }
 
 .empty-conversations {
