@@ -44,17 +44,21 @@ export function ChatWindow({ conversationId, currentUserId }: Props) {
 
     const fetchOtherUser = async () => {
         try {
+            console.log('👤 Fetching other user for conversation:', conversationId)
             const { data: conv, error } = await supabase
                 .from('conversations')
                 .select('user1_id, user2_id')
                 .eq('id', conversationId)
                 .single()
 
+            console.log('📦 Conversation data:', conv, 'Error:', error)
+
             if (error) throw error
 
             if (conv) {
                 // Déterminer l'autre utilisateur
                 const otherUserId = conv.user1_id === currentUserId ? conv.user2_id : conv.user1_id
+                console.log('🎯 Other user ID:', otherUserId, 'Current user:', currentUserId)
 
                 const { data: profile } = await supabase
                     .from('profiles')
@@ -62,10 +66,11 @@ export function ChatWindow({ conversationId, currentUserId }: Props) {
                     .eq('id', otherUserId)
                     .single()
 
+                console.log('✅ Profile loaded:', profile)
                 setOtherUser(profile)
             }
         } catch (error) {
-            console.error('Error fetching user:', error)
+            console.error('❌ Error fetching user:', error)
         }
     }
 
