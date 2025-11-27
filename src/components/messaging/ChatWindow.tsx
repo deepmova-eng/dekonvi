@@ -150,11 +150,11 @@ export function ChatWindow({ conversationId, currentUserId }: Props) {
                 <div className="header-user">
                     <img
                         src={otherUser?.avatar_url || '/default-avatar.png'}
-                        alt={otherUser?.full_name}
+                        alt={otherUser?.name}
                         className="header-avatar"
                     />
                     <div className="header-info">
-                        <h3 className="header-name">{otherUser?.full_name || 'Utilisateur'}</h3>
+                        <h3 className="header-name">{otherUser?.name || 'Utilisateur'}</h3>
                         <span className="header-status">En ligne</span>
                     </div>
                 </div>
