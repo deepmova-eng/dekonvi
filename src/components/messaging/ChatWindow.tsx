@@ -9,6 +9,8 @@ interface Props {
 }
 
 export function ChatWindow({ conversationId, currentUserId }: Props) {
+    console.log('🪟 ChatWindow mounted with conversationId:', conversationId, 'currentUserId:', currentUserId)
+
     const [messages, setMessages] = useState<any[]>([])
     const [newMessage, setNewMessage] = useState('')
     const [sending, setSending] = useState(false)
@@ -16,6 +18,7 @@ export function ChatWindow({ conversationId, currentUserId }: Props) {
     const messagesEndRef = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
+        console.log('🔄 useEffect triggered, conversationId:', conversationId)
         if (conversationId) {
             fetchMessages()
             fetchOtherUser()
