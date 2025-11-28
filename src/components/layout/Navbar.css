@@ -240,7 +240,17 @@
         0 12px 40px rgba(0, 0, 0, 0.12);
     padding: 24px;
     min-width: 600px;
+    max-width: 90vw;
     animation: megaMenuSlide 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@media (max-width: 768px) {
+    .mega-menu {
+        min-width: unset;
+        width: 90vw;
+        left: 5vw;
+        transform: none;
+    }
 }
 
 @keyframes megaMenuSlide {
@@ -329,7 +339,15 @@
     border-radius: 12px;
     padding: 10px 16px;
     min-width: 280px;
+    max-width: 100%;
     transition: all 0.3s ease;
+}
+
+@media (max-width: 768px) {
+    .search-box {
+        min-width: unset;
+        flex: 1;
+    }
 }
 
 .search-box:focus-within {

@@ -4,21 +4,31 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Prevent horizontal scroll globally */
-html,
-body {
+/* ============================================
+   GLOBAL FIX: Prevent horizontal scroll 
+   ============================================ */
+html {
   overflow-x: hidden;
-  max-width: 100vw;
+  max-width: 100%;
+  width: 100%;
 }
 
 body {
+  overflow-x: hidden;
+  max-width: 100%;
+  width: 100%;
   margin: 0;
-  /* Space for fixed navbar */
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  overflow-x: hidden;
+  max-width: 100%;
+  width: 100%;
 }
 
 /* Custom scrollbar hiding */
