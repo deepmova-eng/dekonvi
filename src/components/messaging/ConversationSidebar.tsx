@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Search, MoreVertical } from 'lucide-react'
 import { SidebarMenu } from './SidebarMenu'
+import { ProductCard } from './ProductCard'
 import './ConversationSidebar.css'
 
 interface Props {
@@ -8,9 +9,10 @@ interface Props {
     activeId: string | null
     onSelect: (id: string) => void
     currentUserId: string
+    activeListing?: any | null
 }
 
-export function ConversationSidebar({ conversations, activeId, onSelect, currentUserId }: Props) {
+export function ConversationSidebar({ conversations, activeId, onSelect, currentUserId, activeListing }: Props) {
     const [searchQuery, setSearchQuery] = useState('')
     const [showMenu, setShowMenu] = useState(false)
 
@@ -56,6 +58,13 @@ export function ConversationSidebar({ conversations, activeId, onSelect, current
                     />
                 )}
             </div>
+
+            {/* Product Card - Context de la conversation active */}
+            {activeListing && (
+                <div className="px-4 py-3 border-b border-gray-200">
+                    <ProductCard listing={activeListing} />
+                </div>
+            )}
 
             {/* Search */}
             <div className="sidebar-search">

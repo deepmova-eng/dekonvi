@@ -5,7 +5,6 @@ import { ChatHeaderMenu } from './ChatHeaderMenu'
 import { MessageBubble } from './MessageBubble'
 import { ConversationHeader } from './ConversationHeader'
 import { DateSeparator } from './DateSeparator'
-import { ProductCard } from './ProductCard'
 import { uploadMessageImage, validateImage } from '../../lib/imageUpload'
 import { getRelativeTime } from '../../lib/timeUtils'
 import './ChatWindow.css'
@@ -359,11 +358,6 @@ export function ChatWindow({ conversationId, currentUserId, onMobileBack }: Prop
                     conversationId={conversationId || ''}
                     onClose={() => setShowMenu(false)}
                 />
-            )}
-
-            {/* Product Card - Context de la conversation */}
-            {listing && (
-                <ProductCard listing={listing} />
             )}
 
             {/* Messages */}
