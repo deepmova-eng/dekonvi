@@ -20,7 +20,7 @@ export function ConversationHeader({
 }: ConversationHeaderProps) {
 
     return (
-        <div className="sticky top-0 z-50 bg-white border-b border-gray-200 px-6 py-4 md:px-6 md:py-4 sm:px-4 sm:py-3 flex items-center justify-between gap-3">
+        <div className="sticky top-0 z-50 bg-white border-b border-gray-200 px-4 py-3 md:px-6 md:py-4 flex items-center justify-between gap-3">
 
             {/* Left section: Back button (mobile) + Avatar + User info */}
             <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -53,11 +53,11 @@ export function ConversationHeader({
 
                 {/* User info */}
                 <div className="flex flex-col min-w-0">
-                    <h3 className="font-semibold text-gray-900 text-base md:text-base sm:text-[15px] truncate">
+                    <h3 className="font-semibold text-gray-900 text-base truncate">
                         {otherUserName}
                     </h3>
                     {lastActivity && (
-                        <span className="text-sm text-gray-500 truncate md:block sm:hidden">
+                        <span className="text-xs md:text-sm text-gray-500 truncate">
                             {lastActivity}
                         </span>
                     )}
