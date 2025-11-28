@@ -36,6 +36,23 @@ export default function App() {
     trackPageview();
   }, [location]);
 
+  // Fix viewport height mobile (clavier)
+  useEffect(() => {
+    const setVH = () => {
+      const vh = window.innerHeight * 0.01;
+      document.documentElement.style.setProperty('--vh', `${vh}px`);
+    };
+
+    setVH();
+    window.addEventListener('resize', setVH);
+    window.addEventListener('orientationchange', setVH);
+
+    return () => {
+      window.removeEventListener('resize', setVH);
+      window.removeEventListener('orientationchange', setVH);
+    };
+  }, []);
+
   // Determine active tab from current path
   const getActiveTab = () => {
     const path = location.pathname;
@@ -65,12 +82,15 @@ export default function App() {
     location.pathname.startsWith('/login') ||
     location.pathname.startsWith('/register');
 
+  // Cacher SEULEMENT la navbar du haut sur /messages (garder la BottomNav)
+  const hideTopNav = hideNavigation || location.pathname.startsWith('/messages');
+
   return (
     <div className="min-h-screen bg-gray-50 pb-16 md:pb-0">
       <Toaster position="top-center" />
 
-      {/* Navigation Header */}
-      <Navbar />
+      {/* Desktop Navigation - Hide on /messages for immersive chat */}
+      {!hideTopNav && <Navbar />}
 
       <main className="max-w-7xl mx-auto min-h-[calc(100vh-4rem)]">
         <Routes>
