@@ -342,6 +342,8 @@
 .message {
     display: flex;
     animation: slideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    max-width: 70%;
+    min-width: 280px;
 }
 
 @keyframes slideIn {
@@ -361,12 +363,12 @@
 }
 
 .message-bubble {
-    max-width: 70%;
     padding: var(--space-3) var(--space-4);
     border-radius: var(--radius-2xl);
     font-size: var(--text-base);
     line-height: var(--leading-normal);
     word-wrap: break-word;
+    width: 100%;
 }
 
 .message.received .message-bubble {
@@ -457,6 +459,11 @@
         left: 0;
         background: white;
         z-index: 20;
+    }
+
+    .message {
+        max-width: 85%;
+        min-width: 220px;
     }
 }
 

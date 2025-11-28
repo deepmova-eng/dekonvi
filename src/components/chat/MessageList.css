@@ -32,6 +32,7 @@
     display: flex;
     animation: slideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     max-width: 70%;
+    min-width: 280px;
 }
 
 @keyframes slideIn {
@@ -106,6 +107,7 @@
 
     .message {
         max-width: 85%;
+        min-width: 220px;
     }
 
     .message-bubble {
