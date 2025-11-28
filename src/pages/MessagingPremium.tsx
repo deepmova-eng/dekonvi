@@ -37,6 +37,12 @@ export default function MessagingPremium() {
                         .eq('id', otherUserId)
                         .single()
 
+                    // Récupérer le listing associé à la conversation
+                    const { data: listing } = await supabase
+                        .from('listings')
+                        .select('id, title, price, images')
+                        .eq('id', conv.listing_id)
+                        .single()
 
                     // Récupérer le dernier message
                     const { data: lastMsg } = await supabase
@@ -50,6 +56,7 @@ export default function MessagingPremium() {
                     return {
                         ...conv,
                         other_user: profile,
+                        listing: listing,
                         last_message: lastMsg ? [lastMsg] : [],
                     }
                 })
