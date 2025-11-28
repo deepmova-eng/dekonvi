@@ -53,6 +53,8 @@
 @media (max-width: 1024px) {
   .messaging-premium {
     top: 0;
+    bottom: 72px;
+    /* Laisse espace pour la navbar du bas sur mobile */
     /* Occupe tout l'écran sur mobile (pas de navbar 72px) */
     grid-template-columns: 1fr;
     /* GARDE position: fixed même sur mobile */
