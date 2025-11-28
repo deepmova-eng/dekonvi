@@ -3,10 +3,12 @@ import { useSupabase } from '../contexts/SupabaseContext'
 import { supabase } from '../lib/supabase'
 import { ConversationSidebar } from '../components/messaging/ConversationSidebar'
 import { ChatWindow } from '../components/messaging/ChatWindow'
+import { useSearchParams } from 'react-router-dom'
 import './MessagingPremium.css'
 
 export default function MessagingPremium() {
     const { user } = useSupabase()
+    const [searchParams] = useSearchParams()
     const [conversations, setConversations] = useState<any[]>([])
     const [activeConversationId, setActiveConversationId] = useState<string | null>(null)
     const [loading, setLoading] = useState(true)
@@ -114,6 +116,18 @@ export default function MessagingPremium() {
             return cleanup
         }
     }, [user, fetchConversations, subscribeToConversations])
+
+    // Auto-select conversation from URL parameter
+    useEffect(() => {
+        const conversationParam = searchParams.get('conversation')
+        if (conversationParam && conversations.length > 0) {
+            const conv = conversations.find(c => c.id === conversationParam)
+            if (conv) {
+                setActiveConversationId(conversationParam)
+                setIsMobileViewingChat(true)
+            }
+        }
+    }, [searchParams, conversations])
 
     if (loading) {
         return (

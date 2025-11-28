@@ -106,19 +106,40 @@ export default function ProductDetails() {
         .maybeSingle();
 
       if (existingConv) {
-        navigate(`/messages`);
+        // La conversation existe, vérifier si elle a été soft-deleted par l'utilisateur
+        const { data: deletion } = await (supabase as any)
+          .from('conversation_deletions')
+          .select('id')
+          .eq('conversation_id', existingConv.id)
+          .eq('user_id', user.id)
+          .maybeSingle();
+
+        // Si la conversation a été supprimée par l'utilisateur, la "restaurer"
+        if (deletion) {
+          await (supabase as any)
+            .from('conversation_deletions')
+            .delete()
+            .eq('id', deletion.id);
+        }
+
+        // Naviguer vers la conversation
+        navigate(`/messages?conversation=${existingConv.id}`);
       } else {
         // Créer nouvelle conversation
-        const { error } = await supabase
+        const { data: newConv, error } = await supabase
           .from('conversations')
           .insert({
             listing_id: listing.id,
             user1_id: user.id,
             user2_id: listing.seller_id,
-          });
+          })
+          .select('id')
+          .single();
 
         if (error) throw error;
-        navigate(`/messages`);
+
+        // Naviguer vers la nouvelle conversation
+        navigate(`/messages?conversation=${newConv.id}`);
       }
     } catch (error) {
       console.error('Error creating conversation:', error);
