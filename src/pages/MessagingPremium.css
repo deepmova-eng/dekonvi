@@ -52,6 +52,8 @@
 /* Gestion affichage mobile */
 @media (max-width: 1024px) {
   .messaging-premium {
+    top: 0;
+    /* Occupe tout l'écran sur mobile (pas de navbar 72px) */
     grid-template-columns: 1fr;
     /* GARDE position: fixed même sur mobile */
   }
