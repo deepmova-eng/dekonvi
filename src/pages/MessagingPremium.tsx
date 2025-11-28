@@ -24,9 +24,20 @@ export default function MessagingPremium() {
 
             if (error) throw error
 
+            // Récupérer les conversations soft-deleted par l'utilisateur actuel
+            const { data: deletedConvs } = await supabase
+                .from('conversation_deletions')
+                .select('conversation_id')
+                .eq('user_id', user?.id || '')
+
+            const deletedConvIds = new Set(deletedConvs?.map(d => d.conversation_id) || [])
+
+            // Filtrer les conversations soft-deleted
+            const activeConvs = (convs || []).filter(conv => !deletedConvIds.has(conv.id))
+
             // Pour chaque conversation, récupérer l'autre utilisateur et le dernier message
             const conversationsWithDetails = await Promise.all(
-                (convs || []).map(async (conv: any) => {
+                activeConvs.map(async (conv: any) => {
                     // Déterminer l'ID de l'autre utilisateur
                     const otherUserId = conv.user1_id === user?.id ? conv.user2_id : conv.user1_id
 

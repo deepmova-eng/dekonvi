@@ -56,7 +56,7 @@ export function ChatHeaderMenu({ listingId, otherUserId, conversationId, onClose
 
     const handleDelete = async () => {
         const confirm = window.confirm(
-            'Êtes-vous sûr de vouloir supprimer cette conversation ? Cette action est irréversible.'
+            'Êtes-vous sûr de vouloir supprimer cette conversation ? Elle restera visible pour l\'autre utilisateur.'
         )
         if (!confirm) return
 
@@ -64,26 +64,24 @@ export function ChatHeaderMenu({ listingId, otherUserId, conversationId, onClose
             const { supabase } = await import('../../lib/supabase')
             const { showToast } = await import('../../utils/toast')
 
-            // 1. Supprimer tous les messages de la conversation
-            const { error: messagesError } = await supabase
-                .from('messages')
-                .delete()
-                .eq('conversation_id', conversationId)
+            // Get current user ID
+            const { data: { user } } = await supabase.auth.getUser()
+            if (!user) throw new Error('User not authenticated')
 
-            if (messagesError) throw messagesError
+            // Soft delete: insert into conversation_deletions table
+            const { error: deleteError } = await supabase
+                .from('conversation_deletions')
+                .insert({
+                    conversation_id: conversationId,
+                    user_id: user.id
+                })
 
-            // 2. Supprimer la conversation
-            const { error: conversationError } = await supabase
-                .from('conversations')
-                .delete()
-                .eq('id', conversationId)
+            if (deleteError) throw deleteError
 
-            if (conversationError) throw conversationError
+            // Show success toast
+            showToast('success', 'Conversation supprimée', 'La conversation a été supprimée de votre liste')
 
-            // 3. Afficher toast de succès
-            showToast('success', 'Conversation supprimée', 'La conversation a été supprimée avec succès')
-
-            // 4. Notify parent to refresh and deselect
+            // Notify parent to refresh and deselect
             onClose()
             if (onConversationDeleted) {
                 onConversationDeleted()
