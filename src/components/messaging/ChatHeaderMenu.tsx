@@ -7,9 +7,10 @@ interface Props {
     otherUserId: string
     conversationId: string
     onClose: () => void
+    onConversationDeleted?: () => void
 }
 
-export function ChatHeaderMenu({ listingId, otherUserId, conversationId, onClose }: Props) {
+export function ChatHeaderMenu({ listingId, otherUserId, conversationId, onClose, onConversationDeleted }: Props) {
     const menuRef = useRef<HTMLDivElement>(null)
 
     // Ferme le menu si on clique ailleurs
@@ -61,6 +62,7 @@ export function ChatHeaderMenu({ listingId, otherUserId, conversationId, onClose
 
         try {
             const { supabase } = await import('../../lib/supabase')
+            const { showToast } = await import('../../utils/toast')
 
             // 1. Supprimer tous les messages de la conversation
             const { error: messagesError } = await supabase
@@ -78,11 +80,18 @@ export function ChatHeaderMenu({ listingId, otherUserId, conversationId, onClose
 
             if (conversationError) throw conversationError
 
-            // 3. Rediriger vers la page des messages
-            window.location.href = '/messages'
+            // 3. Afficher toast de succès
+            showToast('success', 'Conversation supprimée', 'La conversation a été supprimée avec succès')
+
+            // 4. Notify parent to refresh and deselect
+            onClose()
+            if (onConversationDeleted) {
+                onConversationDeleted()
+            }
         } catch (error) {
             console.error('Error deleting conversation:', error)
-            alert('Erreur lors de la suppression de la conversation')
+            const { showToast } = await import('../../utils/toast')
+            showToast('error', 'Erreur', 'Erreur lors de la suppression de la conversation')
         }
     }
 

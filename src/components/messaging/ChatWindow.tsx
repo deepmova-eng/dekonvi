@@ -13,9 +13,10 @@ interface Props {
     conversationId: string | null
     currentUserId: string
     onMobileBack?: () => void
+    onConversationDeleted?: () => void
 }
 
-export function ChatWindow({ conversationId, currentUserId, onMobileBack }: Props) {
+export function ChatWindow({ conversationId, currentUserId, onMobileBack, onConversationDeleted }: Props) {
     const [messages, setMessages] = useState<any[]>([])
     const [newMessage, setNewMessage] = useState('')
     const [sending, setSending] = useState(false)
@@ -357,6 +358,7 @@ export function ChatWindow({ conversationId, currentUserId, onMobileBack }: Prop
                     otherUserId={otherUser?.id}
                     conversationId={conversationId || ''}
                     onClose={() => setShowMenu(false)}
+                    onConversationDeleted={onConversationDeleted}
                 />
             )}
 
