@@ -98,16 +98,6 @@ export function ConversationSidebar({ conversations, activeId, onSelect, current
                                 className={`conversation-item ${isActive ? 'active' : ''}`}
                                 onClick={() => onSelect(conv.id)}
                             >
-                                {/* Avatar */}
-                                <div className="conv-avatar-wrapper">
-                                    <img
-                                        src={otherUser?.avatar_url || '/default-avatar.png'}
-                                        alt={otherUser?.name}
-                                        className="conv-avatar"
-                                    />
-                                    <div className="online-status" />
-                                </div>
-
                                 {/* Content */}
                                 <div className="conv-content">
                                     <div className="conv-header">
