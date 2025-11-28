@@ -87,6 +87,7 @@ export function ConversationSidebar({ conversations, activeId, onSelect, current
                 ) : (
                     filteredConversations.map((conv) => {
                         const otherUser = conv.other_user
+                        const listing = conv.listing
                         const lastMessage = conv.last_message?.[0]
                         const isActive = activeId === conv.id
                         const unreadCount = conv.unread_count || 0
@@ -110,7 +111,7 @@ export function ConversationSidebar({ conversations, activeId, onSelect, current
                                 {/* Content */}
                                 <div className="conv-content">
                                     <div className="conv-header">
-                                        <span className="conv-name">{otherUser?.name || 'Utilisateur'}</span>
+                                        <span className="conv-name">{listing?.title || 'Annonce'}</span>
                                         {lastMessage && (
                                             <span className="conv-time">{getTimeAgo(lastMessage.created_at)}</span>
                                         )}
