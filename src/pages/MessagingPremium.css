@@ -1,24 +1,22 @@
 /* Container principal de la messagerie */
 .messaging-premium {
+  position: fixed;
+  top: 72px;
+  left: 0;
+  right: 0;
+  bottom: 0;
   display: grid;
   grid-template-columns: 360px 1fr;
-  height: calc(100vh - 72px);
-  /* 72px = hauteur du header Dekonvi */
+  /* CRITIQUE : Container fixe, ne scroll jamais */
   overflow: hidden;
-  /* CRITIQUE : Empêche le scroll global */
-  margin-top: 72px;
   background: #F9FAFB;
 }
 
 .sidebar-wrapper,
 .chat-wrapper {
   position: relative;
-}
-
-@media (max-width: 1024px) {
-  .messaging-premium {
-    grid-template-columns: 1fr;
-  }
+  height: 100%;
+  overflow: hidden;
 }
 
 .loading-messaging {
@@ -54,46 +52,19 @@
 /* Gestion affichage mobile */
 @media (max-width: 1024px) {
   .messaging-premium {
-    position: relative;
-    overflow: hidden;
-  }
-
-  .sidebar-wrapper {
-    position: absolute;
-    left: 0;
     top: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 1;
-    transition: transform 0.3s ease;
+    bottom: 72px;
+    /* Laisse espace pour la navbar du bas sur mobile */
+    /* Occupe tout l'écran sur mobile (pas de navbar 72px) */
+    grid-template-columns: 1fr;
+    /* GARDE position: fixed même sur mobile */
   }
 
-  .sidebar-wrapper.mobile-hidden {
-    transform: translateX(-100%);
-    pointer-events: none;
-  }
-
-  .chat-wrapper {
-    position: absolute;
-    right: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 2;
-    transition: transform 0.3s ease;
-  }
-
-  .chat-wrapper.mobile-hidden {
-    transform: translateX(100%);
-    pointer-events: none;
-  }
-}
-/* Fix mobile - affichage conditionnel simple */
-@media (max-width: 1024px) {
+  /* Affichage conditionnel simple sur mobile */
   .messaging-premium.mobile-viewing-chat .conversation-sidebar {
     display: none;
   }
-  
+
   .messaging-premium:not(.mobile-viewing-chat) .chat-wrapper {
     display: none;
   }

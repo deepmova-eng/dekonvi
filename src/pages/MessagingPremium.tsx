@@ -121,6 +121,7 @@ export default function MessagingPremium() {
                         setIsMobileViewingChat(true)
                     }}
                     currentUserId={user?.id || ''}
+                    activeListing={conversations.find(c => c.id === activeConversationId)?.listing}
                 />
             </div>
 

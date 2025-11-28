@@ -5,7 +5,6 @@ import { ChatHeaderMenu } from './ChatHeaderMenu'
 import { MessageBubble } from './MessageBubble'
 import { ConversationHeader } from './ConversationHeader'
 import { DateSeparator } from './DateSeparator'
-import { ProductCard } from './ProductCard'
 import { uploadMessageImage, validateImage } from '../../lib/imageUpload'
 import { getRelativeTime } from '../../lib/timeUtils'
 import './ChatWindow.css'
@@ -339,7 +338,7 @@ export function ChatWindow({ conversationId, currentUserId, onMobileBack }: Prop
     }
 
     return (
-        <div className="flex flex-col h-screen bg-white overflow-hidden">
+        <div className="flex flex-col h-full bg-white overflow-hidden">
 
             {/* Header */}
             <ConversationHeader
@@ -359,11 +358,6 @@ export function ChatWindow({ conversationId, currentUserId, onMobileBack }: Prop
                     conversationId={conversationId || ''}
                     onClose={() => setShowMenu(false)}
                 />
-            )}
-
-            {/* Product Card - Context de la conversation */}
-            {listing && (
-                <ProductCard listing={listing} />
             )}
 
             {/* Messages */}
@@ -406,7 +400,7 @@ export function ChatWindow({ conversationId, currentUserId, onMobileBack }: Prop
             </div>
 
             {/* Input */}
-            <div className="border-t border-gray-200 bg-white px-4 py-3 flex items-center gap-3 z-10">
+            <div className="border-t border-gray-200 bg-white px-4 py-3 flex items-center gap-3 shrink-0">
                 {/* Input file caché */}
                 <input
                     ref={fileInputRef}

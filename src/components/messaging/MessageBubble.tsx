@@ -40,10 +40,10 @@ export function MessageBubble({
             {/* Bulle de message */}
             <div
                 className={`
-                    px-4 py-2 
+                    px-3 py-2 
                     rounded-2xl 
-                    min-w-[120px]
-                    w-fit
+                    inline-block
+                    max-w-full
                     break-words
                     ${isOwn
                         ? 'bg-emerald-50 text-gray-900 rounded-br-sm'
