@@ -25,7 +25,7 @@ export default function MessagingPremium() {
             if (error) throw error
 
             // Récupérer les conversations soft-deleted par l'utilisateur actuel
-            const { data: deletedConvs } = await supabase
+            const { data: deletedConvs } = await (supabase as any)
                 .from('conversation_deletions')
                 .select('conversation_id')
                 .eq('user_id', user?.id || '')
