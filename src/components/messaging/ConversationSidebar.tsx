@@ -86,7 +86,6 @@ export function ConversationSidebar({ conversations, activeId, onSelect, current
                     </div>
                 ) : (
                     filteredConversations.map((conv) => {
-                        const otherUser = conv.other_user
                         const listing = conv.listing
                         const lastMessage = conv.last_message?.[0]
                         const isActive = activeId === conv.id
