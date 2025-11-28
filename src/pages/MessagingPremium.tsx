@@ -151,6 +151,7 @@ export default function MessagingPremium() {
                     }}
                     currentUserId={user?.id || ''}
                     activeListing={conversations.find(c => c.id === activeConversationId)?.listing}
+                    onDeleteConversation={handleConversationDeleted}
                 />
             </div>
 
