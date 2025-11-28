@@ -313,11 +313,10 @@
 
 .message-bubble {
     padding: 12px 16px;
-    /* ← Plus généreux qu'avant */
     border-radius: 18px;
     min-width: 120px;
-    /* ← CRITIQUE : Évite "sal\nut" */
-    max-width: 70%;
+    max-width: 65%;
+    /* ← UNIFIÉ : Même largeur max pour TOUS les messages */
     width: fit-content;
 
     /* Gestion texte */
@@ -325,31 +324,30 @@
     overflow-wrap: break-word;
     white-space: pre-wrap;
     line-height: 1.5;
-    /* ← Plus aéré */
 
     /* Espacement interne */
     box-sizing: border-box;
     box-shadow: none;
 }
 
-/* Bulle envoyée - Vert transparent comme avant */
+/* Bulle envoyée - Vert transparent */
 .message-bubble.sent,
 .message-wrapper.own .message-bubble {
     background: rgba(45, 209, 129, 0.15);
-    /* ← Légèrement plus visible */
     color: #111;
     border: none;
     border-bottom-right-radius: 4px;
+    /* Hérite max-width: 65% de .message-bubble */
 }
 
-/* Bulle reçue - FOND GRIS CLAIR au lieu de blanc */
+/* Bulle reçue - FOND GRIS CLAIR */
 .message-bubble.received,
 .message-wrapper.other .message-bubble {
     background: #F0F0F0;
-    /* ← CRITIQUE : Meilleur contraste */
     color: #111;
     border: 1px solid #E0E0E0;
     border-bottom-left-radius: 4px;
+    /* Hérite max-width: 65% de .message-bubble */
 }
 
 /* Texte dans la bulle */
