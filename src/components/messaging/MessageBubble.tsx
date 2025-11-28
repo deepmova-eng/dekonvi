@@ -33,7 +33,7 @@ export function MessageBubble({
             className={`
                 flex flex-col 
                 ${isOwn ? 'items-end ml-auto' : 'items-start mr-auto'} 
-                max-w-[75%] md:max-w-[75%] sm:max-w-[85%]
+                max-w-[280px] sm:max-w-md
                 animate-fadeIn
             `}
         >
