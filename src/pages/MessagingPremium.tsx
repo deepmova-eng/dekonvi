@@ -115,16 +115,16 @@ export default function MessagingPremium() {
         )
     }
 
-    const handleConversationDeleted = useCallback(async () => {
+    const handleConversationDeleted = () => {
         // Refresh the conversation list
-        await fetchConversations()
+        fetchConversations()
 
         // Deselect the active conversation
         setActiveConversationId(null)
 
         // On mobile, go back to sidebar
         setIsMobileViewingChat(false)
-    }, [fetchConversations])
+    }
 
     return (
         <div className={`messaging-premium ${isMobileViewingChat ? 'mobile-viewing-chat' : ''}`}>
