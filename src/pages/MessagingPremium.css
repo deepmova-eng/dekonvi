@@ -13,6 +13,8 @@
 .sidebar-wrapper,
 .chat-wrapper {
   position: relative;
+  height: 100%;
+  overflow: hidden;
 }
 
 @media (max-width: 1024px) {
@@ -88,12 +90,13 @@
     pointer-events: none;
   }
 }
+
 /* Fix mobile - affichage conditionnel simple */
 @media (max-width: 1024px) {
   .messaging-premium.mobile-viewing-chat .conversation-sidebar {
     display: none;
   }
-  
+
   .messaging-premium:not(.mobile-viewing-chat) .chat-wrapper {
     display: none;
   }
