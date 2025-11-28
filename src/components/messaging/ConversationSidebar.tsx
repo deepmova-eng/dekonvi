@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Search, MoreVertical, Trash2 } from 'lucide-react'
 import { SidebarMenu } from './SidebarMenu'
 import { ProductCard } from './ProductCard'
@@ -75,6 +75,21 @@ export function ConversationSidebar({ conversations, activeId, onSelect, current
             showToast('error', 'Erreur', 'Erreur lors de la suppression de la conversation')
         }
     }
+
+    // Close menu when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (e: MouseEvent) => {
+            if (activeConvMenu) {
+                const target = e.target as HTMLElement
+                if (!target.closest('.conv-menu-dropdown') && !target.closest('.conv-menu-btn')) {
+                    setActiveConvMenu(null)
+                }
+            }
+        }
+
+        document.addEventListener('mousedown', handleClickOutside)
+        return () => document.removeEventListener('mousedown', handleClickOutside)
+    }, [activeConvMenu])
 
     return (
         <div className="conversation-sidebar">
@@ -170,7 +185,7 @@ export function ConversationSidebar({ conversations, activeId, onSelect, current
 
                                 {/* Delete menu button */}
                                 <button
-                                    className="conv-menu-btn"
+                                    className={`conv-menu-btn ${showConvMenu ? 'active' : ''}`}
                                     onClick={(e) => {
                                         e.stopPropagation()
                                         setActiveConvMenu(showConvMenu ? null : conv.id)
