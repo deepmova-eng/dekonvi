@@ -1,8 +1,13 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { supabase } from '../../lib/supabase'
-import { Send, Smile, Paperclip, MoreVertical, ArrowLeft, X } from 'lucide-react'
+import { Send, Paperclip, X } from 'lucide-react'
 import { ChatHeaderMenu } from './ChatHeaderMenu'
+import { MessageBubble } from './MessageBubble'
+import { ConversationHeader } from './ConversationHeader'
+import { DateSeparator } from './DateSeparator'
+import { ProductCard } from './ProductCard'
 import { uploadMessageImage, validateImage } from '../../lib/imageUpload'
+import { getRelativeTime } from '../../lib/timeUtils'
 import './ChatWindow.css'
 
 interface Props {
@@ -334,126 +339,65 @@ export function ChatWindow({ conversationId, currentUserId, onMobileBack }: Prop
     }
 
     return (
-        <div className="chat-window">
+        <div className="flex flex-col h-screen bg-white overflow-hidden">
 
             {/* Header */}
-            <div className="chat-header">
+            <ConversationHeader
+                otherUserName={otherUser?.name || 'Utilisateur'}
+                otherUserAvatar={otherUser?.avatar_url}
+                lastActivity={otherUser?.last_seen ? getRelativeTime(otherUser.last_seen) : "En ligne"}
+                onMenuClick={() => setShowMenu(!showMenu)}
+                onMobileBack={onMobileBack}
+                showMobileBack={true}
+            />
 
-                {/* Groupe gauche : Retour + Avatar + Nom (comme Leboncoin) */}
-                <div className="header-left">
-                    {/* Bouton retour mobile */}
-                    <button
-                        className="mobile-back-button"
-                        onClick={onMobileBack}
-                    >
-                        <ArrowLeft size={20} />
-                        <span>Retour</span>
-                    </button>
+            {/* Menu dropdown */}
+            {showMenu && (
+                <ChatHeaderMenu
+                    listingId={listing?.id || null}
+                    otherUserId={otherUser?.id}
+                    conversationId={conversationId || ''}
+                    onClose={() => setShowMenu(false)}
+                />
+            )}
 
-                    {/* Avatar + Nom */}
-                    <div className="header-user">
-                        <img
-                            src={otherUser?.avatar_url || '/default-avatar.png'}
-                            alt={otherUser?.name}
-                            className="header-avatar"
-                        />
-                        <div className="header-info">
-                            <h3 className="header-name">{otherUser?.name || 'Utilisateur'}</h3>
-                            <span className="header-status">En ligne</span>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Groupe droite : Actions */}
-                <div className="header-actions">
-                    {/* Annonce liée */}
-                    {listing ? (
-                        <div
-                            className="chat-listing-info"
-                            onClick={() => window.location.href = `/listings/${listing.id}`}
-                        >
-                            <img
-                                src={listing.images?.[0] || '/placeholder.png'}
-                                alt={listing.title}
-                                className="listing-thumbnail"
-                            />
-                            <div className="listing-details">
-                                <h4 className="listing-title">{listing.title}</h4>
-                                <p className="listing-price">{listing.price?.toLocaleString()} FCFA</p>
-                            </div>
-                        </div>
-                    ) : (
-                        <div className="no-listing">Annonce supprimée</div>
-                    )}
-
-
-                    {/* Menu 3 points */}
-                    <button
-                        className="action-btn"
-                        onClick={() => setShowMenu(!showMenu)}
-                    >
-                        <MoreVertical size={20} />
-                    </button>
-
-                    {/* Menu dropdown */}
-                    {showMenu && (
-                        <ChatHeaderMenu
-                            listingId={listing?.id || null}
-                            otherUserId={otherUser?.id}
-                            conversationId={conversationId || ''}
-                            onClose={() => setShowMenu(false)}
-                        />
-                    )}
-                </div>
-            </div>
+            {/* Product Card - Context de la conversation */}
+            {listing && (
+                <ProductCard listing={listing} />
+            )}
 
             {/* Messages */}
-            <div className="messages-container">
-                <div className="messages-list">
+            <div className="flex-1 overflow-y-auto overflow-x-hidden bg-gradient-to-b from-gray-50 to-white px-4 py-3">
+                <div className="flex flex-col max-w-4xl mx-auto">
                     {messages.map((message, index) => {
                         const isOwn = message.sender_id === currentUserId
-                        const showAvatar = index === 0 || messages[index - 1].sender_id !== message.sender_id
-                        const isSending = message.is_sending
+
+                        // Check if we need a date separator
+                        const showDateSeparator = index === 0 ||
+                            new Date(messages[index - 1].created_at).toDateString() !== new Date(message.created_at).toDateString()
+
+                        // Check if message is part of a group (same sender as previous)
+                        const isGrouped = index > 0 &&
+                            messages[index - 1].sender_id === message.sender_id &&
+                            !showDateSeparator
 
                         return (
                             <div
                                 key={message.id}
-                                className={`message-wrapper ${isOwn ? 'own' : 'other'} ${isSending ? 'sending' : ''}`}
+                                className={isGrouped ? 'mt-1' : 'mt-3'}
                             >
-                                {!isOwn && showAvatar && (
-                                    <img
-                                        src={otherUser?.avatar_url || '/default-avatar.png'}
-                                        alt=""
-                                        className="message-avatar"
-                                    />
+                                {showDateSeparator && (
+                                    <DateSeparator date={message.created_at} />
                                 )}
-                                {!isOwn && !showAvatar && <div className="message-avatar-spacer" />}
-
-                                <div className="message-bubble">
-                                    {/* Images si présentes */}
-                                    {message.images && message.images.length > 0 && (
-                                        <div className="message-images">
-                                            {message.images.map((imageUrl: string, idx: number) => (
-                                                <img
-                                                    key={idx}
-                                                    src={imageUrl}
-                                                    alt={`Image ${idx + 1}`}
-                                                    className="message-image"
-                                                    onClick={() => window.open(imageUrl, '_blank')}
-                                                />
-                                            ))}
-                                        </div>
-                                    )}
-
-                                    {message.content && message.content !== '📷 Image' && (
-                                        <p className="message-text">{message.content}</p>
-                                    )}
-                                    <div className="message-meta">
-                                        <span className="message-time">{getTimeDisplay(message.created_at)}</span>
-                                        {isOwn && !isSending && <span className="message-status">✓✓</span>}
-                                        {isSending && <span className="message-status">⏱</span>}
-                                    </div>
-                                </div>
+                                <MessageBubble
+                                    content={message.content}
+                                    isOwn={isOwn}
+                                    timestamp={getTimeDisplay(message.created_at)}
+                                    images={message.images || []}
+                                    isSending={message.is_sending}
+                                    readAt={message.read_at}
+                                    deliveredAt={message.delivered_at}
+                                />
                             </div>
                         )
                     })}
@@ -462,7 +406,7 @@ export function ChatWindow({ conversationId, currentUserId, onMobileBack }: Prop
             </div>
 
             {/* Input */}
-            <div className="message-input-container">
+            <div className="border-t border-gray-200 bg-white px-4 py-3 flex items-center gap-3 z-10">
                 {/* Input file caché */}
                 <input
                     ref={fileInputRef}
@@ -475,16 +419,16 @@ export function ChatWindow({ conversationId, currentUserId, onMobileBack }: Prop
 
                 {/* Image previews */}
                 {previewUrls.length > 0 && (
-                    <div className="image-preview-container">
+                    <div className="absolute bottom-full left-0 right-0 bg-gray-50 p-2 flex gap-2 overflow-x-auto">
                         {previewUrls.map((url, index) => (
-                            <div key={index} className="image-preview-item">
-                                <img src={url} alt={`Preview ${index + 1}`} />
+                            <div key={index} className="relative w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden">
+                                <img src={url} alt={`Preview ${index + 1}`} className="w-full h-full object-cover" />
                                 <button
-                                    className="remove-preview-btn"
+                                    className="absolute top-1 right-1 w-6 h-6 rounded-full bg-black/70 text-white flex items-center justify-center hover:bg-red-600 transition-colors"
                                     onClick={() => removeImage(index)}
                                     type="button"
                                 >
-                                    <X size={16} />
+                                    <X size={14} />
                                 </button>
                             </div>
                         ))}
@@ -492,7 +436,7 @@ export function ChatWindow({ conversationId, currentUserId, onMobileBack }: Prop
                 )}
 
                 <button
-                    className="input-action-btn"
+                    className="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 transition-colors disabled:opacity-50"
                     onClick={() => fileInputRef.current?.click()}
                     type="button"
                     disabled={uploading}
@@ -500,30 +444,27 @@ export function ChatWindow({ conversationId, currentUserId, onMobileBack }: Prop
                     <Paperclip size={20} />
                 </button>
 
-                <div className="input-wrapper">
+                <div className="flex-1 flex items-center gap-2 bg-gray-100 border border-gray-300 rounded-full px-4 py-2 focus-within:bg-white focus-within:border-emerald-500 focus-within:ring-2 focus-within:ring-emerald-500/20 transition-all">
                     <input
                         type="text"
                         placeholder="Écrivez votre message..."
                         value={newMessage}
                         onChange={(e) => setNewMessage(e.target.value)}
                         onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && handleSend()}
-                        className="message-input"
+                        className="flex-1 bg-transparent border-none outline-none text-[15px] text-gray-900 placeholder-gray-400"
                         disabled={sending || uploading}
                     />
-                    <button className="input-action-btn" disabled={uploading}>
-                        <Smile size={20} />
-                    </button>
                 </div>
 
                 <button
-                    className="send-btn"
+                    className="flex-shrink-0 w-11 h-11 flex items-center justify-center rounded-full bg-emerald-500 hover:bg-emerald-600 text-white transition-all disabled:bg-gray-300 disabled:cursor-not-allowed shadow-md hover:shadow-lg disabled:shadow-none"
                     onClick={handleSend}
                     disabled={(!newMessage.trim() && selectedImages.length === 0) || sending || uploading}
                 >
                     {uploading ? (
-                        <div className="spinner-small" />
+                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                     ) : sending ? (
-                        <div className="spinner-small" />
+                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                     ) : (
                         <Send size={20} />
                     )}
