@@ -298,9 +298,10 @@
 
 .conv-menu-btn:hover,
 .conv-menu-btn.active {
-    background: rgba(0, 0, 0, 0.05);
-    /* Very subtle grey background on hover */
+    background: transparent;
+    /* No background at all */
     color: #111827;
+    /* Darker icon color */
     box-shadow: none;
     /* No shadow */
     border: none;
