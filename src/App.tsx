@@ -74,6 +74,16 @@ export default function App() {
     navigate('/create-premium');
   };
 
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 1024);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 1024);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   // Determine if we should hide navigation based on current route
   const hideNavigation =
     location.pathname.startsWith('/listings/') ||
@@ -82,8 +92,9 @@ export default function App() {
     location.pathname.startsWith('/login') ||
     location.pathname.startsWith('/register');
 
-  // Cacher SEULEMENT la navbar du haut sur /messages (garder la BottomNav)
-  const hideTopNav = hideNavigation || location.pathname.startsWith('/messages');
+  // Cacher SEULEMENT la navbar du haut sur /messages SI on est sur mobile
+  // Sur desktop, on veut toujours voir la navbar même sur /messages
+  const hideTopNav = hideNavigation || (location.pathname.startsWith('/messages') && isMobile);
 
   return (
     <div className="min-h-screen bg-gray-50 pb-16 md:pb-0">
