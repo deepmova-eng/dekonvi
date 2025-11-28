@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react'
-import { Search, MoreVertical, Trash2 } from 'lucide-react'
+import { useState } from 'react'
+import { Search, MoreVertical } from 'lucide-react'
 import { SidebarMenu } from './SidebarMenu'
 import { ProductCard } from './ProductCard'
+import { ConversationItem } from './ConversationItem'
 import './ConversationSidebar.css'
 
 interface Props {
@@ -16,7 +17,6 @@ interface Props {
 export function ConversationSidebar({ conversations, activeId, onSelect, currentUserId, activeListing, onDeleteConversation }: Props) {
     const [searchQuery, setSearchQuery] = useState('')
     const [showMenu, setShowMenu] = useState(false)
-    const [activeConvMenu, setActiveConvMenu] = useState<string | null>(null)
 
     const filteredConversations = conversations.filter(conv => {
         const otherUser = conv.other_user
@@ -39,8 +39,8 @@ export function ConversationSidebar({ conversations, activeId, onSelect, current
         return then.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })
     }
 
-    const handleDeleteConversation = async (conversationId: string, e: React.MouseEvent) => {
-        e.stopPropagation()
+    const handleDeleteConversation = async (conversationId: string, e: any) => {
+        if (e && e.stopPropagation) e.stopPropagation()
 
         const confirm = window.confirm(
             'Êtes-vous sûr de vouloir supprimer cette conversation ? Elle restera visible pour l\'autre utilisateur.'
@@ -65,7 +65,6 @@ export function ConversationSidebar({ conversations, activeId, onSelect, current
 
             showToast('success', 'Conversation supprimée', 'La conversation a été supprimée de votre liste')
 
-            setActiveConvMenu(null)
             if (onDeleteConversation) {
                 onDeleteConversation(conversationId)
             }
@@ -75,21 +74,6 @@ export function ConversationSidebar({ conversations, activeId, onSelect, current
             showToast('error', 'Erreur', 'Erreur lors de la suppression de la conversation')
         }
     }
-
-    // Close menu when clicking outside
-    useEffect(() => {
-        const handleClickOutside = (e: MouseEvent) => {
-            if (activeConvMenu) {
-                const target = e.target as HTMLElement
-                if (!target.closest('.conv-menu-dropdown') && !target.closest('.conv-menu-btn')) {
-                    setActiveConvMenu(null)
-                }
-            }
-        }
-
-        document.addEventListener('mousedown', handleClickOutside)
-        return () => document.removeEventListener('mousedown', handleClickOutside)
-    }, [activeConvMenu])
 
     return (
         <div className="conversation-sidebar">
@@ -139,76 +123,17 @@ export function ConversationSidebar({ conversations, activeId, onSelect, current
                         <p>Aucune conversation trouvée</p>
                     </div>
                 ) : (
-                    filteredConversations.map((conv) => {
-                        const listing = conv.listing
-                        const lastMessage = conv.last_message?.[0]
-                        const isActive = activeId === conv.id
-                        const unreadCount = conv.unread_count || 0
-                        const showConvMenu = activeConvMenu === conv.id
-
-                        return (
-                            <div key={conv.id} className="conversation-item-wrapper">
-                                <button
-                                    className={`conversation-item ${isActive ? 'active' : ''}`}
-                                    onClick={() => onSelect(conv.id)}
-                                >
-                                    {/* Listing Image */}
-                                    <div className="conv-avatar-wrapper">
-                                        <img
-                                            src={listing?.images?.[0] || '/placeholder-product.png'}
-                                            alt={listing?.title || 'Annonce'}
-                                            className="conv-avatar"
-                                            style={{ objectFit: 'cover' }}
-                                        />
-                                    </div>
-
-                                    {/* Content */}
-                                    <div className="conv-content">
-                                        <div className="conv-header">
-                                            <span className="conv-name">{listing?.title || 'Annonce'}</span>
-                                            {lastMessage && (
-                                                <span className="conv-time">{getTimeAgo(lastMessage.created_at)}</span>
-                                            )}
-                                        </div>
-
-                                        <div className="conv-footer">
-                                            <p className="conv-preview">
-                                                {lastMessage?.sender_id === currentUserId && 'Vous: '}
-                                                {lastMessage?.content || 'Aucun message'}
-                                            </p>
-                                            {unreadCount > 0 && (
-                                                <div className="unread-badge">{unreadCount}</div>
-                                            )}
-                                        </div>
-                                    </div>
-                                </button>
-
-                                {/* Delete menu button */}
-                                <button
-                                    className={`conv-menu-btn ${showConvMenu ? 'active' : ''}`}
-                                    onClick={(e) => {
-                                        e.stopPropagation()
-                                        setActiveConvMenu(showConvMenu ? null : conv.id)
-                                    }}
-                                >
-                                    <MoreVertical size={18} />
-                                </button>
-
-                                {/* Delete menu dropdown */}
-                                {showConvMenu && (
-                                    <div className="conv-menu-dropdown">
-                                        <button
-                                            className="conv-menu-item danger"
-                                            onClick={(e) => handleDeleteConversation(conv.id, e)}
-                                        >
-                                            <Trash2 size={16} />
-                                            <span>Supprimer</span>
-                                        </button>
-                                    </div>
-                                )}
-                            </div>
-                        )
-                    })
+                    filteredConversations.map((conv) => (
+                        <ConversationItem
+                            key={conv.id}
+                            conv={conv}
+                            isActive={activeId === conv.id}
+                            currentUserId={currentUserId}
+                            onSelect={onSelect}
+                            onDelete={handleDeleteConversation}
+                            getTimeAgo={getTimeAgo}
+                        />
+                    ))
                 )}
             </div>
         </div>

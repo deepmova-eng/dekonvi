@@ -364,3 +364,59 @@
 .conv-menu-item.danger:hover {
     background: rgba(239, 68, 68, 0.08);
 }
+/* ============================================
+   SWIPE TO DELETE STYLES
+   ============================================ */
+
+.conversation-item-container {
+    position: relative;
+    overflow: hidden; /* Hide the swipe actions initially */
+    background: #EF4444; /* Red background for delete */
+}
+
+.swipe-actions {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    width: 80px; /* Width of the revealed area */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
+}
+
+.swipe-delete-btn {
+    background: transparent;
+    border: none;
+    color: white;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.conversation-item-wrapper {
+    background: white; /* Ensure it covers the red background */
+    position: relative;
+    z-index: 2;
+    transition: transform 0.2s ease-out;
+    width: 100%;
+}
+
+.conversation-item-wrapper.swiped {
+    transform: translateX(-80px); /* Move left to reveal delete button */
+}
+
+/* On desktop, disable swipe effect visually if needed, 
+   but the logic is JS based so it won't trigger easily with mouse */
+@media (min-width: 769px) {
+    .conversation-item-wrapper.swiped {
+        transform: none; /* Disable swipe on desktop */
+    }
+    .conversation-item-container {
+        background: white;
+    }
+}
