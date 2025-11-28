@@ -248,9 +248,9 @@
 .message-wrapper {
     display: flex;
     gap: 6px;
-    /* Minimal */
+    margin-bottom: 12px;
+    /* ← Au lieu de 8px ou moins */
     max-width: none;
-    /* PAS de max-width fixe - s'adapte au contenu */
 }
 
 @keyframes fadeInUp {
@@ -307,78 +307,94 @@
 }
 
 /* Bulles - VRAIMENT compactes comme Leboncoin */
+/* ========================================
+   BULLES - UX AMÉLIORÉE
+   ======================================== */
+
 .message-bubble {
-    padding: 8px 12px;
-    /* Très compact */
-    border-radius: 16px;
-    /* Coins arrondis */
-    word-wrap: break-word;
-    word-break: break-word;
-    /* Casse les longs mots */
-    max-width: 280px;
-    /* Limite raisonnable */
-    min-width: auto;
-    /* S'adapte au contenu */
+    padding: 12px 16px;
+    /* ← Plus généreux qu'avant */
+    border-radius: 18px;
+    min-width: 120px;
+    /* ← CRITIQUE : Évite "sal\nut" */
+    max-width: 70%;
     width: fit-content;
-    /* Largeur adaptative */
-    font-size: 15px;
-    line-height: 1.35;
-    /* Compact */
+
+    /* Gestion texte */
+    word-break: break-word;
+    overflow-wrap: break-word;
+    white-space: pre-wrap;
+    line-height: 1.5;
+    /* ← Plus aéré */
+
+    /* Espacement interne */
+    box-sizing: border-box;
     box-shadow: none;
-    /* Pas d'ombre */
 }
 
-/* Messages ENVOYÉS - Vert clair transparent */
+/* Bulle envoyée - Vert transparent comme avant */
+.message-bubble.sent,
 .message-wrapper.own .message-bubble {
-    background: rgba(45, 209, 129, 0.12);
-    /* Plus subtil */
-    color: #111827;
+    background: rgba(45, 209, 129, 0.15);
+    /* ← Légèrement plus visible */
+    color: #111;
     border: none;
+    border-bottom-right-radius: 4px;
 }
 
-/* Messages REÇUS - Fond blanc bordure */
+/* Bulle reçue - FOND GRIS CLAIR au lieu de blanc */
+.message-bubble.received,
 .message-wrapper.other .message-bubble {
-    background: white;
-    color: #111827;
-    border: 1px solid #E5E7EB;
+    background: #F0F0F0;
+    /* ← CRITIQUE : Meilleur contraste */
+    color: #111;
+    border: 1px solid #E0E0E0;
+    border-bottom-left-radius: 4px;
 }
 
-/* Texte dans bulles */
+/* Texte dans la bulle */
 .message-text {
     margin: 0;
     font-size: 15px;
-    line-height: 1.35;
-    white-space: normal;
-    /* Normal pour éviter les coupures */
-    color: inherit;
+    color: #111;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    line-height: 1.5;
 }
 
-/* Métadata très discrète */
+/* ========================================
+   TIMESTAMPS - Lisibles et bien positionnés
+   ======================================== */
+
 .message-meta {
     display: flex;
     align-items: center;
-    gap: 3px;
-    margin-top: 2px;
-    font-size: 11px;
-    opacity: 0.5;
-    /* Très discrète */
+    gap: 4px;
+    margin-top: 4px;
     justify-content: flex-end;
 }
 
 .message-time {
-    font-size: 11px;
-    color: inherit;
-    opacity: 0.6;
+    font-size: 12px;
+    /* ← Plus gros qu'avant */
+    color: #666;
+    /* ← Plus foncé que #999 */
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-weight: 500;
+    /* ← Légèrement bold */
 }
 
+/* Statut lecture (coches) */
 .message-status {
-    font-size: 11px;
-    color: inherit;
-    opacity: 0.6;
+    font-size: 14px;
+    color: #2DD181;
+    /* ← Vert visible */
 }
 
 /* ========================================
-   INPUT - POSITION ABSOLUTE EN BAS
+   INPUT ZONE - Plus confortable
    ======================================== */
 
 .message-input-container {
@@ -389,78 +405,28 @@
     z-index: 100;
     background: white;
     border-top: 1px solid #E5E7EB;
-    padding: 16px 24px;
-    height: 80px;
-    box-shadow: 0 -1px 3px rgba(0, 0, 0, 0.05);
+    padding: 16px 20px;
+    /* ← Plus généreux */
+    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.08);
     display: flex;
     align-items: center;
     gap: 12px;
+    height: auto;
+    /* Auto height */
+    min-height: 80px;
 }
 
-/* Mobile : FIXED pour être au-dessus de la BottomNav */
-@media (max-width: 1024px) {
-    .message-input-container {
-        position: fixed;
-        /* Fixed pour sortir de chat-window et être au-dessus de BottomNav */
-        bottom: 72px;
-        /* Rétabli à 72px pour ne pas mordre sur la BottomNav */
-        height: 60px;
-        padding: 8px 12px;
-        z-index: 1001;
-        /* Au-dessus de la BottomNav */
-    }
-
-    /* Ajuster le bottom de messages-container pour compenser */
-    .messages-container {
-        bottom: 132px;
-        /* Input (60px) + BottomNav (72px) */
-    }
-}
-
-/* Fix iOS Safari - Safe area pour le clavier */
-@supports (padding: env(safe-area-inset-bottom)) {
-    .message-input-container {
-        padding-bottom: calc(16px + env(safe-area-inset-bottom));
-    }
-
-    @media (max-width: 1024px) {
-        .message-input-container {
-            bottom: calc(72px + env(safe-area-inset-bottom));
-            padding-bottom: calc(8px + env(safe-area-inset-bottom));
-        }
-    }
-}
-
-.input-action-btn {
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: transparent;
-    border: none;
-    border-radius: 50%;
-    color: #6B7280;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    flex-shrink: 0;
-}
-
-.input-action-btn:hover {
-    background: #F3F4F6;
-    color: #111827;
-}
-
+/* Input field */
 .input-wrapper {
     flex: 1;
     display: flex;
     align-items: center;
     gap: 8px;
     background: #F9FAFB;
-    border: 2px solid #E5E7EB;
+    border: 1px solid #E0E0E0;
     border-radius: 24px;
     padding: 0 16px;
-    transition: all 0.2s ease;
+    transition: all 0.2s;
 }
 
 .input-wrapper:focus-within {
@@ -476,46 +442,114 @@
     outline: none;
     font-size: 15px;
     color: #111827;
-    padding: 10px 0;
+    padding: 12px 0;
+    /* ← Plus confortable */
     resize: none;
-    /* Pas de resize */
     overflow: hidden;
-    /* Cache l'overflow */
-    max-height: 40px;
-    /* Limite hauteur */
-    line-height: 1.4;
+    max-height: 100px;
+    /* Plus grand max height */
+    min-height: 24px;
+    line-height: 1.5;
 }
 
 .message-input::placeholder {
     color: #9CA3AF;
 }
 
-/* Bouton envoyer - TOUJOURS VISIBLE */
+/* Bouton envoi */
 .send-btn {
+    background: #2DD181;
+    /* Vert visible */
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    flex-shrink: 0;
+    box-shadow: 0 2px 5px rgba(45, 209, 129, 0.3);
+}
+
+.send-btn:hover:not(:disabled) {
+    background: #25B870;
+    transform: scale(1.05);
+}
+
+.send-btn:active:not(:disabled) {
+    transform: scale(0.95);
+}
+
+.send-btn:disabled {
+    background: #E5E7EB;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* Bouton pièce jointe (input action btn) */
+.input-action-btn {
     width: 40px;
     height: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #FF6B35;
-    /* Orange comme Leboncoin (visible) */
+    background: #F3F4F6;
     border: none;
     border-radius: 50%;
-    color: white;
+    color: #6B7280;
     cursor: pointer;
     transition: all 0.2s ease;
     flex-shrink: 0;
 }
 
-.send-btn:hover:not(:disabled) {
-    background: #E85A28;
-    transform: scale(1.05);
+.input-action-btn:hover {
+    background: #E5E7EB;
+    color: #374151;
 }
 
-.send-btn:disabled {
-    background: #D1D5DB;
-    opacity: 0.5;
-    cursor: not-allowed;
+/* Mobile adjustments */
+@media (max-width: 1024px) {
+    .message-input-container {
+        position: fixed;
+        bottom: 72px;
+        /* Au-dessus BottomNav */
+        padding: 12px 16px;
+        height: auto;
+        min-height: 64px;
+        z-index: 1001;
+    }
+
+    .message-input {
+        padding: 10px 0;
+    }
+
+    .send-btn {
+        width: 40px;
+        height: 40px;
+    }
+
+    .messages-container {
+        bottom: 140px;
+        /* Ajusté pour input plus grand */
+    }
+}
+
+/* Fix iOS Safari - Safe area pour le clavier */
+@supports (padding: env(safe-area-inset-bottom)) {
+    .message-input-container {
+        padding-bottom: calc(16px + env(safe-area-inset-bottom));
+    }
+
+    @media (max-width: 1024px) {
+        .message-input-container {
+            bottom: calc(72px + env(safe-area-inset-bottom));
+            padding-bottom: calc(8px + env(safe-area-inset-bottom));
+        }
+    }
 }
 
 .spinner-small {
