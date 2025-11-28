@@ -60,12 +60,29 @@ export function ChatHeaderMenu({ listingId, otherUserId, conversationId, onClose
         if (!confirm) return
 
         try {
-            // TODO: Implémenter la suppression
-            alert('Conversation supprimée (fonctionnalité à implémenter)')
+            const { supabase } = await import('../../lib/supabase')
+
+            // 1. Supprimer tous les messages de la conversation
+            const { error: messagesError } = await supabase
+                .from('messages')
+                .delete()
+                .eq('conversation_id', conversationId)
+
+            if (messagesError) throw messagesError
+
+            // 2. Supprimer la conversation
+            const { error: conversationError } = await supabase
+                .from('conversations')
+                .delete()
+                .eq('id', conversationId)
+
+            if (conversationError) throw conversationError
+
+            // 3. Rediriger vers la page des messages
             window.location.href = '/messages'
         } catch (error) {
             console.error('Error deleting conversation:', error)
-            alert('Erreur lors de la suppression')
+            alert('Erreur lors de la suppression de la conversation')
         }
     }
 
