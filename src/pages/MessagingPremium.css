@@ -1,12 +1,14 @@
 /* Container principal de la messagerie */
 .messaging-premium {
+  position: fixed;
+  top: 72px;
+  left: 0;
+  right: 0;
+  bottom: 0;
   display: grid;
   grid-template-columns: 360px 1fr;
-  height: calc(100vh - 72px);
-  /* 72px = hauteur du header Dekonvi */
+  /* CRITIQUE : Container fixe, ne scroll jamais */
   overflow: hidden;
-  /* CRITIQUE : Empêche le scroll global */
-  margin-top: 72px;
   background: #F9FAFB;
 }
 
