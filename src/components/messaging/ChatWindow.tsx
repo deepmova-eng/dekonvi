@@ -339,28 +339,32 @@ export function ChatWindow({ conversationId, currentUserId, onMobileBack }: Prop
             {/* Header */}
             <div className="chat-header">
 
-                {/* Bouton retour mobile */}
-                <button
-                    className="mobile-back-button"
-                    onClick={onMobileBack}
-                >
-                    <ArrowLeft size={20} />
-                    <span>Retour</span>
-                </button>
+                {/* Groupe gauche : Retour + Avatar + Nom (comme Leboncoin) */}
+                <div className="header-left">
+                    {/* Bouton retour mobile */}
+                    <button
+                        className="mobile-back-button"
+                        onClick={onMobileBack}
+                    >
+                        <ArrowLeft size={20} />
+                        <span>Retour</span>
+                    </button>
 
-                {/* Reste du header existant */}
-                <div className="header-user">
-                    <img
-                        src={otherUser?.avatar_url || '/default-avatar.png'}
-                        alt={otherUser?.name}
-                        className="header-avatar"
-                    />
-                    <div className="header-info">
-                        <h3 className="header-name">{otherUser?.name || 'Utilisateur'}</h3>
-                        <span className="header-status">En ligne</span>
+                    {/* Avatar + Nom */}
+                    <div className="header-user">
+                        <img
+                            src={otherUser?.avatar_url || '/default-avatar.png'}
+                            alt={otherUser?.name}
+                            className="header-avatar"
+                        />
+                        <div className="header-info">
+                            <h3 className="header-name">{otherUser?.name || 'Utilisateur'}</h3>
+                            <span className="header-status">En ligne</span>
+                        </div>
                     </div>
                 </div>
 
+                {/* Groupe droite : Actions */}
                 <div className="header-actions">
                     {/* Annonce liée */}
                     {listing ? (
