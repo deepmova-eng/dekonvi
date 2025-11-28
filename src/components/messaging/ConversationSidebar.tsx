@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
 import { Search, MoreVertical, Trash2 } from 'lucide-react'
-import { SidebarMenu } from './SidebarMenu'
 import { ProductCard } from './ProductCard'
 import './ConversationSidebar.css'
 
@@ -15,7 +14,6 @@ interface Props {
 
 export function ConversationSidebar({ conversations, activeId, onSelect, currentUserId, activeListing, onDeleteConversation }: Props) {
     const [searchQuery, setSearchQuery] = useState('')
-    const [showMenu, setShowMenu] = useState(false)
     const [activeConvMenu, setActiveConvMenu] = useState<string | null>(null)
 
     const filteredConversations = conversations.filter(conv => {
@@ -97,20 +95,6 @@ export function ConversationSidebar({ conversations, activeId, onSelect, current
             {/* Header */}
             <div className="sidebar-header">
                 <h2>Messages</h2>
-                <button
-                    className="header-menu-btn"
-                    onClick={() => setShowMenu(!showMenu)}
-                >
-                    <MoreVertical size={20} />
-                </button>
-
-                {/* Menu dropdown */}
-                {showMenu && (
-                    <SidebarMenu
-                        onClose={() => setShowMenu(false)}
-                        conversationCount={conversations.length}
-                    />
-                )}
             </div>
 
             {/* Product Card - Context de la conversation active */}

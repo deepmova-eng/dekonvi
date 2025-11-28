@@ -32,24 +32,7 @@
     margin: 0;
 }
 
-.header-menu-btn {
-    width: 36px;
-    height: 36px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: transparent;
-    border: none;
-    border-radius: 8px;
-    color: #6B7280;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
 
-.header-menu-btn:hover {
-    background: #F3F4F6;
-    color: #111827;
-}
 
 /* Search - Fixe sous le header */
 .sidebar-search {
