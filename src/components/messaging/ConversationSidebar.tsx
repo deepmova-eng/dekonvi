@@ -97,6 +97,16 @@ export function ConversationSidebar({ conversations, activeId, onSelect, current
                                 className={`conversation-item ${isActive ? 'active' : ''}`}
                                 onClick={() => onSelect(conv.id)}
                             >
+                                {/* Listing Image */}
+                                <div className="conv-avatar-wrapper">
+                                    <img
+                                        src={listing?.images?.[0] || '/placeholder-product.png'}
+                                        alt={listing?.title || 'Annonce'}
+                                        className="conv-avatar"
+                                        style={{ objectFit: 'cover' }}
+                                    />
+                                </div>
+
                                 {/* Content */}
                                 <div className="conv-content">
                                     <div className="conv-header">
