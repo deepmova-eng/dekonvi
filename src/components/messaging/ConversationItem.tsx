@@ -134,8 +134,11 @@ export function ConversationItem({ conv, isActive, currentUserId, onSelect, onDe
                         <button
                             className="conv-menu-item danger"
                             onClick={(e) => {
-                                onDelete(conv.id, e)
-                                setShowMenu(false)
+                                e.stopPropagation()
+                                if (window.confirm('Supprimer cette conversation ?')) {
+                                    onDelete(conv.id, e)
+                                    setShowMenu(false)
+                                }
                             }}
                         >
                             <Trash2 size={16} />

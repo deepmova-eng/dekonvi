@@ -42,10 +42,7 @@ export function ConversationSidebar({ conversations, activeId, onSelect, current
     const handleDeleteConversation = async (conversationId: string, e: any) => {
         if (e && e.stopPropagation) e.stopPropagation()
 
-        const confirm = window.confirm(
-            'Êtes-vous sûr de vouloir supprimer cette conversation ? Elle restera visible pour l\'autre utilisateur.'
-        )
-        if (!confirm) return
+
 
         try {
             const { supabase } = await import('../../lib/supabase')
