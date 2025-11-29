@@ -59,16 +59,23 @@ export function ChatHeaderMenu({ listingId, otherUserId, conversationId, onClose
             const { data: { user } } = await supabase.auth.getUser()
             if (!user) throw new Error('User not authenticated')
 
-            // Soft delete: upsert into conversation_deletions table
-            // Using upsert to handle re-deletion (updates deleted_at if already exists)
+            // Soft delete: delete old entry then insert new one
+            // This avoids RLS policy issues with upsert
+
+            // First, delete any existing deletion record
+            await (supabase as any)
+                .from('conversation_deletions')
+                .delete()
+                .eq('conversation_id', conversationId)
+                .eq('user_id', user.id)
+
+            // Then insert new deletion record with current timestamp
             const { error: deleteError } = await (supabase as any)
                 .from('conversation_deletions')
-                .upsert({
+                .insert({
                     conversation_id: conversationId,
                     user_id: user.id,
                     deleted_at: new Date().toISOString()
-                }, {
-                    onConflict: 'conversation_id,user_id'
                 })
 
             if (deleteError) throw deleteError
