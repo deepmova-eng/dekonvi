@@ -18,7 +18,7 @@ export function ProductCard({ listing }: ProductCardProps) {
 
     return (
         <div
-            className="border-b border-gray-200 bg-white px-4 py-3 cursor-pointer hover:bg-gray-50 transition-colors"
+            className="bg-white px-4 py-3 cursor-pointer hover:bg-gray-50 transition-colors"
             onClick={handleClick}
         >
             <div className="flex items-center gap-3">

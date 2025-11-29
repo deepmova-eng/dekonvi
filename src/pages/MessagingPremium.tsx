@@ -102,7 +102,7 @@ export default function MessagingPremium() {
 
             setConversations(conversationsWithDetails)
 
-            // Sélectionne la première conversation par défaut
+            // Sélectionne la première conversation par défaut SI aucune n'est active
             if (conversationsWithDetails && conversationsWithDetails.length > 0 && !activeConversationId) {
                 setActiveConversationId(conversationsWithDetails[0].id)
             }
@@ -111,7 +111,7 @@ export default function MessagingPremium() {
         } finally {
             setLoading(false)
         }
-    }, [user?.id, activeConversationId])
+    }, [user?.id]) // Removed activeConversationId to prevent re-fetch loop
 
 
     const subscribeToConversations = useCallback(() => {
