@@ -96,13 +96,13 @@ export function ConversationSidebar({ conversations, activeId, onSelect, current
 
             {/* Product Card - Context de la conversation active */}
             {activeListing && (
-                <div className="px-4 py-3 border-b border-gray-200">
+                <div className="hidden md:block px-4 py-3 border-b border-gray-200">
                     <ProductCard listing={activeListing} />
                 </div>
             )}
 
             {/* Search */}
-            <div className="sidebar-search">
+            <div className="sidebar-search hidden md:flex">
                 <Search size={18} className="search-icon" />
                 <input
                     type="text"
