@@ -150,14 +150,29 @@ export default function ProductDetails() {
         // Auto-envoyer un message initial pour que le vendeur soit notifié
         const initialMessage = `Bonjour, je suis intéressé(e) par votre annonce "${listing.title}".`;
 
-        await supabase
+        console.log('📤 Sending initial message:', {
+          conversation_id: newConv.id,
+          sender_id: user.id,
+          to_seller: listing.seller_id,
+          message: initialMessage
+        });
+
+        const { data: messageData, error: messageError } = await supabase
           .from('messages')
           .insert({
             conversation_id: newConv.id,
             sender_id: user.id,
             content: initialMessage,
             read: false
-          });
+          })
+          .select();
+
+        if (messageError) {
+          console.error('❌ Error sending initial message:', messageError);
+          throw new Error(`Failed to send message: ${messageError.message}`);
+        }
+
+        console.log('✅ Initial message sent successfully:', messageData);
 
         // Naviguer vers la nouvelle conversation
         navigate(`/messages?conversation=${newConv.id}`);
