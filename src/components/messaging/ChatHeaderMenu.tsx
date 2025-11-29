@@ -59,12 +59,16 @@ export function ChatHeaderMenu({ listingId, otherUserId, conversationId, onClose
             const { data: { user } } = await supabase.auth.getUser()
             if (!user) throw new Error('User not authenticated')
 
-            // Soft delete: insert into conversation_deletions table
+            // Soft delete: upsert into conversation_deletions table
+            // Using upsert to handle re-deletion (updates deleted_at if already exists)
             const { error: deleteError } = await (supabase as any)
                 .from('conversation_deletions')
-                .insert({
+                .upsert({
                     conversation_id: conversationId,
-                    user_id: user.id
+                    user_id: user.id,
+                    deleted_at: new Date().toISOString()
+                }, {
+                    onConflict: 'conversation_id,user_id'
                 })
 
             if (deleteError) throw deleteError
