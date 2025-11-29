@@ -3,6 +3,7 @@ import { Shield, Ban, User, CheckCircle, XCircle, Trash2 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import type { Database } from '../../types/supabase';
 import toast from 'react-hot-toast';
+import { ConfirmDialog } from '../shared/ConfirmDialog';
 
 type Profile = Database['public']['Tables']['profiles']['Row'];
 
@@ -20,6 +21,14 @@ export default function UserManagement({ filter = 'confirmed' }: UserManagementP
   const [users, setUsers] = useState<ExtendedUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [confirmAction, setConfirmAction] = useState<{
+    type: 'ban' | 'admin' | 'confirm' | 'delete';
+    user: ExtendedUser | null;
+    title: string;
+    message: string;
+    danger?: boolean;
+  }>({ type: 'ban', user: null, title: '', message: '' });
 
   const fetchUsers = async () => {
     try {
@@ -86,9 +95,17 @@ export default function UserManagement({ filter = 'confirmed' }: UserManagementP
   }, []);
 
   const handleBanUser = async (user: ExtendedUser) => {
-    if (!window.confirm(`Êtes-vous sûr de vouloir ${user.status === 'banned' ? 'débannir' : 'bannir'} cet utilisateur ?`)) {
-      return;
-    }
+    setConfirmAction({
+      type: 'ban',
+      user,
+      title: user.status === 'banned' ? 'Débannir l\'utilisateur' : 'Bannir l\'utilisateur',
+      message: `Êtes-vous sûr de vouloir ${user.status === 'banned' ? 'débannir' : 'bannir'} cet utilisateur ?`,
+      danger: user.status !== 'banned'
+    });
+    setShowConfirmDialog(true);
+  };
+
+  const executeBan = async (user: ExtendedUser) => {
 
     try {
       const newStatus = user.status === 'banned' ? 'active' : 'banned';
@@ -127,9 +144,17 @@ export default function UserManagement({ filter = 'confirmed' }: UserManagementP
   };
 
   const handleMakeAdmin = async (user: ExtendedUser) => {
-    if (!window.confirm(`Êtes-vous sûr de vouloir ${user.role === 'admin' ? 'rétrograder' : 'promouvoir'} cet utilisateur ?`)) {
-      return;
-    }
+    setConfirmAction({
+      type: 'admin',
+      user,
+      title: user.role === 'admin' ? 'Rétrograder l\'utilisateur' : 'Promouvoir l\'utilisateur',
+      message: `Êtes-vous sûr de vouloir ${user.role === 'admin' ? 'rétr ograder' : 'promouvoir'} cet utilisateur ?`,
+      danger: false
+    });
+    setShowConfirmDialog(true);
+  };
+
+  const executeAdmin = async (user: ExtendedUser) => {
 
     try {
       const newRole = user.role === 'admin' ? 'user' : 'admin';
@@ -168,9 +193,17 @@ export default function UserManagement({ filter = 'confirmed' }: UserManagementP
   };
 
   const handleConfirmUser = async (user: ExtendedUser) => {
-    if (!window.confirm('Voulez-vous confirmer manuellement cet utilisateur ?')) {
-      return;
-    }
+    setConfirmAction({
+      type: 'confirm',
+      user,
+      title: 'Confirmer l\'utilisateur',
+      message: 'Voulez-vous confirmer manuellement cet utilisateur ?',
+      danger: false
+    });
+    setShowConfirmDialog(true);
+  };
+
+  const executeConfirmUser = async (user: ExtendedUser) => {
 
     const toastId = toast.loading('Confirmation en cours...');
 
@@ -206,9 +239,17 @@ export default function UserManagement({ filter = 'confirmed' }: UserManagementP
   };
 
   const handleDeleteUser = async (user: ExtendedUser) => {
-    if (!window.confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ? Cette action est irréversible.')) {
-      return;
-    }
+    setConfirmAction({
+      type: 'delete',
+      user,
+      title: 'Supprimer l\'utilisateur',
+      message: 'Êtes-vous sûr de vouloir supprimer cet utilisateur ? Cette action est irréversible.',
+      danger: true
+    });
+    setShowConfirmDialog(true);
+  };
+
+  const executeDeleteUser = async (user: ExtendedUser) => {
 
     const toastId = toast.loading('Suppression en cours...');
 
@@ -225,6 +266,28 @@ export default function UserManagement({ filter = 'confirmed' }: UserManagementP
       console.error('Error deleting user:', error);
       toast.error(`Erreur: ${error.message || 'Échec de la suppression'}`, { id: toastId });
     }
+  };
+
+  const handleConfirm = async () => {
+    if (!confirmAction.user) return;
+
+    switch (confirmAction.type) {
+      case 'ban':
+        await executeBan(confirmAction.user);
+        break;
+      case 'admin':
+        await executeAdmin(confirmAction.user);
+        break;
+      case 'confirm':
+        await executeConfirmUser(confirmAction.user);
+        break;
+      case 'delete':
+        await executeDeleteUser(confirmAction.user);
+        break;
+    }
+
+    setShowConfirmDialog(false);
+    setConfirmAction({ type: 'ban', user: null, title: '', message: '' });
   };
 
   const filteredUsers = users.filter(user => {
@@ -367,6 +430,18 @@ export default function UserManagement({ filter = 'confirmed' }: UserManagementP
           </div>
         ))}
       </div>
+
+      {/* Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={showConfirmDialog}
+        onClose={() => setShowConfirmDialog(false)}
+        onConfirm={handleConfirm}
+        title={confirmAction.title}
+        message={confirmAction.message}
+        confirmText="Confirmer"
+        cancelText="Annuler"
+        danger={confirmAction.danger}
+      />
     </div>
   );
 }

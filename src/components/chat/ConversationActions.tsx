@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { MoreHorizontal } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import toast from 'react-hot-toast';
+import { ConfirmDialog } from '../shared/ConfirmDialog';
 
 interface ConversationActionsProps {
   conversationId: string;
@@ -14,14 +15,15 @@ import { useSupabase } from '../../contexts/SupabaseContext';
 export default function ConversationActions({ conversationId, onClose }: ConversationActionsProps) {
   const { user } = useSupabase();
   const [showMenu, setShowMenu] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   const handleDeleteConversation = async () => {
-    if (!window.confirm('Voulez-vous vraiment supprimer cette conversation ?')) {
-      return;
-    }
+    setShowMenu(false);
+    setShowDeleteDialog(true);
+  };
 
+  const confirmDelete = async () => {
     try {
-      // const user = supabase.auth.getUser()?.data.user;
       if (!user) return;
 
       // Delete conversation and related messages using RPC
@@ -47,6 +49,8 @@ export default function ConversationActions({ conversationId, onClose }: Convers
     } catch (error) {
       console.error('Error deleting conversation:', error);
       toast.error('Erreur lors de la suppression');
+    } finally {
+      setShowDeleteDialog(false);
     }
   };
 
@@ -78,6 +82,18 @@ export default function ConversationActions({ conversationId, onClose }: Convers
           </div>
         </>
       )}
+
+      {/* Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={showDeleteDialog}
+        onClose={() => setShowDeleteDialog(false)}
+        onConfirm={confirmDelete}
+        title="Supprimer la conversation"
+        message="Voulez-vous vraiment supprimer cette conversation ? Cette action est irréversible."
+        confirmText="Supprimer"
+        cancelText="Annuler"
+        danger={true}
+      />
     </div>
   );
 }
