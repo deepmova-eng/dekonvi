@@ -54,7 +54,6 @@
     flex-shrink: 0;
     /* Ne rétrécit jamais */
     padding: 16px 24px;
-    border-bottom: 1px solid #F3F4F6;
     display: flex;
     align-items: center;
     gap: 12px;
