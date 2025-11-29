@@ -116,10 +116,19 @@ export default function ProductDetails() {
 
         // Si la conversation a été supprimée par l'utilisateur, la "restaurer"
         if (deletion) {
+          // 1. Supprimer l'entrée de soft-delete pour restaurer la conversation
           await (supabase as any)
             .from('conversation_deletions')
             .delete()
             .eq('id', deletion.id);
+
+          // 2. Supprimer uniquement les messages de l'utilisateur actuel
+          // (garde les messages du vendeur pour qu'il garde le contexte)
+          await supabase
+            .from('messages')
+            .delete()
+            .eq('conversation_id', existingConv.id)
+            .eq('sender_id', user.id);
         }
 
         // Naviguer vers la conversation
