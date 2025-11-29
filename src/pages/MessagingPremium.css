@@ -21,12 +21,20 @@
 /* Mobile/Tablet: sans navbar du haut */
 @media (max-width: 1024px) {
   .messaging-premium {
-    top: 0;
+    top: 0 !important;
     bottom: 72px;
     /* Laisse espace pour la navbar du bas sur mobile */
     width: 100vw;
     height: auto;
     grid-template-columns: 1fr;
+    padding: 0;
+    margin: 0;
+  }
+
+  /* Force chat-wrapper to stick to top */
+  .chat-wrapper {
+    padding-top: 0 !important;
+    margin-top: 0 !important;
   }
 
   /* Affichage conditionnel simple sur mobile */
