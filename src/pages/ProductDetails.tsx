@@ -129,6 +129,33 @@ export default function ProductDetails() {
             .delete()
             .eq('conversation_id', existingConv.id)
             .eq('sender_id', user.id);
+
+          // 3. Envoyer un nouveau message initial pour notifier le vendeur
+          const initialMessage = `Bonjour, je suis intéressé(e) par votre annonce "${listing.title}".`;
+
+          console.log('📤 Sending initial message (restored conversation):', {
+            conversation_id: existingConv.id,
+            sender_id: user.id,
+            to_seller: listing.seller_id,
+            message: initialMessage
+          });
+
+          const { data: messageData, error: messageError } = await supabase
+            .from('messages')
+            .insert({
+              conversation_id: existingConv.id,
+              sender_id: user.id,
+              content: initialMessage,
+              read: false
+            })
+            .select();
+
+          if (messageError) {
+            console.error('❌ Error sending initial message:', messageError);
+            throw new Error(`Failed to send message: ${messageError.message}`);
+          }
+
+          console.log('✅ Initial message sent successfully (restored):', messageData);
         }
 
         // Naviguer vers la conversation
