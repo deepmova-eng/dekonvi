@@ -17,25 +17,49 @@ export default function MessagingPremium() {
     const fetchConversations = useCallback(async () => {
         try {
             // Récupérer toutes les conversations de l'utilisateur
-            const { data: convs, error } = await supabase
+            const { data: convs, error: convError } = await supabase
                 .from('conversations')
                 .select('*')
                 .or(`user1_id.eq.${user?.id},user2_id.eq.${user?.id}`)
                 .order('created_at', { ascending: false })
 
+            if (convError) throw convError
 
-            if (error) throw error
-
-            // Récupérer les conversations soft-deleted par l'utilisateur actuel
-            const { data: deletedConvs } = await (supabase as any)
+            // 🔥 CRITIQUE : Récupérer deleted_at timestamps, PAS juste conversation_id
+            const { data: deletions } = await (supabase as any)
                 .from('conversation_deletions')
-                .select('conversation_id')
+                .select('conversation_id, deleted_at')
                 .eq('user_id', user?.id || '')
 
-            const deletedConvIds = new Set(deletedConvs?.map(d => d.conversation_id) || [])
+            // Map pour accès rapide : conversation_id → deleted_at
+            const deletionMap = new Map(
+                deletions?.map((d: any) => [d.conversation_id, d.deleted_at]) || []
+            )
 
-            // Filtrer les conversations soft-deleted
-            const activeConvs = (convs || []).filter(conv => !deletedConvIds.has(conv.id))
+            // 🔥 CRITIQUE : Filtrer les conversations
+            const filteredConvs = await Promise.all(
+                (convs || []).map(async (conv: any) => {
+                    const deletedAt = deletionMap.get(conv.id)
+
+                    // Conversation jamais supprimée → Toujours afficher
+                    if (!deletedAt) return conv
+
+                    // Conversation supprimée → Vérifier si messages APRÈS suppression
+                    const { data: newMessages } = await supabase
+                        .from('messages')
+                        .select('id')
+                        .eq('conversation_id', conv.id)
+                        .gt('created_at', deletedAt)
+                        .limit(1)
+
+                    // Si nouveaux messages → Afficher
+                    // Sinon → Cacher (return null)
+                    return newMessages && newMessages.length > 0 ? conv : null
+                })
+            )
+
+            // Retirer les conversations null (supprimées sans nouveaux messages)
+            const activeConvs = filteredConvs.filter((conv: any) => conv !== null)
 
             // Pour chaque conversation, récupérer l'autre utilisateur et le dernier message
             const conversationsWithDetails = await Promise.all(

@@ -32,22 +32,41 @@ export function ChatWindow({ conversationId, currentUserId, onMobileBack, onConv
 
     // Fetch messages
     const fetchMessages = useCallback(async () => {
-        if (!conversationId) return
+        if (!conversationId || !currentUserId) return
 
         try {
-            const { data, error } = await supabase
+            // 🔥 CRITIQUE : Vérifier si user a supprimé cette conversation
+            const { data: deletion } = await (supabase as any)
+                .from('conversation_deletions')
+                .select('deleted_at')
+                .eq('conversation_id', conversationId)
+                .eq('user_id', currentUserId)
+                .maybeSingle()
+
+            console.log('🔍 Deletion check:', deletion ? `Deleted at ${deletion.deleted_at}` : 'Not deleted')
+
+            // Charger les messages
+            let query = supabase
                 .from('messages')
                 .select('*')
                 .eq('conversation_id', conversationId)
-                .order('created_at', { ascending: true })
+
+            // 🔥 CRITIQUE : Si supprimée, filtrer messages APRÈS deleted_at
+            if (deletion?.deleted_at) {
+                console.log('⏱️ Filtering messages after:', deletion.deleted_at)
+                query = query.gt('created_at', deletion.deleted_at)
+            }
+
+            const { data, error } = await query.order('created_at', { ascending: true })
 
             if (error) throw error
 
+            console.log(`💬 Messages loaded: ${data?.length || 0} (filtered: ${!!deletion})`)
             setMessages(data || [])
         } catch (error) {
             console.error('❌ Error fetching messages:', error)
         }
-    }, [conversationId])
+    }, [conversationId, currentUserId])
 
     // Fetch other user and listing
     const fetchOtherUser = useCallback(async () => {
