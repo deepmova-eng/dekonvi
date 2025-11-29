@@ -77,7 +77,12 @@ export function SupabaseProvider({ children }: { children: ReactNode }) {
           setProfile(null);
         }
       } catch (error) {
-        console.error('Background session verification failed:', error);
+        // Only log real errors, not timeouts (which are expected and handled)
+        if (error instanceof Error && error.message === 'getSession timeout') {
+          console.log('[SupabaseContext] Session check timed out, using cached session');
+        } else {
+          console.error('Background session verification failed:', error);
+        }
       }
     };
 
