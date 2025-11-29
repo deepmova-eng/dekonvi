@@ -1,4 +1,4 @@
-import { useState, TouchEvent } from 'react'
+import { useState, TouchEvent, useEffect, useRef } from 'react'
 import { MoreVertical, Trash2 } from 'lucide-react'
 import './ConversationSidebar.css'
 
@@ -16,6 +16,24 @@ export function ConversationItem({ conv, isActive, currentUserId, onSelect, onDe
     const [touchStart, setTouchStart] = useState<number | null>(null)
     const [touchEnd, setTouchEnd] = useState<number | null>(null)
     const [isSwiped, setIsSwiped] = useState(false)
+    const menuRef = useRef<HTMLDivElement>(null)
+
+    // Close menu when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+                setShowMenu(false)
+            }
+        }
+
+        if (showMenu) {
+            document.addEventListener('mousedown', handleClickOutside)
+        }
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside)
+        }
+    }, [showMenu])
 
     // Minimum distance for swipe
     const minSwipeDistance = 50
@@ -128,7 +146,7 @@ export function ConversationItem({ conv, isActive, currentUserId, onSelect, onDe
 
                 {/* Delete menu dropdown */}
                 {showMenu && (
-                    <div className="conv-menu-dropdown">
+                    <div className="conv-menu-dropdown" ref={menuRef}>
                         <button
                             className="conv-menu-item danger"
                             onClick={(e) => {
