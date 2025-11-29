@@ -38,6 +38,10 @@
   }
 
   /* Affichage conditionnel simple sur mobile */
+  .messaging-premium.mobile-viewing-chat .sidebar-wrapper {
+    display: none;
+  }
+
   .messaging-premium.mobile-viewing-chat .conversation-sidebar {
     display: none;
   }
