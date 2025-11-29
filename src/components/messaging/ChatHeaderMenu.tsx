@@ -1,6 +1,6 @@
 import { useRef, useEffect, useState } from 'react'
 import { ExternalLink, Flag, Ban, Trash2 } from 'lucide-react'
-import { ConfirmDialog } from './ConfirmDialog'
+import { ConfirmDialog } from '../shared/ConfirmDialog'
 import './ChatHeaderMenu.css'
 
 interface Props {

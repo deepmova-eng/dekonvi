@@ -3,7 +3,7 @@ import { Search, MoreVertical } from 'lucide-react'
 import { SidebarMenu } from './SidebarMenu'
 import { ProductCard } from './ProductCard'
 import { ConversationItem } from './ConversationItem'
-import { ConfirmDialog } from './ConfirmDialog'
+import { ConfirmDialog } from '../shared/ConfirmDialog'
 import './ConversationSidebar.css'
 
 interface Props {

@@ -3,6 +3,7 @@ import { Plus, X, Edit, Trash2 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import type { Database } from '../../types/supabase';
 import toast from 'react-hot-toast';
+import { ConfirmDialog } from '../shared/ConfirmDialog';
 
 type Advertisement = Database['public']['Tables']['advertisements']['Row'];
 
@@ -12,6 +13,8 @@ export default function AdvertisementManager() {
   const [newImage, setNewImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState('');
   const [loading, setLoading] = useState(true);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [adToDelete, setAdToDelete] = useState<Advertisement | null>(null);
 
   useEffect(() => {
     const fetchAds = async () => {
@@ -37,12 +40,12 @@ export default function AdvertisementManager() {
     // Subscribe to changes
     const channel = supabase
       .channel('advertisements_changes')
-      .on('postgres_changes', 
-        { 
-          event: '*', 
-          schema: 'public', 
+      .on('postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
           table: 'advertisements'
-        }, 
+        },
         () => {
           fetchAds();
         }
@@ -130,14 +133,17 @@ export default function AdvertisementManager() {
   };
 
   const handleDelete = async (ad: Advertisement) => {
-    if (!window.confirm('Êtes-vous sûr de vouloir supprimer cette publicité ?')) {
-      return;
-    }
+    setAdToDelete(ad);
+    setShowDeleteDialog(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!adToDelete) return;
 
     try {
       // Delete the image from storage
-      if (ad.image_url) {
-        const path = ad.image_url.split('/').pop();
+      if (adToDelete.image_url) {
+        const path = adToDelete.image_url.split('/').pop();
         if (path) {
           await supabase.storage
             .from('advertisements')
@@ -149,13 +155,16 @@ export default function AdvertisementManager() {
       const { error } = await supabase
         .from('advertisements')
         .delete()
-        .eq('id', ad.id);
+        .eq('id', adToDelete.id);
 
       if (error) throw error;
       toast.success('Publicité supprimée');
     } catch (error) {
       console.error('Error deleting advertisement:', error);
       toast.error('Erreur lors de la suppression');
+    } finally {
+      setShowDeleteDialog(false);
+      setAdToDelete(null);
     }
   };
 
@@ -305,6 +314,18 @@ export default function AdvertisementManager() {
             ))}
           </div>
         </div>
+
+        {/* Confirmation Dialog */}
+        <ConfirmDialog
+          isOpen={showDeleteDialog}
+          onClose={() => setShowDeleteDialog(false)}
+          onConfirm={confirmDelete}
+          title="Supprimer la publicité"
+          message="Êtes-vous sûr de vouloir supprimer cette publicité ? Cette action est irréversible."
+          confirmText="Supprimer"
+          cancelText="Annuler"
+          danger={true}
+        />
       </div>
     </div>
   );
