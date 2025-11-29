@@ -147,6 +147,18 @@ export default function ProductDetails() {
 
         if (error) throw error;
 
+        // Auto-envoyer un message initial pour que le vendeur soit notifié
+        const initialMessage = `Bonjour, je suis intéressé(e) par votre annonce "${listing.title}".`;
+
+        await supabase
+          .from('messages')
+          .insert({
+            conversation_id: newConv.id,
+            sender_id: user.id,
+            content: initialMessage,
+            read: false
+          });
+
         // Naviguer vers la nouvelle conversation
         navigate(`/messages?conversation=${newConv.id}`);
       }
