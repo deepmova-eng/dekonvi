@@ -19,7 +19,8 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 20px 24px;
+    padding: 20px 8px 20px 24px;
+    /* Right padding reduced to 8px to align menu with conversation menus */
     border-bottom: 1px solid #F3F4F6;
     position: relative;
     /* Important pour le menu dropdown */
@@ -364,14 +365,17 @@
 .conv-menu-item.danger:hover {
     background: rgba(239, 68, 68, 0.08);
 }
+
 /* ============================================
    SWIPE TO DELETE STYLES
    ============================================ */
 
 .conversation-item-container {
     position: relative;
-    overflow: hidden; /* Hide the swipe actions initially */
-    background: #EF4444; /* Red background for delete */
+    overflow: hidden;
+    /* Hide the swipe actions initially */
+    background: #EF4444;
+    /* Red background for delete */
 }
 
 .swipe-actions {
@@ -379,7 +383,8 @@
     top: 0;
     bottom: 0;
     right: 0;
-    width: 80px; /* Width of the revealed area */
+    width: 80px;
+    /* Width of the revealed area */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -399,7 +404,8 @@
 }
 
 .conversation-item-wrapper {
-    background: white; /* Ensure it covers the red background */
+    background: white;
+    /* Ensure it covers the red background */
     position: relative;
     z-index: 2;
     transition: transform 0.2s ease-out;
@@ -407,15 +413,18 @@
 }
 
 .conversation-item-wrapper.swiped {
-    transform: translateX(-80px); /* Move left to reveal delete button */
+    transform: translateX(-80px);
+    /* Move left to reveal delete button */
 }
 
 /* On desktop, disable swipe effect visually if needed, 
    but the logic is JS based so it won't trigger easily with mouse */
 @media (min-width: 769px) {
     .conversation-item-wrapper.swiped {
-        transform: none; /* Disable swipe on desktop */
+        transform: none;
+        /* Disable swipe on desktop */
     }
+
     .conversation-item-container {
         background: white;
     }
