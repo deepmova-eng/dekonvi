@@ -61,7 +61,7 @@ export function useListings(filters?: ListingFilters) {
         )
       }
 
-      const { data, error } = await query
+      const { data, error } = await query.limit(1000)  // ✅ Limit to prevent timeout
 
       if (error) throw error
       return data as Listing[]

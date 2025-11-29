@@ -22,6 +22,7 @@ export default function MessagingPremium() {
                 .select('*')
                 .or(`user1_id.eq.${user?.id},user2_id.eq.${user?.id}`)
                 .order('created_at', { ascending: false })
+                .limit(100)  // ✅ Limit to 100 most recent conversations
 
             if (convError) throw convError
 

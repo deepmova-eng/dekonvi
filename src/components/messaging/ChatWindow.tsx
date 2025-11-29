@@ -54,7 +54,9 @@ export function ChatWindow({ conversationId, currentUserId, onMobileBack, onConv
                 query = query.gt('created_at', deletion.deleted_at)
             }
 
-            const { data, error } = await query.order('created_at', { ascending: true })
+            const { data, error } = await query
+                .order('created_at', { ascending: true })
+                .limit(500)  // ✅ Limit messages to prevent page crash
 
             if (error) throw error
 
