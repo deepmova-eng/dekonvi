@@ -43,8 +43,6 @@ export function ChatWindow({ conversationId, currentUserId, onMobileBack, onConv
                 .eq('user_id', currentUserId)
                 .maybeSingle()
 
-            console.log('🔍 Deletion check:', deletion ? `Deleted at ${deletion.deleted_at}` : 'Not deleted')
-
             // Charger les messages
             let query = supabase
                 .from('messages')
@@ -53,7 +51,6 @@ export function ChatWindow({ conversationId, currentUserId, onMobileBack, onConv
 
             // 🔥 CRITIQUE : Si supprimée, filtrer messages APRÈS deleted_at
             if (deletion?.deleted_at) {
-                console.log('⏱️ Filtering messages after:', deletion.deleted_at)
                 query = query.gt('created_at', deletion.deleted_at)
             }
 
@@ -61,7 +58,6 @@ export function ChatWindow({ conversationId, currentUserId, onMobileBack, onConv
 
             if (error) throw error
 
-            console.log(`💬 Messages loaded: ${data?.length || 0} (filtered: ${!!deletion})`)
             setMessages(data || [])
         } catch (error) {
             console.error('❌ Error fetching messages:', error)
