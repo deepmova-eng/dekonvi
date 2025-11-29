@@ -339,7 +339,7 @@ export function ChatWindow({ conversationId, currentUserId, onMobileBack, onConv
     }
 
     return (
-        <div className="flex flex-col h-full bg-white overflow-hidden">
+        <div className="flex flex-col h-full bg-white">
 
             {/* Header */}
             <ConversationHeader
@@ -362,9 +362,9 @@ export function ChatWindow({ conversationId, currentUserId, onMobileBack, onConv
                 />
             )}
 
-            {/* Messages */}
-            <div className="flex-1 overflow-y-auto overflow-x-hidden bg-gradient-to-b from-gray-50 to-white px-4 py-3">
-                <div className="flex flex-col max-w-4xl mx-auto">
+            {/* Messages - Scrollable zone */}
+            <div className="flex-1 overflow-y-auto">
+                <div className="p-4 space-y-2">
                     {messages.map((message, index) => {
                         const isOwn = message.sender_id === currentUserId
 

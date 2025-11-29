@@ -103,7 +103,7 @@ export default function App() {
       {/* Desktop Navigation - Hide on /messages for immersive chat */}
       {!hideTopNav && <Navbar />}
 
-      <main className="max-w-7xl mx-auto min-h-[calc(100vh-4rem)]">
+      <main className={location.pathname.startsWith('/messages') ? 'min-h-[calc(100vh-4rem)]' : 'max-w-7xl mx-auto min-h-[calc(100vh-4rem)]'}>
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<Home onProductSelect={(id) => navigate(`/listings/${id}`)} />} />
