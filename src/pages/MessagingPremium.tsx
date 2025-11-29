@@ -88,8 +88,10 @@ export default function MessagingPremium() {
         }
     }, [user?.id, activeConversationId])
 
+
     const subscribeToConversations = useCallback(() => {
-        const subscription = supabase
+        // Subscribe to conversations table changes
+        const conversationsSubscription = supabase
             .channel('conversations_changes')
             .on(
                 'postgres_changes',
@@ -104,8 +106,25 @@ export default function MessagingPremium() {
             )
             .subscribe()
 
+        // Subscribe to messages table changes to update last_message in sidebar
+        const messagesSubscription = supabase
+            .channel('messages_changes')
+            .on(
+                'postgres_changes',
+                {
+                    event: 'INSERT',
+                    schema: 'public',
+                    table: 'messages',
+                },
+                () => {
+                    fetchConversations() // Refresh to update last_message
+                }
+            )
+            .subscribe()
+
         return () => {
-            subscription.unsubscribe()
+            conversationsSubscription.unsubscribe()
+            messagesSubscription.unsubscribe()
         }
     }, [fetchConversations])
 
