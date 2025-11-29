@@ -3,6 +3,7 @@ import { Search, MoreVertical } from 'lucide-react'
 import { SidebarMenu } from './SidebarMenu'
 import { ProductCard } from './ProductCard'
 import { ConversationItem } from './ConversationItem'
+import { ConfirmDialog } from './ConfirmDialog'
 import './ConversationSidebar.css'
 
 interface Props {
@@ -17,6 +18,8 @@ interface Props {
 export function ConversationSidebar({ conversations, activeId, onSelect, currentUserId, activeListing, onDeleteConversation }: Props) {
     const [searchQuery, setSearchQuery] = useState('')
     const [showMenu, setShowMenu] = useState(false)
+    const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+    const [conversationToDelete, setConversationToDelete] = useState<string | null>(null)
 
     const filteredConversations = conversations.filter(conv => {
         const otherUser = conv.other_user
@@ -42,7 +45,13 @@ export function ConversationSidebar({ conversations, activeId, onSelect, current
     const handleDeleteConversation = async (conversationId: string, e: any) => {
         if (e && e.stopPropagation) e.stopPropagation()
 
+        // Show confirmation dialog
+        setConversationToDelete(conversationId)
+        setShowDeleteDialog(true)
+    }
 
+    const confirmDeleteConversation = async () => {
+        if (!conversationToDelete) return
 
         try {
             const { supabase } = await import('../../lib/supabase')
@@ -54,7 +63,7 @@ export function ConversationSidebar({ conversations, activeId, onSelect, current
             const { error: deleteError } = await (supabase as any)
                 .from('conversation_deletions')
                 .insert({
-                    conversation_id: conversationId,
+                    conversation_id: conversationToDelete,
                     user_id: user.id
                 })
 
@@ -63,12 +72,15 @@ export function ConversationSidebar({ conversations, activeId, onSelect, current
             showToast('success', 'Conversation supprimée', 'La conversation a été supprimée de votre liste')
 
             if (onDeleteConversation) {
-                onDeleteConversation(conversationId)
+                onDeleteConversation(conversationToDelete)
             }
         } catch (error) {
             console.error('Error deleting conversation:', error)
             const { showToast } = await import('../../utils/toast')
             showToast('error', 'Erreur', 'Erreur lors de la suppression de la conversation')
+        } finally {
+            setShowDeleteDialog(false)
+            setConversationToDelete(null)
         }
     }
 
@@ -133,6 +145,18 @@ export function ConversationSidebar({ conversations, activeId, onSelect, current
                     ))
                 )}
             </div>
+
+            {/* Confirmation Dialog */}
+            <ConfirmDialog
+                isOpen={showDeleteDialog}
+                onClose={() => setShowDeleteDialog(false)}
+                onConfirm={confirmDeleteConversation}
+                title="Supprimer la conversation"
+                message="Êtes-vous sûr de vouloir supprimer cette conversation ? Elle restera visible pour l'autre utilisateur mais disparaîtra de votre liste."
+                confirmText="Supprimer"
+                cancelText="Annuler"
+                danger={true}
+            />
         </div>
     )
 }

@@ -1,5 +1,6 @@
-import { useRef, useEffect } from 'react'
+import { useRef, useEffect, useState } from 'react'
 import { ExternalLink, Flag, Ban, Trash2 } from 'lucide-react'
+import { ConfirmDialog } from './ConfirmDialog'
 import './ChatHeaderMenu.css'
 
 interface Props {
@@ -12,6 +13,7 @@ interface Props {
 
 export function ChatHeaderMenu({ listingId, otherUserId, conversationId, onClose, onConversationDeleted }: Props) {
     const menuRef = useRef<HTMLDivElement>(null)
+    const [showDeleteDialog, setShowDeleteDialog] = useState(false)
 
     // Ferme le menu si on clique ailleurs
     useEffect(() => {
@@ -38,28 +40,17 @@ export function ChatHeaderMenu({ listingId, otherUserId, conversationId, onClose
         onClose()
     }
 
-    const handleBlock = async () => {
-        const confirm = window.confirm(
-            'Êtes-vous sûr de vouloir bloquer cet utilisateur ? Vous ne pourrez plus échanger avec lui.'
-        )
-        if (!confirm) return
-
-        try {
-            // TODO: Implémenter le blocage dans Supabase
-            alert('Utilisateur bloqué (fonctionnalité à implémenter)')
-            onClose()
-        } catch (error) {
-            console.error('Error blocking user:', error)
-            alert('Erreur lors du blocage')
-        }
+    const handleBlock = () => {
+        // TODO: Implémenter blocage utilisateur
+        alert('Fonctionnalité de blocage à venir')
+        onClose()
     }
 
-    const handleDelete = async () => {
-        const confirm = window.confirm(
-            'Êtes-vous sûr de vouloir supprimer cette conversation ? Elle restera visible pour l\'autre utilisateur.'
-        )
-        if (!confirm) return
+    const handleDelete = () => {
+        setShowDeleteDialog(true)
+    }
 
+    const confirmDeleteConversation = async () => {
         try {
             const { supabase } = await import('../../lib/supabase')
             const { showToast } = await import('../../utils/toast')
@@ -122,6 +113,18 @@ export function ChatHeaderMenu({ listingId, otherUserId, conversationId, onClose
                 <Trash2 size={18} />
                 <span>Supprimer la conversation</span>
             </button>
+
+            {/* Confirmation Dialog */}
+            <ConfirmDialog
+                isOpen={showDeleteDialog}
+                onClose={() => setShowDeleteDialog(false)}
+                onConfirm={confirmDeleteConversation}
+                title="Supprimer la conversation"
+                message="Êtes-vous sûr de vouloir supprimer cette conversation ? Elle restera visible pour l'autre utilisateur mais disparaîtra de votre liste."
+                confirmText="Supprimer"
+                cancelText="Annuler"
+                danger={true}
+            />
         </div>
     )
 }
