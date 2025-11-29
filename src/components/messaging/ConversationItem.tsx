@@ -134,7 +134,7 @@ export function ConversationItem({ conv, isActive, currentUserId, onSelect, onDe
 
                 {/* Delete menu button (Desktop/No-swipe) */}
                 <button
-                    className={`conv - menu - btn ${showMenu ? 'active' : ''} `}
+                    className={`conv-menu-btn ${showMenu ? 'active' : ''}`}
                     onClick={(e) => {
                         e.stopPropagation()
                         setShowMenu(!showMenu)
