@@ -114,48 +114,30 @@ export default function ProductDetails() {
           .eq('user_id', user.id)
           .maybeSingle();
 
-        // Si la conversation a été supprimée par l'utilisateur, la "restaurer"
+        // Si la conversation a été supprimée par l'utilisateur
         if (deletion) {
-          // 1. Supprimer l'entrée de soft-delete pour restaurer la conversation
-          await (supabase as any)
-            .from('conversation_deletions')
-            .delete()
-            .eq('id', deletion.id);
+          // NE PAS supprimer conversation_deletions !
+          // On garde deleted_at pour filtrer les anciens messages
 
-          // 2. Supprimer uniquement les messages de l'utilisateur actuel
-          // (garde les messages du vendeur pour qu'il garde le contexte)
-          await supabase
-            .from('messages')
-            .delete()
-            .eq('conversation_id', existingConv.id)
-            .eq('sender_id', user.id);
-
-          // 3. Envoyer un nouveau message initial pour notifier le vendeur
+          // Envoyer un message initial pour rouvrir la conversation
           const initialMessage = `Bonjour, je suis intéressé(e) par votre annonce "${listing.title}".`;
 
-          console.log('📤 Sending initial message (restored conversation):', {
-            conversation_id: existingConv.id,
-            sender_id: user.id,
-            to_seller: listing.seller_id,
-            message: initialMessage
-          });
-
-          const { data: messageData, error: messageError } = await supabase
+          const { error: messageError } = await supabase
             .from('messages')
             .insert({
               conversation_id: existingConv.id,
               sender_id: user.id,
               content: initialMessage,
               read: false
-            })
-            .select();
+            });
 
           if (messageError) {
-            console.error('❌ Error sending initial message:', messageError);
             throw new Error(`Failed to send message: ${messageError.message}`);
           }
 
-          console.log('✅ Initial message sent successfully (restored):', messageData);
+          // Rediriger vers la messagerie
+          navigate(`/messages?conversation=${existingConv.id}`);
+          return;
         }
 
         // Naviguer vers la conversation
