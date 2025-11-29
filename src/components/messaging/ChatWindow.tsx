@@ -182,7 +182,11 @@ export function ChatWindow({ conversationId, currentUserId, onMobileBack, onConv
 
     // Scroll to bottom when messages change
     useEffect(() => {
-        scrollToBottom()
+        // Only auto-scroll if there are many messages (3+)
+        // This prevents whitespace when there's only 1-2 messages
+        if (messages.length >= 3) {
+            scrollToBottom()
+        }
     }, [messages])
 
     const scrollToBottom = () => {
@@ -364,7 +368,7 @@ export function ChatWindow({ conversationId, currentUserId, onMobileBack, onConv
 
             {/* Messages - Scrollable zone */}
             <div className="flex-1 overflow-y-auto pt-[48px] md:pt-0">
-                <div className="flex flex-col justify-end min-h-full p-4 space-y-2">
+                <div className="flex flex-col p-4 space-y-2">
                     {messages.map((message, index) => {
                         const isOwn = message.sender_id === currentUserId
 
