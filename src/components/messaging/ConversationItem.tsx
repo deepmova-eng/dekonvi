@@ -1,4 +1,4 @@
-import { useState, TouchEvent } from 'react'
+import { useState, TouchEvent, useEffect, useRef } from 'react'
 import { MoreVertical, Trash2 } from 'lucide-react'
 import './ConversationSidebar.css'
 
@@ -16,6 +16,24 @@ export function ConversationItem({ conv, isActive, currentUserId, onSelect, onDe
     const [touchStart, setTouchStart] = useState<number | null>(null)
     const [touchEnd, setTouchEnd] = useState<number | null>(null)
     const [isSwiped, setIsSwiped] = useState(false)
+    const menuRef = useRef<HTMLDivElement>(null)
+
+    // Close menu when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+                setShowMenu(false)
+            }
+        }
+
+        if (showMenu) {
+            document.addEventListener('mousedown', handleClickOutside)
+        }
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside)
+        }
+    }, [showMenu])
 
     // Minimum distance for swipe
     const minSwipeDistance = 50
@@ -68,13 +86,13 @@ export function ConversationItem({ conv, isActive, currentUserId, onSelect, onDe
 
             {/* Foreground Content */}
             <div
-                className={`conversation-item-wrapper ${isSwiped ? 'swiped' : ''}`}
+                className={`conversation - item - wrapper ${isSwiped ? 'swiped' : ''} `}
                 onTouchStart={onTouchStart}
                 onTouchMove={onTouchMove}
                 onTouchEnd={onTouchEnd}
             >
                 <button
-                    className={`conversation-item ${isActive ? 'active' : ''}`}
+                    className={`conversation - item ${isActive ? 'active' : ''} `}
                     onClick={() => {
                         if (isSwiped) {
                             setIsSwiped(false)
@@ -116,7 +134,7 @@ export function ConversationItem({ conv, isActive, currentUserId, onSelect, onDe
 
                 {/* Delete menu button (Desktop/No-swipe) */}
                 <button
-                    className={`conv-menu-btn ${showMenu ? 'active' : ''}`}
+                    className={`conv - menu - btn ${showMenu ? 'active' : ''} `}
                     onClick={(e) => {
                         e.stopPropagation()
                         setShowMenu(!showMenu)
@@ -128,7 +146,7 @@ export function ConversationItem({ conv, isActive, currentUserId, onSelect, onDe
 
                 {/* Delete menu dropdown */}
                 {showMenu && (
-                    <div className="conv-menu-dropdown">
+                    <div className="conv-menu-dropdown" ref={menuRef}>
                         <button
                             className="conv-menu-item danger"
                             onClick={(e) => {
