@@ -43,10 +43,10 @@ export function ConversationHeader({
                             <img
                                 src={otherUserAvatar}
                                 alt={otherUserName}
-                                className="w-12 h-12 md:w-12 md:h-12 sm:w-10 sm:h-10 rounded-full object-cover"
+                                className="w-10 h-10 rounded-full object-cover"
                             />
                         ) : (
-                            <div className="w-12 h-12 md:w-12 md:h-12 sm:w-10 sm:h-10 rounded-full bg-emerald-500 flex items-center justify-center text-white font-semibold text-lg">
+                            <div className="w-10 h-10 rounded-full bg-emerald-500 flex items-center justify-center text-white font-semibold text-base">
                                 {otherUserName.charAt(0).toUpperCase()}
                             </div>
                         )}
@@ -54,7 +54,7 @@ export function ConversationHeader({
 
                     {/* User info */}
                     <div className="flex flex-col min-w-0">
-                        <h3 className="font-semibold text-gray-900 text-base truncate">
+                        <h3 className="font-semibold text-gray-900 text-sm truncate">
                             {otherUserName}
                         </h3>
                         {lastActivity && (
