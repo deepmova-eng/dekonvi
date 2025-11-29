@@ -60,11 +60,20 @@ export function ConversationSidebar({ conversations, activeId, onSelect, current
             const { data: { user } } = await supabase.auth.getUser()
             if (!user) throw new Error('User not authenticated')
 
+            // Delete existing deletion record first
+            await (supabase as any)
+                .from('conversation_deletions')
+                .delete()
+                .eq('conversation_id', conversationToDelete)
+                .eq('user_id', user.id)
+
+            // Then insert new deletion record
             const { error: deleteError } = await (supabase as any)
                 .from('conversation_deletions')
                 .insert({
                     conversation_id: conversationToDelete,
-                    user_id: user.id
+                    user_id: user.id,
+                    deleted_at: new Date().toISOString()
                 })
 
             if (deleteError) throw deleteError
