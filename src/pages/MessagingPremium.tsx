@@ -122,26 +122,9 @@ export default function MessagingPremium() {
             )
             .subscribe()
 
-        // Subscribe to conversation_deletions to detect auto-restore by trigger
-        const deletionsSubscription = supabase
-            .channel('deletions_changes')
-            .on(
-                'postgres_changes',
-                {
-                    event: 'DELETE',
-                    schema: 'public',
-                    table: 'conversation_deletions',
-                },
-                () => {
-                    fetchConversations() // Refresh when conversation restored
-                }
-            )
-            .subscribe()
-
         return () => {
             conversationsSubscription.unsubscribe()
             messagesSubscription.unsubscribe()
-            deletionsSubscription.unsubscribe()
         }
     }, [fetchConversations])
 
