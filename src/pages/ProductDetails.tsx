@@ -97,12 +97,13 @@ export default function ProductDetails() {
     try {
       const { supabase } = await import('../lib/supabase');
 
-      // Vérifier si une conversation existe déjà (dans les 2 sens)
+      // Vérifier si une conversation existe déjà pour ce listing et ces utilisateurs
       const { data: existingConv } = await supabase
         .from('conversations')
         .select('id')
         .eq('listing_id', listing.id)
-        .or(`and(user1_id.eq.${user.id},user2_id.eq.${listing.seller_id}),and(user1_id.eq.${listing.seller_id},user2_id.eq.${user.id})`)
+        .contains('participants', [user.id])
+        .contains('participants', [listing.seller_id])
         .maybeSingle();
 
       if (existingConv) {
@@ -166,8 +167,7 @@ export default function ProductDetails() {
           .from('conversations')
           .insert({
             listing_id: listing.id,
-            user1_id: user.id,
-            user2_id: listing.seller_id,
+            participants: [user.id, listing.seller_id], // ✅ Correct schema: participants array
           })
           .select('id')
           .single();
