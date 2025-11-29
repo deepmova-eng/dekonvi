@@ -20,7 +20,7 @@ export function ConversationHeader({
 }: ConversationHeaderProps) {
 
     return (
-        <div className="absolute md:sticky top-0 left-0 right-0 md:left-auto md:right-auto z-50 bg-white border-b border-gray-200 px-4 py-3 md:px-6 md:py-4 flex items-center justify-between gap-3">
+        <div className="sticky top-0 z-50 bg-white border-b border-gray-200 px-4 py-3 md:px-6 md:py-4 flex items-center justify-between gap-3">
 
             {/* Left section: Back button (mobile) + Avatar + User info */}
             <div className="flex items-center gap-3 flex-1 min-w-0">
