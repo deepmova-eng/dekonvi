@@ -58,10 +58,8 @@ export function ConversationItem({ conv, isActive, currentUserId, onSelect, onDe
                     className="swipe-delete-btn"
                     onClick={(e) => {
                         e.stopPropagation()
-                        if (window.confirm('Supprimer cette conversation ?')) {
-                            onDelete(conv.id, e)
-                            setIsSwiped(false)
-                        }
+                        onDelete(conv.id, e)
+                        setIsSwiped(false)
                     }}
                 >
                     <Trash2 size={20} />
@@ -135,10 +133,8 @@ export function ConversationItem({ conv, isActive, currentUserId, onSelect, onDe
                             className="conv-menu-item danger"
                             onClick={(e) => {
                                 e.stopPropagation()
-                                if (window.confirm('Supprimer cette conversation ?')) {
-                                    onDelete(conv.id, e)
-                                    setShowMenu(false)
-                                }
+                                onDelete(conv.id, e)
+                                setShowMenu(false)
                             }}
                         >
                             <Trash2 size={16} />
