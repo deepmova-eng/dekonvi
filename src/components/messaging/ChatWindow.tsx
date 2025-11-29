@@ -367,8 +367,8 @@ export function ChatWindow({ conversationId, currentUserId, onMobileBack, onConv
             )}
 
             {/* Messages - Scrollable zone */}
-            <div className="flex-1 overflow-y-auto pt-[48px] md:pt-0">
-                <div className="flex flex-col p-4 space-y-2">
+            <div className="flex-1 overflow-y-auto">
+                <div className="flex flex-col pt-[48px] md:pt-0 p-4 space-y-2">
                     {messages.map((message, index) => {
                         const isOwn = message.sender_id === currentUserId
 
