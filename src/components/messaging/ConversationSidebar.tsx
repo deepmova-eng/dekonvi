@@ -98,21 +98,23 @@ export function ConversationSidebar({ conversations, activeId, onSelect, current
 
             {/* Header */}
             <div className="sidebar-header">
-                <h2>Messages</h2>
-                <button
-                    className="header-menu-btn"
-                    onClick={() => setShowMenu(!showMenu)}
-                >
-                    <MoreVertical size={20} />
-                </button>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 8px 0 24px' }}>
+                    <h2>Messages</h2>
+                    <button
+                        className="header-menu-btn"
+                        onClick={() => setShowMenu(!showMenu)}
+                    >
+                        <MoreVertical size={20} />
+                    </button>
 
-                {/* Menu dropdown */}
-                {showMenu && (
-                    <SidebarMenu
-                        onClose={() => setShowMenu(false)}
-                        conversationCount={conversations.length}
-                    />
-                )}
+                    {/* Menu dropdown */}
+                    {showMenu && (
+                        <SidebarMenu
+                            onClose={() => setShowMenu(false)}
+                            conversationCount={conversations.length}
+                        />
+                    )}
+                </div>
             </div>
 
             {/* Product Card - Context de la conversation active */}

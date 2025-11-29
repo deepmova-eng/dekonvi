@@ -16,14 +16,11 @@
 .sidebar-header {
     flex-shrink: 0;
     /* Ne rétrécit jamais */
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 20px 8px 20px 24px;
-    /* Right padding reduced to 8px to align menu with conversation menus */
     border-bottom: 1px solid #F3F4F6;
     position: relative;
     /* Important pour le menu dropdown */
+    padding: 20px 0;
+    /* Only vertical padding, horizontal moved to inner div */
 }
 
 .sidebar-header h2 {
