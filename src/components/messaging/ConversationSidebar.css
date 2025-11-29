@@ -117,6 +117,7 @@
     align-items: center;
     gap: 12px;
     padding: 12px 24px;
+    /* Padding kept for inner content */
     border: none;
     background: transparent;
     width: 100%;
@@ -129,8 +130,10 @@
 .conversation-item::after {
     content: '';
     position: absolute;
-    left: 24px;
-    right: 24px;
+    left: 0;
+    /* Changed from 24px to 0 for full width border */
+    right: 0;
+    /* Changed from 24px to 0 for full width border */
     bottom: 0;
     height: 1px;
     background: #F3F4F6;
