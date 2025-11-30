@@ -2,8 +2,10 @@ import { Heart, MapPin } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { useQueryClient } from '@tanstack/react-query';
 import { useIsFavorite, useToggleFavorite } from '../../hooks/useFavorites';
 import { useSupabase } from '../../contexts/SupabaseContext';
+import { supabase } from '../../lib/supabase';
 import OptimizedImage from '../common/OptimizedImage';
 import type { Listing } from '../../types/listing';
 import './ProductCard.css';
@@ -14,8 +16,47 @@ interface ProductCardProps {
 
 export default function ProductCard({ listing }: ProductCardProps) {
     const { user } = useSupabase();
+    const queryClient = useQueryClient();
     const { data: isFavorite = false } = useIsFavorite(listing.id);
     const { mutate: toggleFavorite } = useToggleFavorite();
+
+    // ⚡ Prefetch au hover pour navigation instantanée
+    const handleMouseEnter = () => {
+        // Prefetch listing details
+        queryClient.prefetchQuery({
+            queryKey: ['listing', listing.id],
+            queryFn: async () => {
+                const { data, error } = await supabase
+                    .from('listings')
+                    .select('*')
+                    .eq('id', listing.id)
+                    .single();
+
+                if (error) throw error;
+                return data;
+            },
+            staleTime: 1000 * 60 * 5, // 5 minutes
+        });
+
+        // Prefetch seller profile
+        const sellerId = (listing as any).seller_id || listing.sellerId;
+        if (sellerId) {
+            queryClient.prefetchQuery({
+                queryKey: ['seller-profile', sellerId],
+                queryFn: async () => {
+                    const { data, error } = await supabase
+                        .from('profiles')
+                        .select('*')
+                        .eq('id', sellerId)
+                        .single();
+
+                    if (error) throw error;
+                    return data;
+                },
+                staleTime: 1000 * 60 * 10, // 10 minutes
+            });
+        }
+    };
 
     const handleFavoriteClick = (e: React.MouseEvent) => {
         e.preventDefault();
@@ -43,7 +84,7 @@ export default function ProductCard({ listing }: ProductCardProps) {
         }
     };
 
-    // Check if listing is new (< 48h)
+    // Check if listing is new (<48h)
     const isNew = () => {
         // Handle both camelCase and snake_case
         const createdAtValue = (listing as any).created_at || listing.createdAt;
@@ -56,7 +97,11 @@ export default function ProductCard({ listing }: ProductCardProps) {
     };
 
     return (
-        <Link to={`/listings/${listing.id}`} className="product-card">
+        <Link
+            to={`/listings/${listing.id}`}
+            className="product-card"
+            onMouseEnter={handleMouseEnter}
+        >
             {/* Image container */}
             <div className="product-card__image-container">
                 <OptimizedImage

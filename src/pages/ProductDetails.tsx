@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { useQueryClient } from '@tanstack/react-query';
 import { useProduct } from '../hooks/useProduct';
 import { useIsFavorite, useToggleFavorite } from '../hooks/useFavorites';
 import { useSupabase } from '../contexts/SupabaseContext';
@@ -27,6 +28,7 @@ export default function ProductDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useSupabase();
+  const queryClient = useQueryClient();
   const { product: listing, loading: isLoading, error } = useProduct(id!);
   const { data: isFavorite = false } = useIsFavorite(id!);
   const { mutate: toggleFavorite } = useToggleFavorite();
@@ -34,6 +36,69 @@ export default function ProductDetails() {
 
   // ✅ React Query hook - remplace useEffect seller fetch
   const { data: sellerProfile } = useSellerProfile(listing?.seller_id);
+
+  // ⚡ Prefetch complet pour page vendeur (hover)
+  const handleSellerHover = () => {
+    if (!listing?.seller_id) return;
+
+    // Prefetch seller profile complet
+    queryClient.prefetchQuery({
+      queryKey: ['seller-profile', listing.seller_id],
+      queryFn: async () => {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', listing.seller_id)
+          .single();
+
+        if (error) throw error;
+        return data;
+      },
+      staleTime: 1000 * 60 * 10,
+    });
+
+    // Prefetch seller listings
+    queryClient.prefetchQuery({
+      queryKey: ['seller-listings', listing.seller_id],
+      queryFn: async () => {
+        const { data, error } = await supabase
+          .from('listings')
+          .select('*')
+          .eq('seller_id', listing.seller_id)
+          .eq('status', 'active')
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        return data || [];
+      },
+      staleTime: 1000 * 60 * 5,
+    });
+
+    // Prefetch seller reviews
+    queryClient.prefetchQuery({
+      queryKey: ['seller-reviews', listing.seller_id],
+      queryFn: async () => {
+        const { data, error } = await supabase
+          .from('reviews')
+          .select(`
+            *,
+            profiles:buyer_id (
+              name
+            )
+          `)
+          .eq('seller_id', listing.seller_id)
+          .eq('status', 'approved')
+          .order('created_at', { ascending: false });
+
+        if (error) {
+          console.error('Error fetching reviews:', error);
+          return [];
+        }
+        return data || [];
+      },
+      staleTime: 1000 * 60 * 5,
+    });
+  };
 
   const handleFavoriteClick = () => {
     if (!user) {
@@ -359,6 +424,7 @@ export default function ProductDetails() {
               to={`/seller/${listing.seller_id}`}
               className="group block"
               style={{ textDecoration: 'none' }}
+              onMouseEnter={handleSellerHover}
             >
               <div
                 className="seller-premium-card"
