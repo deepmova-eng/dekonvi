@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   ChevronLeft,
@@ -11,7 +11,8 @@ import {
   MessageCircle,
   Phone,
   ArrowLeft,
-  User
+  User,
+  Star
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -19,6 +20,7 @@ import { useProduct } from '../hooks/useProduct';
 import { useIsFavorite, useToggleFavorite } from '../hooks/useFavorites';
 import { useSupabase } from '../contexts/SupabaseContext';
 import './ProductDetails.css';
+import { supabase } from '../lib/supabase';
 
 export default function ProductDetails() {
   const { id } = useParams();
@@ -28,6 +30,26 @@ export default function ProductDetails() {
   const { data: isFavorite = false } = useIsFavorite(id!);
   const { mutate: toggleFavorite } = useToggleFavorite();
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [sellerProfile, setSellerProfile] = useState<any>(null);
+
+  // Fetch seller profile when listing loads
+  useEffect(() => {
+    const fetchSellerProfile = async () => {
+      if (!listing?.seller_id) return;
+
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id, name, avatar_url, rating, total_ratings')
+        .eq('id', listing.seller_id)
+        .single();
+
+      if (!error && data) {
+        setSellerProfile(data);
+      }
+    };
+
+    fetchSellerProfile();
+  }, [listing?.seller_id]);
 
   const handleFavoriteClick = () => {
     if (!user) {
@@ -300,13 +322,41 @@ export default function ProductDetails() {
                 </button>
 
                 {/* Bouton premium profil vendeur */}
-                <button
-                  className="btn btn--seller-profile btn--large"
-                  onClick={() => navigate(`/profile/${listing.seller_id}`)}
-                >
-                  <User size={20} />
-                  Voir le profil
-                </button>
+                {sellerProfile && (
+                  <button
+                    className="btn btn--seller-profile btn--large"
+                    onClick={() => navigate(`/profile/${listing.seller_id}`)}
+                  >
+                    <div className="seller-profile-btn-content">
+                      {/* Avatar */}
+                      <div className="seller-avatar">
+                        {sellerProfile.avatar_url ? (
+                          <img src={sellerProfile.avatar_url} alt={sellerProfile.name} />
+                        ) : (
+                          <div className="seller-avatar-placeholder">
+                            {sellerProfile.name.charAt(0).toUpperCase()}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Info */}
+                      <div className="seller-info">
+                        <span className="seller-name">{sellerProfile.name}</span>
+                        <div className="seller-rating">
+                          <Star
+                            size={14}
+                            className="star-icon"
+                            fill="#FF6B35"
+                            strokeWidth={0}
+                          />
+                          <span className="rating-text">
+                            {sellerProfile.rating || 5} ({sellerProfile.total_ratings || 0})
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </button>
+                )}
 
                 {listing.contact_phone && !listing.hide_phone && (
                   <button className="btn btn--secondary btn--large">

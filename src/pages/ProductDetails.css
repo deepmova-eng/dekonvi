@@ -318,7 +318,7 @@
     position: relative;
     background: linear-gradient(135deg, #2DD181 0%, #26B56E 100%);
     color: white;
-    padding: var(--space-14) var(--space-24);
+    padding: 12px 20px;
     font-size: var(--font-base);
     border: 2px solid transparent;
     background-clip: padding-box;
@@ -326,6 +326,79 @@
     box-shadow:
         0 4px 12px rgba(45, 209, 129, 0.25),
         0 2px 6px rgba(45, 209, 129, 0.15);
+    display: flex !important;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.seller-profile-btn-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+}
+
+.seller-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    overflow: hidden;
+    flex-shrink: 0;
+    background: white;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.seller-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.seller-avatar-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #FF6B35, #FF8C42);
+    color: white;
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.seller-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    flex: 1;
+    min-width: 0;
+}
+
+.seller-name {
+    font-size: 16px;
+    font-weight: 700;
+    color: white;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+.seller-rating {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.star-icon {
+    flex-shrink: 0;
+}
+
+.rating-text {
+    font-size: 14px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.95);
 }
 
 .btn--seller-profile::before {
@@ -335,8 +408,7 @@
     left: -100%;
     width: 100%;
     height: 100%;
-    ;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.25), transparent);
     transition: left 0.6s ease;
 }
 
