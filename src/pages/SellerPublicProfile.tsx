@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import {
@@ -6,8 +6,6 @@ import {
     MapPin,
     Calendar,
     Package,
-    MessageCircle,
-    Phone,
     ArrowLeft,
     CheckCircle,
     TrendingUp,
@@ -57,7 +55,6 @@ export default function SellerPublicProfile() {
     const [listings, setListings] = useState<Listing[]>([]);
     const [reviews, setReviews] = useState<Review[]>([]);
     const [loading, setLoading] = useState(true);
-    const [showPhone, setShowPhone] = useState(false);
     const [showReviewModal, setShowReviewModal] = useState(false);
     const [reviewFormData, setReviewFormData] = useState({
         rating: 5,
@@ -67,13 +64,8 @@ export default function SellerPublicProfile() {
     });
     const [submittingReview, setSubmittingReview] = useState(false);
 
-    useEffect(() => {
-        if (id) {
-            fetchSellerData();
-        }
-    }, [id]);
-
-    const fetchSellerData = async () => {
+    // Define fetchSellerData BEFORE useEffect
+    const fetchSellerData = useCallback(async () => {
         try {
             setLoading(true);
 
@@ -124,7 +116,14 @@ export default function SellerPublicProfile() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [id]);
+
+    useEffect(() => {
+        if (id) {
+            fetchSellerData();
+        }
+    }, [id, fetchSellerData]);
+
 
     const handleProofImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -349,27 +348,36 @@ export default function SellerPublicProfile() {
 
                             </div>
 
-                            {/* Contact Buttons */}
-                            <div className="flex flex-wrap gap-3 mt-6">
-
-                                {/* Phone */}
-                                {seller.phone && (
-                                    <button
-                                        onClick={() => setShowPhone(!showPhone)}
-                                        className="flex items-center space-x-2 px-6 py-3 bg-white border-2 border-emerald-300 text-gray-700 font-semibold rounded-full hover:bg-emerald-50 transition-colors"
-                                    >
-                                        <Phone className="h-5 w-5" />
-                                        <span>{showPhone ? seller.phone : 'Afficher le numéro'}</span>
-                                    </button>
+                            {/* Rating Display */}
+                            <div className="mt-6">
+                                {reviews.length > 0 ? (
+                                    <div className="flex items-center space-x-4">
+                                        <div className="flex items-center space-x-1">
+                                            {[...Array(5)].map((_, i) => (
+                                                <Star
+                                                    key={i}
+                                                    className={`h-6 w-6 ${i < Math.floor(averageRating)
+                                                        ? 'text-yellow-400 fill-yellow-400'
+                                                        : 'text-gray-300 fill-gray-300'
+                                                        }`}
+                                                />
+                                            ))}
+                                        </div>
+                                        <div className="flex items-center space-x-2">
+                                            <span className="text-2xl font-bold text-gray-900">
+                                                {averageRating.toFixed(1)}
+                                            </span>
+                                            <span className="text-lg text-gray-500">
+                                                ({reviews.length} {reviews.length > 1 ? 'avis' : 'avis'})
+                                            </span>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="flex items-center space-x-2 text-gray-500">
+                                        <Star className="h-5 w-5" />
+                                        <span>Aucun avis pour le moment</span>
+                                    </div>
                                 )}
-
-                                {/* Message */}
-                                <button
-                                    className="flex items-center space-x-2 px-6 py-3 bg-emerald-600 text-white font-semibold rounded-full hover:bg-emerald-700 transition-colors shadow-lg"
-                                >
-                                    <MessageCircle className="h-5 w-5" />
-                                    <span>Envoyer un message</span>
-                                </button>
                             </div>
 
                         </div>
