@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
   ChevronLeft,
   ChevronRight,
@@ -321,43 +321,6 @@ export default function ProductDetails() {
                   Envoyer un message
                 </button>
 
-                {/* Bouton premium profil vendeur */}
-                {sellerProfile && (
-                  <button
-                    className="btn btn--seller-profile btn--large"
-                    onClick={() => navigate(`/profile/${listing.seller_id}`)}
-                  >
-                    <div className="seller-profile-btn-content">
-                      {/* Avatar */}
-                      <div className="seller-avatar">
-                        {sellerProfile.avatar_url ? (
-                          <img src={sellerProfile.avatar_url} alt={sellerProfile.name} />
-                        ) : (
-                          <div className="seller-avatar-placeholder">
-                            {sellerProfile.name.charAt(0).toUpperCase()}
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Nom et rating sur la même ligne */}
-                      <div className="seller-info">
-                        <span className="seller-name">{sellerProfile.name}</span>
-                        <div className="seller-rating">
-                          <Star
-                            size={16}
-                            className="star-icon"
-                            fill="#FFD700"
-                            strokeWidth={0}
-                          />
-                          <span className="rating-text">
-                            {sellerProfile.rating || 5} ({sellerProfile.total_ratings || 0})
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </button>
-                )}
-
                 {listing.contact_phone && !listing.hide_phone && (
                   <button className="btn btn--secondary btn--large">
                     <Phone size={20} />
@@ -400,6 +363,174 @@ export default function ProductDetails() {
           </div>
 
         </div>
+
+        {/* ═══════════════════════════════════════ */}
+        {/* SECTION VENDEUR - ULTRA PREMIUM */}
+        {/* ═══════════════════════════════════════ */}
+        {sellerProfile && (
+          <div className="product-description-section" style={{ marginBottom: '24px' }}>
+            <h2>Vendeur</h2>
+
+            <Link
+              to={`/profile/${listing.seller_id}`}
+              className="group block"
+              style={{ textDecoration: 'none' }}
+            >
+              <div
+                className="seller-premium-card"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  padding: '20px',
+                  borderRadius: '12px',
+                  background: 'linear-gradient(to right, #F9FAFB, white)',
+                  border: '1px solid #E5E7EB',
+                  transition: 'all 0.3s ease',
+                  cursor: 'pointer',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = '#2DD181';
+                  e.currentTarget.style.boxShadow = '0 10px 25px rgba(45, 209, 129, 0.1)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = '#E5E7EB';
+                  e.currentTarget.style.boxShadow = 'none';
+                }}
+              >
+                {/* Avatar avec badge vérifié */}
+                <div style={{ position: 'relative', flexShrink: 0 }}>
+                  <div
+                    style={{
+                      width: '64px',
+                      height: '64px',
+                      borderRadius: '50%',
+                      background: 'linear-gradient(135deg, #D1FAE5, #ECFDF5)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      border: '2px solid white',
+                      overflow: 'hidden',
+                      transition: 'all 0.3s ease',
+                    }}
+                  >
+                    {sellerProfile.avatar_url ? (
+                      <img
+                        src={sellerProfile.avatar_url}
+                        alt={sellerProfile.name}
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      />
+                    ) : (
+                      <span style={{
+                        color: '#059669',
+                        fontWeight: 700,
+                        fontSize: '24px',
+                      }}>
+                        {sellerProfile.name.charAt(0).toUpperCase()}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Badge vérifié */}
+                  <div
+                    style={{
+                      position: 'absolute',
+                      bottom: '-4px',
+                      right: '-4px',
+                      width: '24px',
+                      height: '24px',
+                      background: '#2DD181',
+                      borderRadius: '50%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      border: '2px solid white',
+                    }}
+                  >
+                    <svg style={{ width: '14px', height: '14px', color: 'white' }} fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                </div>
+
+                {/* Infos vendeur */}
+                <div style={{ flex: 1, minWidth: 0, marginLeft: '16px' }}>
+                  {/* Nom + flèche */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <h4 style={{
+                      fontWeight: 600,
+                      fontSize: '18px',
+                      color: '#111827',
+                      margin: 0,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                      transition: 'color 0.3s ease',
+                    }}>
+                      {sellerProfile.name}
+                    </h4>
+                    <svg
+                      style={{ width: '20px', height: '20px', color: '#9CA3AF', flexShrink: 0, transition: 'all 0.3s ease' }}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </div>
+
+                  {/* Membre depuis */}
+                  <p style={{ fontSize: '14px', color: '#6B7280', margin: '4px 0 0 0' }}>
+                    Membre depuis {new Date(sellerProfile.created_at || Date.now()).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })}
+                  </p>
+
+                  {/* Étoiles et avis */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '10px' }}>
+                    {/* Étoiles */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
+                      {[...Array(5)].map((_, i) => (
+                        <Star
+                          key={i}
+                          className={i < Math.floor(sellerProfile.rating || 5) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300 fill-gray-300'}
+                          size={16}
+                        />
+                      ))}
+                    </div>
+
+                    {/* Note */}
+                    <span style={{ fontSize: '14px', fontWeight: 600, color: '#111827' }}>
+                      {(sellerProfile.rating || 5).toFixed(1)}
+                    </span>
+
+                    {/* Nombre avis */}
+                    <span style={{ fontSize: '14px', color: '#6B7280' }}>
+                      ({sellerProfile.total_ratings || 0} avis)
+                    </span>
+                  </div>
+                </div>
+
+                {/* Badge "Voir profil" */}
+                <div style={{ flexShrink: 0 }}>
+                  <div
+                    className="voir-profil-badge"
+                    style={{
+                      padding: '8px 16px',
+                      background: '#ECFDF5',
+                      color: '#059669',
+                      fontSize: '14px',
+                      fontWeight: 500,
+                      borderRadius: '20px',
+                      opacity: 0,
+                      transition: 'opacity 0.3s ease',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    Voir profil
+                  </div>
+                </div>
+              </div>
+            </Link>
+          </div>
+        )}
 
         {/* Description (pleine largeur) */}
         <div className="product-description-section">
