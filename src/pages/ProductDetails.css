@@ -312,6 +312,132 @@
     color: var(--color-primary);
 }
 
+/* ==================== BOUTON PROFIL VENDEUR ULTRA PREMIUM ==================== */
+
+.btn--seller-profile {
+    position: relative;
+    background: linear-gradient(135deg, #2DD181 0%, #26B56E 100%);
+    color: white;
+    padding: var(--space-14) var(--space-24);
+    font-size: var(--font-base);
+    border: 2px solid transparent;
+    background-clip: padding-box;
+    overflow: hidden;
+    box-shadow:
+        0 4px 12px rgba(45, 209, 129, 0.25),
+        0 2px 6px rgba(45, 209, 129, 0.15);
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+}
+
+.seller-profile-btn-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.seller-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    overflow: hidden;
+    flex-shrink: 0;
+    background: white;
+}
+
+.seller-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.seller-avatar-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #FF6B35, #FF8C42);
+    color: white;
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.seller-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.seller-name {
+    font-size: var(--font-base);
+    font-weight: var(--font-semibold);
+    color: white;
+}
+
+.seller-rating {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.star-icon {
+    flex-shrink: 0;
+}
+
+/* ==================== SECTION VENDEUR ULTRA PREMIUM ==================== */
+
+.seller-premium-card:hover .voir-profil-badge {
+    opacity: 1 !important;
+}
+
+.seller-premium-card:hover h4 {
+    color: #2DD181 !important;
+}
+
+.seller-premium-card:hover svg[stroke] {
+    color: #2DD181 !important;
+    transform: translateX(4px);
+}
+
+.rating-text {
+    font-size: var(--font-base);
+    font-weight: var(--font-semibold);
+    color: white;
+}
+
+.btn--seller-profile::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.25), transparent);
+    transition: left 0.6s ease;
+}
+
+.btn--seller-profile:hover::before {
+    left: 100%;
+}
+
+.btn--seller-profile:hover {
+    transform: translateY(-2px);
+    box-shadow:
+        0 8px 20px rgba(45, 209, 129, 0.35),
+        0 4px 10px rgba(45, 209, 129, 0.25);
+    background: linear-gradient(135deg, #26B56E 0%, #2DD181 100%);
+}
+
+.btn--seller-profile:active {
+    transform: translateY(0);
+    box-shadow:
+        0 2px 8px rgba(45, 209, 129, 0.25),
+        0 1px 4px rgba(45, 209, 129, 0.15);
+}
+
 /* Info boxes */
 .info-box {
     display: flex;

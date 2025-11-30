@@ -113,7 +113,7 @@ export default function App() {
           <Route path="/categories/:slug" element={<CategoryListings />} />
           <Route path="/category/:categoryId" element={<CategoryPage />} />
           <Route path="/listings/:id" element={<ProductDetails />} />
-          <Route path="/profile/:userId" element={<SellerProfile />} />
+          <Route path="/profile/:id" element={<SellerProfile />} />
 
           {/* Protected Routes - Require Login */}
           <Route
