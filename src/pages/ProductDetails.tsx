@@ -19,6 +19,7 @@ import { fr } from 'date-fns/locale';
 import { useProduct } from '../hooks/useProduct';
 import { useIsFavorite, useToggleFavorite } from '../hooks/useFavorites';
 import { useSupabase } from '../contexts/SupabaseContext';
+import { useSellerProfile } from '../hooks/useProfile';
 import './ProductDetails.css';
 import { supabase } from '../lib/supabase';
 
@@ -30,26 +31,9 @@ export default function ProductDetails() {
   const { data: isFavorite = false } = useIsFavorite(id!);
   const { mutate: toggleFavorite } = useToggleFavorite();
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
-  const [sellerProfile, setSellerProfile] = useState<any>(null);
 
-  // Fetch seller profile when listing loads
-  useEffect(() => {
-    const fetchSellerProfile = async () => {
-      if (!listing?.seller_id) return;
-
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('id, name, avatar_url, rating, total_ratings')
-        .eq('id', listing.seller_id)
-        .single();
-
-      if (!error && data) {
-        setSellerProfile(data);
-      }
-    };
-
-    fetchSellerProfile();
-  }, [listing?.seller_id]);
+  // ✅ React Query hook - remplace useEffect seller fetch
+  const { data: sellerProfile } = useSellerProfile(listing?.seller_id);
 
   const handleFavoriteClick = () => {
     if (!user) {

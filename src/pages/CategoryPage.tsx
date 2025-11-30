@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { supabase } from '../lib/supabase'
 import { useDebounce } from '../hooks/useDebounce'
+import { useListings } from '../hooks/useListings'
 import { Smartphone, Shirt, Home as HomeIcon, Car, Book, Package, ArrowLeft, SlidersHorizontal } from 'lucide-react'
 import './CategoryPage.css'
 
@@ -16,8 +16,6 @@ const CATEGORIES = {
 
 export default function CategoryPage() {
     const { categoryId } = useParams<{ categoryId: string }>()
-    const [listings, setListings] = useState<any[]>([])
-    const [loading, setLoading] = useState(true)
     const [filters, setFilters] = useState({
         subcategory: '',
         minPrice: '',
@@ -35,66 +33,14 @@ export default function CategoryPage() {
     const category = CATEGORIES[categoryId as keyof typeof CATEGORIES]
     const Icon = category?.icon || Package
 
-    useEffect(() => {
-        if (categoryId && category) {
-            fetchListings()
-        }
-    }, [categoryId, debouncedMinPrice, debouncedMaxPrice, filters.condition, debouncedCity, sortBy])
-
-    const fetchListings = async () => {
-        try {
-            setLoading(true)
-
-            // Utilise la valeur DB (high-tech, mode, etc.)
-            const dbCategory = category.dbValue
-
-            let query = supabase
-                .from('listings')
-                .select('*')
-                .eq('category', dbCategory)
-                .eq('status', 'active')
-
-            // Applique les filtres
-            if (filters.subcategory) {
-                query = query.eq('subcategory', filters.subcategory)
-            }
-            if (debouncedMinPrice) {
-                query = query.gte('price', parseFloat(debouncedMinPrice))
-            }
-            if (debouncedMaxPrice) {
-                query = query.lte('price', parseFloat(debouncedMaxPrice))
-            }
-            if (filters.condition) {
-                query = query.eq('condition', filters.condition)
-            }
-            if (debouncedCity) {
-                query = query.ilike('location', `% ${debouncedCity}% `)
-            }
-
-            // Applique le tri
-            switch (sortBy) {
-                case 'recent':
-                    query = query.order('created_at', { ascending: false })
-                    break
-                case 'price_asc':
-                    query = query.order('price', { ascending: true })
-                    break
-                case 'price_desc':
-                    query = query.order('price', { ascending: false })
-                    break
-            }
-
-            const { data, error } = await query
-
-            if (error) throw error
-
-            setListings(data || [])
-        } catch (error) {
-            console.error('Error fetching listings:', error)
-        } finally {
-            setLoading(false)
-        }
-    }
+    // ✅ React Query hook - remplace tout le code useEffect + fetchListings
+    const { data: listings = [], isLoading: loading } = useListings({
+        category: category?.dbValue,
+        status: 'active',
+        minPrice: debouncedMinPrice ? parseFloat(debouncedMinPrice) : undefined,
+        maxPrice: debouncedMaxPrice ? parseFloat(debouncedMaxPrice) : undefined,
+        location: debouncedCity || undefined,
+    })
 
     const resetFilters = () => {
         setFilters({

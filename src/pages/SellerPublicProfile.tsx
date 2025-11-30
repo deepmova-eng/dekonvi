@@ -1,6 +1,9 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
+import { useSellerProfile } from '../hooks/useProfile';
+import { useSellerListings } from '../hooks/useListings';
+import { useSellerReviews, useSubmitReview } from '../hooks/useReviews';
 import {
     Star,
     MapPin,
@@ -51,10 +54,13 @@ export default function SellerPublicProfile() {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
 
-    const [seller, setSeller] = useState<SellerProfile | null>(null);
-    const [listings, setListings] = useState<Listing[]>([]);
-    const [reviews, setReviews] = useState<Review[]>([]);
-    const [loading, setLoading] = useState(true);
+    // ✅ React Query hooks - remplace tout le code useEffect ci-dessus
+    const { data: seller, isLoading: sellerLoading } = useSellerProfile(id);
+    const { data: listings = [], isLoading: listingsLoading } = useSellerListings(id);
+    const { data: reviews = [], isLoading: reviewsLoading } = useSellerReviews(id);
+
+    const loading = sellerLoading || listingsLoading || reviewsLoading;
+
     const [showReviewModal, setShowReviewModal] = useState(false);
     const [reviewFormData, setReviewFormData] = useState({
         rating: 5,
@@ -63,66 +69,6 @@ export default function SellerPublicProfile() {
         proofImagePreview: ''
     });
     const [submittingReview, setSubmittingReview] = useState(false);
-
-    // Define fetchSellerData BEFORE useEffect
-    const fetchSellerData = useCallback(async () => {
-        try {
-            setLoading(true);
-
-            if (!id) {
-                throw new Error('No seller ID provided');
-            }
-
-            // Fetch seller profile
-            const { data: sellerData, error: sellerError } = await supabase
-                .from('profiles')
-                .select('*')
-                .eq('id', id)
-                .single();
-
-            if (sellerError) {
-                console.error('Error fetching seller:', sellerError);
-                throw sellerError;
-            }
-            setSeller(sellerData);
-
-            // Fetch seller's active listings
-            const { data: listingsData, error: listingsError } = await supabase
-                .from('listings')
-                .select('*')
-                .eq('seller_id', id)
-                .eq('status', 'active')
-                .order('created_at', { ascending: false });
-
-            if (listingsError) {
-                console.error('Error fetching listings:', listingsError);
-            }
-            setListings(listingsData || []);
-
-            // Fetch seller's reviews - simplified query without join
-            const { data: reviewsData, error: reviewsError } = await supabase
-                .from('reviews')
-                .select('*')
-                .eq('seller_id', id)
-                .order('created_at', { ascending: false });
-
-            if (reviewsError) {
-                console.error('Error fetching reviews:', reviewsError);
-            }
-            setReviews(reviewsData || []);
-
-        } catch (error) {
-            console.error('Error fetching seller data:', error);
-        } finally {
-            setLoading(false);
-        }
-    }, [id]);
-
-    useEffect(() => {
-        if (id) {
-            fetchSellerData();
-        }
-    }, [id, fetchSellerData]);
 
 
     const handleProofImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
