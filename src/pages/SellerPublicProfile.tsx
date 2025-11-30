@@ -150,13 +150,13 @@ export default function SellerPublicProfile() {
         <div className="min-h-screen bg-gray-50">
 
             {/* Hero Header - Ultra Premium */}
-            <div className="bg-gradient-to-br from-emerald-600 via-emerald-500 to-emerald-700 text-white">
+            <div className="bg-gradient-to-br from-emerald-400 via-emerald-300 to-emerald-500 text-gray-900">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
                     {/* Back Button */}
                     <button
                         onClick={() => navigate(-1)}
-                        className="flex items-center space-x-2 text-white/90 hover:text-white mb-6 transition-colors"
+                        className="flex items-center space-x-2 text-gray-700 hover:text-gray-900 mb-6 transition-colors"
                     >
                         <ArrowLeft className="h-5 w-5" />
                         <span>Retour</span>
@@ -167,7 +167,7 @@ export default function SellerPublicProfile() {
 
                         {/* Avatar - Large */}
                         <div className="relative">
-                            <div className="w-32 h-32 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center ring-4 ring-white/30 overflow-hidden">
+                            <div className="w-32 h-32 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center ring-4 ring-emerald-200 overflow-hidden">
                                 {seller.avatar_url ? (
                                     <img
                                         src={seller.avatar_url}
@@ -175,14 +175,14 @@ export default function SellerPublicProfile() {
                                         className="w-full h-full object-cover"
                                     />
                                 ) : (
-                                    <span className="text-white text-5xl font-bold">
+                                    <span className="text-emerald-600 text-5xl font-bold">
                                         {seller.name?.[0]?.toUpperCase() || 'V'}
                                     </span>
                                 )}
                             </div>
 
                             {/* Verified Badge */}
-                            <div className="absolute -bottom-2 -right-2 w-12 h-12 bg-emerald-500 rounded-full flex items-center justify-center ring-4 ring-white shadow-lg">
+                            <div className="absolute -bottom-2 -right-2 w-12 h-12 bg-emerald-600 rounded-full flex items-center justify-center ring-4 ring-white shadow-lg">
                                 <CheckCircle className="w-7 h-7 text-white" />
                             </div>
                         </div>
@@ -200,16 +200,16 @@ export default function SellerPublicProfile() {
                                                 <Star
                                                     key={i}
                                                     className={`h-5 w-5 ${i < Math.floor(averageRating)
-                                                        ? 'text-yellow-300 fill-yellow-300'
-                                                        : 'text-white/30 fill-white/30'
+                                                        ? 'text-yellow-500 fill-yellow-500'
+                                                        : 'text-gray-300 fill-gray-300'
                                                         }`}
                                                 />
                                             ))}
                                         </div>
-                                        <span className="text-xl font-semibold">
+                                        <span className="text-xl font-semibold text-gray-900">
                                             {averageRating.toFixed(1)}
                                         </span>
-                                        <span className="text-white/80">
+                                        <span className="text-gray-700">
                                             ({reviews.length} avis)
                                         </span>
                                     </div>
@@ -220,39 +220,39 @@ export default function SellerPublicProfile() {
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
 
                                 {/* Stat 1 - Annonces */}
-                                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
+                                <div className="bg-white/90 backdrop-blur-sm rounded-lg p-4 border border-emerald-200">
                                     <div className="flex items-center space-x-2 mb-1">
-                                        <Package className="h-5 w-5 text-white/80" />
-                                        <span className="text-2xl font-bold">{listings.length}</span>
+                                        <Package className="h-5 w-5 text-emerald-600" />
+                                        <span className="text-2xl font-bold text-gray-900">{listings.length}</span>
                                     </div>
-                                    <p className="text-sm text-white/70">Annonces</p>
+                                    <p className="text-sm text-gray-600">Annonces</p>
                                 </div>
 
                                 {/* Stat 2 - Membre depuis */}
-                                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
+                                <div className="bg-white/90 backdrop-blur-sm rounded-lg p-4 border border-emerald-200">
                                     <div className="flex items-center space-x-2 mb-1">
-                                        <Calendar className="h-5 w-5 text-white/80" />
-                                        <span className="text-2xl font-bold">{memberSinceMonths}</span>
+                                        <Calendar className="h-5 w-5 text-emerald-600" />
+                                        <span className="text-2xl font-bold text-gray-900">{memberSinceMonths}</span>
                                     </div>
-                                    <p className="text-sm text-white/70">Mois</p>
+                                    <p className="text-sm text-gray-600">Mois</p>
                                 </div>
 
                                 {/* Stat 3 - Taux réponse */}
-                                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
+                                <div className="bg-white/90 backdrop-blur-sm rounded-lg p-4 border border-emerald-200">
                                     <div className="flex items-center space-x-2 mb-1">
-                                        <TrendingUp className="h-5 w-5 text-white/80" />
-                                        <span className="text-2xl font-bold">{responseRate}%</span>
+                                        <TrendingUp className="h-5 w-5 text-emerald-600" />
+                                        <span className="text-2xl font-bold text-gray-900">{responseRate}%</span>
                                     </div>
-                                    <p className="text-sm text-white/70">Réponses</p>
+                                    <p className="text-sm text-gray-600">Réponses</p>
                                 </div>
 
                                 {/* Stat 4 - Localisation */}
-                                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
+                                <div className="bg-white/90 backdrop-blur-sm rounded-lg p-4 border border-emerald-200">
                                     <div className="flex items-center space-x-2 mb-1">
-                                        <MapPin className="h-5 w-5 text-white/80" />
-                                        <span className="text-lg font-bold truncate">{seller.location || 'Lomé'}</span>
+                                        <MapPin className="h-5 w-5 text-emerald-600" />
+                                        <span className="text-lg font-bold text-gray-900 truncate">{seller.location || 'Lomé'}</span>
                                     </div>
-                                    <p className="text-sm text-white/70">Ville</p>
+                                    <p className="text-sm text-gray-600">Ville</p>
                                 </div>
 
                             </div>
@@ -264,7 +264,7 @@ export default function SellerPublicProfile() {
                                 {seller.phone && (
                                     <button
                                         onClick={() => setShowPhone(!showPhone)}
-                                        className="flex items-center space-x-2 px-6 py-3 bg-white/20 backdrop-blur-sm text-white font-semibold rounded-full hover:bg-white/30 transition-colors border-2 border-white/30"
+                                        className="flex items-center space-x-2 px-6 py-3 bg-white border-2 border-emerald-300 text-gray-700 font-semibold rounded-full hover:bg-emerald-50 transition-colors"
                                     >
                                         <Phone className="h-5 w-5" />
                                         <span>{showPhone ? seller.phone : 'Afficher le numéro'}</span>
@@ -273,7 +273,7 @@ export default function SellerPublicProfile() {
 
                                 {/* Message */}
                                 <button
-                                    className="flex items-center space-x-2 px-6 py-3 bg-white text-emerald-600 font-semibold rounded-full hover:bg-emerald-50 transition-colors shadow-lg"
+                                    className="flex items-center space-x-2 px-6 py-3 bg-emerald-600 text-white font-semibold rounded-full hover:bg-emerald-700 transition-colors shadow-lg"
                                 >
                                     <MessageCircle className="h-5 w-5" />
                                     <span>Envoyer un message</span>
