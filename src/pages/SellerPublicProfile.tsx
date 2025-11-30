@@ -65,6 +65,10 @@ export default function SellerPublicProfile() {
         try {
             setLoading(true);
 
+            if (!id) {
+                throw new Error('No seller ID provided');
+            }
+
             // Fetch seller profile
             const { data: sellerData, error: sellerError } = await supabase
                 .from('profiles')
@@ -72,7 +76,10 @@ export default function SellerPublicProfile() {
                 .eq('id', id)
                 .single();
 
-            if (sellerError) throw sellerError;
+            if (sellerError) {
+                console.error('Error fetching seller:', sellerError);
+                throw sellerError;
+            }
             setSeller(sellerData);
 
             // Fetch seller's active listings
@@ -83,26 +90,21 @@ export default function SellerPublicProfile() {
                 .eq('status', 'active')
                 .order('created_at', { ascending: false });
 
-            if (listingsError) throw listingsError;
+            if (listingsError) {
+                console.error('Error fetching listings:', listingsError);
+            }
             setListings(listingsData || []);
 
-            // Fetch seller's reviews
+            // Fetch seller's reviews - simplified query without join
             const { data: reviewsData, error: reviewsError } = await supabase
                 .from('reviews')
-                .select(`
-          id,
-          rating,
-          comment,
-          created_at,
-          buyer_id,
-          profiles:buyer_id (
-            name
-          )
-        `)
+                .select('*')
                 .eq('seller_id', id)
                 .order('created_at', { ascending: false });
 
-            if (reviewsError) throw reviewsError;
+            if (reviewsError) {
+                console.error('Error fetching reviews:', reviewsError);
+            }
             setReviews(reviewsData || []);
 
         } catch (error) {
@@ -198,8 +200,8 @@ export default function SellerPublicProfile() {
                                                 <Star
                                                     key={i}
                                                     className={`h-5 w-5 ${i < Math.floor(averageRating)
-                                                            ? 'text-yellow-300 fill-yellow-300'
-                                                            : 'text-white/30 fill-white/30'
+                                                        ? 'text-yellow-300 fill-yellow-300'
+                                                        : 'text-white/30 fill-white/30'
                                                         }`}
                                                 />
                                             ))}
@@ -349,8 +351,8 @@ export default function SellerPublicProfile() {
                                                 <Star
                                                     key={i}
                                                     className={`h-4 w-4 ${i < review.rating
-                                                            ? 'text-yellow-400 fill-yellow-400'
-                                                            : 'text-gray-300 fill-gray-300'
+                                                        ? 'text-yellow-400 fill-yellow-400'
+                                                        : 'text-gray-300 fill-gray-300'
                                                         }`}
                                                 />
                                             ))}
