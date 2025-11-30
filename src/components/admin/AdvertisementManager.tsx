@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Plus, X, Edit, Trash2 } from 'lucide-react';
+import { useAdvertisements, useCreateAdvertisement, useDeleteAdvertisement } from '../../hooks/useAdmin';
 import { supabase } from '../../lib/supabase';
 import type { Database } from '../../types/supabase';
 import toast from 'react-hot-toast';
@@ -8,54 +9,16 @@ import { ConfirmDialog } from '../shared/ConfirmDialog';
 type Advertisement = Database['public']['Tables']['advertisements']['Row'];
 
 export default function AdvertisementManager() {
-  const [ads, setAds] = useState<Advertisement[]>([]);
+  // ✅ React Query hooks - remplace useState + useEffect
+  const { data: ads = [], isLoading: loading } = useAdvertisements();
+  const createMutation = useCreateAdvertisement();
+  const deleteMutation = useDeleteAdvertisement();
+
   const [editingAd, setEditingAd] = useState<Advertisement | null>(null);
   const [newImage, setNewImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState('');
-  const [loading, setLoading] = useState(true);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [adToDelete, setAdToDelete] = useState<Advertisement | null>(null);
-
-  useEffect(() => {
-    const fetchAds = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('advertisements')
-          .select('*')
-          .order('order_position', { ascending: true });
-
-        if (error) throw error;
-        setAds(data || []);
-      } catch (error) {
-        console.error('Error fetching advertisements:', error);
-        toast.error('Erreur lors du chargement des publicités');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    // Initial fetch
-    fetchAds();
-
-    // Subscribe to changes
-    const channel = supabase
-      .channel('advertisements_changes')
-      .on('postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'advertisements'
-        },
-        () => {
-          fetchAds();
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, []);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

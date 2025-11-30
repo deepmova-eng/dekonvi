@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Sparkles, Check, X } from 'lucide-react';
+import { usePremiumRequests, useApprovePremiumRequest } from '../../hooks/useAdmin';
 import { supabase } from '../../lib/supabase';
 import type { Database } from '../../types/supabase';
 import toast from 'react-hot-toast';
@@ -10,80 +11,9 @@ type PremiumRequest = Database['public']['Tables']['premium_requests']['Row'] & 
 };
 
 export default function PremiumRequests() {
-  const [requests, setRequests] = useState<PremiumRequest[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchPremiumRequests = async () => {
-      try {
-        // 1. Fetch requests with listings
-        const { data: requestsData, error: requestsError } = await supabase
-          .from('premium_requests')
-          .select(`
-            *,
-            listings(title)
-          `)
-          .eq('status', 'pending')
-          .order('created_at', { ascending: false });
-
-        if (requestsError) throw requestsError;
-
-        if (!requestsData || requestsData.length === 0) {
-          setRequests([]);
-          return;
-        }
-
-        // 2. Fetch profiles manually
-        const userIds = [...new Set(requestsData.map(r => r.user_id))];
-        const { data: profilesData, error: profilesError } = await supabase
-          .from('profiles')
-          .select('id, name')
-          .in('id', userIds);
-
-        if (profilesError) {
-          console.error('Error fetching profiles:', profilesError);
-          // Continue without profiles
-        }
-
-        // 3. Merge data
-        const enrichedRequests = requestsData.map(req => ({
-          ...req,
-          listings: Array.isArray(req.listings) ? req.listings[0] : req.listings,
-          profiles: profilesData?.find(p => p.id === req.user_id) || null
-        }));
-
-        setRequests(enrichedRequests);
-      } catch (error) {
-        console.error('Error fetching premium requests:', error);
-        toast.error('Erreur lors du chargement des demandes');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    // Initial fetch
-    fetchPremiumRequests();
-
-    // Subscribe to changes
-    const channel = supabase
-      .channel('premium_requests_changes')
-      .on('postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'premium_requests',
-          filter: 'status=eq.pending'
-        },
-        () => {
-          fetchPremiumRequests();
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, []);
+  // ✅ React Query hook - remplace useState + useEffect
+  const { data: requests = [], isLoading: loading } = usePremiumRequests();
+  const approveMutation = useApprovePremiumRequest();
 
   const handleApprove = async (request: PremiumRequest) => {
     try {
@@ -108,9 +38,9 @@ export default function PremiumRequests() {
         throw new Error(result.error || 'Erreur lors de l\'approbation');
       }
 
+      // Invalide le cache via React Query
+      await approveMutation.mutateAsync(request.id);
       toast.success('Demande approuvée');
-      // Refresh list
-      setRequests(requests.filter(r => r.id !== request.id));
     } catch (error) {
       console.error('Error approving premium request:', error);
       toast.error('Erreur lors de l\'approbation');
@@ -139,9 +69,9 @@ export default function PremiumRequests() {
         throw new Error(result.error || 'Erreur lors du rejet');
       }
 
+      // Invalide le cache via React Query  
+      await approveMutation.mutateAsync(request.id);
       toast.success('Demande rejetée');
-      // Refresh list
-      setRequests(requests.filter(r => r.id !== request.id));
     } catch (error) {
       console.error('Error rejecting premium request:', error);
       toast.error('Erreur lors du rejet');
