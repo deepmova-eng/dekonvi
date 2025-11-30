@@ -147,7 +147,7 @@ export default function SellerPublicProfile() {
     );
 
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-gray-50 pt-20">
 
             {/* Hero Header - Ultra Premium */}
             <div className="bg-gradient-to-br from-primary-600 via-primary-500 to-primary-700 text-white">
