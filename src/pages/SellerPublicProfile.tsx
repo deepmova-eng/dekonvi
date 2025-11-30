@@ -547,7 +547,7 @@ export default function SellerPublicProfile() {
             {/* ═══════════════════════════════════════════════ */}
 
             {showReviewModal && (
-                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 pt-20">
                     <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
 
                         {/* Header */}
@@ -580,8 +580,8 @@ export default function SellerPublicProfile() {
                                         >
                                             <Star
                                                 className={`h-10 w-10 cursor-pointer transition-colors ${star <= reviewFormData.rating
-                                                        ? 'text-yellow-400 fill-yellow-400'
-                                                        : 'text-gray-300 hover:text-yellow-200'
+                                                    ? 'text-yellow-400 fill-yellow-400'
+                                                    : 'text-gray-300 hover:text-yellow-200'
                                                     }`}
                                             />
                                         </button>
