@@ -511,7 +511,7 @@ export default function ProductDetails() {
                     ) : (
                       /* Pas d'avis */
                       <span style={{ fontSize: '14px', color: '#6B7280', fontStyle: 'italic' }}>
-                        Nouveau vendeur - Aucun avis
+                        Aucun avis
                       </span>
                     )}
                   </div>
