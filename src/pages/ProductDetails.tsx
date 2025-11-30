@@ -485,26 +485,35 @@ export default function ProductDetails() {
 
                   {/* Étoiles et avis */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '10px' }}>
-                    {/* Étoiles */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
-                      {[...Array(5)].map((_, i) => (
-                        <Star
-                          key={i}
-                          className={i < Math.floor(sellerProfile.rating || 5) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300 fill-gray-300'}
-                          size={16}
-                        />
-                      ))}
-                    </div>
+                    {sellerProfile.total_ratings > 0 ? (
+                      <>
+                        {/* Étoiles */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
+                          {[...Array(5)].map((_, i) => (
+                            <Star
+                              key={i}
+                              className={i < Math.floor(sellerProfile.rating) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300 fill-gray-300'}
+                              size={16}
+                            />
+                          ))}
+                        </div>
 
-                    {/* Note */}
-                    <span style={{ fontSize: '14px', fontWeight: 600, color: '#111827' }}>
-                      {(sellerProfile.rating || 5).toFixed(1)}
-                    </span>
+                        {/* Note */}
+                        <span style={{ fontSize: '14px', fontWeight: 600, color: '#111827' }}>
+                          {sellerProfile.rating.toFixed(1)}
+                        </span>
 
-                    {/* Nombre avis */}
-                    <span style={{ fontSize: '14px', color: '#6B7280' }}>
-                      ({sellerProfile.total_ratings || 0} avis)
-                    </span>
+                        {/* Nombre avis */}
+                        <span style={{ fontSize: '14px', color: '#6B7280' }}>
+                          ({sellerProfile.total_ratings} avis)
+                        </span>
+                      </>
+                    ) : (
+                      /* Pas d'avis */
+                      <span style={{ fontSize: '14px', color: '#6B7280', fontStyle: 'italic' }}>
+                        Nouveau vendeur - Aucun avis
+                      </span>
+                    )}
                   </div>
                 </div>
 
