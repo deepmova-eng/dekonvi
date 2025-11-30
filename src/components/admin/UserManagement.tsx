@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Shield, Ban, User, CheckCircle, XCircle, Trash2 } from 'lucide-react';
+import { useAllUsers } from '../../hooks/useAdmin';
 import { supabase } from '../../lib/supabase';
 import type { Database } from '../../types/supabase';
 import toast from 'react-hot-toast';
@@ -18,8 +19,9 @@ interface UserManagementProps {
 }
 
 export default function UserManagement({ filter = 'confirmed' }: UserManagementProps) {
-  const [users, setUsers] = useState<ExtendedUser[]>([]);
-  const [loading, setLoading] = useState(true);
+  // ✅ React Query hook - remplace useState + useEffect
+  const { data: users = [], isLoading: loading } = useAllUsers();
+
   const [search, setSearch] = useState('');
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [confirmAction, setConfirmAction] = useState<{
@@ -29,70 +31,6 @@ export default function UserManagement({ filter = 'confirmed' }: UserManagementP
     message: string;
     danger?: boolean;
   }>({ type: 'ban', user: null, title: '', message: '' });
-
-  const fetchUsers = async () => {
-    try {
-      // Fetch profiles
-      const { data: profiles, error: profilesError } = await supabase
-        .from('profiles')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (profilesError) throw profilesError;
-
-      // Fetch auth users via RPC
-      const { data: authUsers, error: authError } = await supabase
-        .rpc('get_users_admin' as any);
-
-      if (authError) {
-        console.error('Error fetching auth users:', authError);
-        // Do NOT revert to just profiles if we already have data and this is a refetch
-        // This prevents the UI from "flickering" back to unconfirmed if the RPC times out
-        if (users.length === 0) {
-          setUsers(profiles || []);
-        }
-      } else {
-        // Merge data
-        const mergedUsers = profiles?.map(profile => {
-          const authUser = (authUsers as any[])?.find((u: any) => u.id === profile.id);
-          return {
-            ...profile,
-            email_confirmed_at: authUser?.email_confirmed_at,
-            last_sign_in_at: authUser?.last_sign_in_at
-          };
-        });
-        setUsers(mergedUsers || []);
-      }
-    } catch (error) {
-      console.error('Error fetching users:', error);
-      toast.error('Erreur lors du chargement des utilisateurs');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchUsers();
-
-    // Subscribe to changes
-    const channel = supabase
-      .channel('profiles_changes')
-      .on('postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'profiles'
-        },
-        () => {
-          fetchUsers();
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, []);
 
   const handleBanUser = async (user: ExtendedUser) => {
     setConfirmAction({

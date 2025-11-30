@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { AlertTriangle, Check, X, Eye } from 'lucide-react';
+import { useReportedListings, useResolveReport } from '../../hooks/useAdmin';
 import { supabase } from '../../lib/supabase';
 import type { Database } from '../../types/supabase';
 import toast from 'react-hot-toast';
@@ -10,56 +11,11 @@ type Report = Database['public']['Tables']['reports']['Row'] & {
 };
 
 export default function ReportedListings() {
-  const [reports, setReports] = useState<Report[]>([]);
-  const [loading, setLoading] = useState(true);
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
 
-  useEffect(() => {
-    const fetchReports = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('reports')
-          .select(`
-            *,
-            listing:listings(*),
-            reporter:profiles(*)
-          `)
-          .eq('status', 'pending')
-          .order('created_at', { ascending: false });
-
-        if (error) throw error;
-        setReports(data || []);
-      } catch (error) {
-        console.error('Error fetching reports:', error);
-        toast.error('Erreur lors du chargement des signalements');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    // Initial fetch
-    fetchReports();
-
-    // Subscribe to changes
-    const channel = supabase
-      .channel('reports_changes')
-      .on('postgres_changes', 
-        { 
-          event: '*', 
-          schema: 'public', 
-          table: 'reports',
-          filter: 'status=eq.pending'
-        }, 
-        () => {
-          fetchReports();
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, []);
+  // ✅ React Query hook - remplace useState + useEffect
+  const { data: reports = [], isLoading: loading } = useReportedListings();
+  const resolveMutation = useResolveReport();
 
   const handleResolve = async (report: Report) => {
     try {
@@ -71,7 +27,8 @@ export default function ReportedListings() {
 
       if (error) throw error;
 
-      setReports(reports.filter(r => r.id !== report.id));
+      // Invalide le cache via React Query
+      await resolveMutation.mutateAsync(report.id);
       toast.success('Signalement résolu et annonce supprimée');
     } catch (error) {
       console.error('Error resolving report:', error);
@@ -83,12 +40,13 @@ export default function ReportedListings() {
     try {
       const { error } = await supabase
         .from('reports')
-        .update({ status: 'dismissed' })
+        .update({ status: 'dismissed' as const })
         .eq('id', report.id);
 
       if (error) throw error;
 
-      setReports(reports.filter(r => r.id !== report.id));
+      // Invalide le cache via React Query
+      await resolveMutation.mutateAsync(report.id);
       toast.success('Signalement ignoré');
     } catch (error) {
       console.error('Error dismissing report:', error);
@@ -109,7 +67,7 @@ export default function ReportedListings() {
       <div className="bg-white rounded-lg shadow p-6">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-bold">Détails du signalement</h2>
-          <button 
+          <button
             onClick={() => setSelectedReport(null)}
             className="text-gray-500 hover:text-gray-700"
           >

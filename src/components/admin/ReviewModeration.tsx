@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import { usePendingReviews, useApproveReview, useRejectReview } from '../../hooks/useAdmin';
 import { supabase } from '../../lib/supabase';
 import { useSupabase } from '../../contexts/SupabaseContext';
 import { Check, X, ExternalLink, Star, Image as ImageIcon } from 'lucide-react';
 import type { Database } from '../../types/supabase';
+import toast from 'react-hot-toast';
 
 type Review = Database['public']['Tables']['reviews']['Row'] & {
     profiles: {
@@ -17,48 +19,25 @@ type Review = Database['public']['Tables']['reviews']['Row'] & {
 
 export default function ReviewModeration() {
     const { user } = useSupabase();
-    const [reviews, setReviews] = useState<Review[]>([]);
-    const [loading, setLoading] = useState(true);
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
-    useEffect(() => {
-        fetchPendingReviews();
-    }, []);
-
-    const fetchPendingReviews = async () => {
-        try {
-            const { data, error } = await supabase
-                .from('reviews')
-                .select(`
-          *,
-          profiles:reviewer_id (name, email),
-          listings:listing_id (title, images)
-        `)
-                .eq('status', 'pending')
-                .order('created_at', { ascending: false });
-
-            if (error) throw error;
-            setReviews(data || []);
-        } catch (error) {
-            console.error('Error fetching reviews:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
+    // ✅ React Query hooks - remplace useState + useEffect
+    const { data: reviews = [], isLoading: loading } = usePendingReviews();
+    const approveMutation = useApproveReview();
+    const rejectMutation = useRejectReview();
 
     const handleModeration = async (reviewId: string, status: 'approved' | 'rejected') => {
         try {
-            const { error } = await supabase
-                .from('reviews')
-                .update({ status })
-                .eq('id', reviewId);
-
-            if (error) throw error;
-
-            // Remove from local list
-            setReviews(prev => prev.filter(r => r.id !== reviewId));
+            if (status === 'approved') {
+                await approveMutation.mutateAsync(reviewId);
+                toast.success('Avis approuvé');
+            } else {
+                await rejectMutation.mutateAsync(reviewId);
+                toast.success('Avis rejeté');
+            }
         } catch (error) {
             console.error('Error updating review:', error);
+            toast.error('Erreur lors de la modération');
         }
     };
 
