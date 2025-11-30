@@ -117,7 +117,7 @@ export default function SellerPublicProfile() {
     if (loading) {
         return (
             <div className="min-h-screen flex items-center justify-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600" />
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600" />
             </div>
         );
     }
@@ -129,7 +129,7 @@ export default function SellerPublicProfile() {
                 <p className="text-gray-600 mb-6">Ce profil n'existe pas ou a été supprimé.</p>
                 <button
                     onClick={() => navigate('/')}
-                    className="px-6 py-3 bg-primary-500 text-white rounded-full hover:bg-primary-600 transition-colors"
+                    className="px-6 py-3 bg-emerald-500 text-white rounded-full hover:bg-emerald-600 transition-colors"
                 >
                     Retour à l'accueil
                 </button>
@@ -147,10 +147,10 @@ export default function SellerPublicProfile() {
     );
 
     return (
-        <div className="min-h-screen bg-gray-50 pt-20">
+        <div className="min-h-screen bg-gray-50">
 
             {/* Hero Header - Ultra Premium */}
-            <div className="bg-gradient-to-br from-primary-600 via-primary-500 to-primary-700 text-white">
+            <div className="bg-gradient-to-br from-emerald-600 via-emerald-500 to-emerald-700 text-white">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
                     {/* Back Button */}
@@ -182,7 +182,7 @@ export default function SellerPublicProfile() {
                             </div>
 
                             {/* Verified Badge */}
-                            <div className="absolute -bottom-2 -right-2 w-12 h-12 bg-primary-500 rounded-full flex items-center justify-center ring-4 ring-white shadow-lg">
+                            <div className="absolute -bottom-2 -right-2 w-12 h-12 bg-emerald-500 rounded-full flex items-center justify-center ring-4 ring-white shadow-lg">
                                 <CheckCircle className="w-7 h-7 text-white" />
                             </div>
                         </div>
@@ -273,7 +273,7 @@ export default function SellerPublicProfile() {
 
                                 {/* Message */}
                                 <button
-                                    className="flex items-center space-x-2 px-6 py-3 bg-white text-primary-600 font-semibold rounded-full hover:bg-primary-50 transition-colors shadow-lg"
+                                    className="flex items-center space-x-2 px-6 py-3 bg-white text-emerald-600 font-semibold rounded-full hover:bg-emerald-50 transition-colors shadow-lg"
                                 >
                                     <MessageCircle className="h-5 w-5" />
                                     <span>Envoyer un message</span>
