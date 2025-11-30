@@ -36,11 +36,36 @@ export function useConversations(userId: string | undefined) {
         return []
       }
 
+      // 1.5. Filter out deleted conversations
+      const { data: deletions, error: deletionsError } = await supabase
+        .from('conversation_deletions')
+        .select('conversation_id')
+        .eq('user_id', userId)
+
+      if (deletionsError) {
+        console.error('Error fetching deletions:', deletionsError)
+      }
+
+      const deletedConversationIds = new Set(deletions?.map(d => d.conversation_id) || [])
+      const visibleConversations = conversations.filter(
+        conv => !deletedConversationIds.has(conv.id)
+      )
+
+      console.log('🔍 [useConversations] After filtering deletions:', {
+        total: conversations.length,
+        deleted: deletedConversationIds.size,
+        visible: visibleConversations.length
+      })
+
+      if (visibleConversations.length === 0) {
+        return []
+      }
+
       // 2. Collect IDs
       const userIds = new Set<string>()
       const listingIds = new Set<string>()
 
-      conversations.forEach(conv => {
+      visibleConversations.forEach(conv => {
         userIds.add(conv.user1_id)
         userIds.add(conv.user2_id)
         if (conv.listing_id) listingIds.add(conv.listing_id)
@@ -69,7 +94,7 @@ export function useConversations(userId: string | undefined) {
       })
 
       // 5. Enrich conversations
-      const enrichedConversations = conversations.map(conv => ({
+      const enrichedConversations = visibleConversations.map(conv => ({
         ...conv,
         user1: profiles?.find(p => p.id === conv.user1_id),
         user2: profiles?.find(p => p.id === conv.user2_id),
