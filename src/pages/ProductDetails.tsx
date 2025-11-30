@@ -339,14 +339,14 @@ export default function ProductDetails() {
                         )}
                       </div>
 
-                      {/* Info */}
+                      {/* Nom et rating sur la même ligne */}
                       <div className="seller-info">
                         <span className="seller-name">{sellerProfile.name}</span>
                         <div className="seller-rating">
                           <Star
-                            size={14}
+                            size={16}
                             className="star-icon"
-                            fill="#FF6B35"
+                            fill="#FFD700"
                             strokeWidth={0}
                           />
                           <span className="rating-text">
