@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Check, X, Eye } from 'lucide-react';
+import { usePendingListings, useApproveListing, useRejectListing } from '../../hooks/useAdmin';
 import { supabase } from '../../lib/supabase';
 import type { Database } from '../../types/supabase';
 import toast from 'react-hot-toast';
@@ -7,52 +8,12 @@ import toast from 'react-hot-toast';
 type Listing = Database['public']['Tables']['listings']['Row'];
 
 export default function PendingListings() {
-  const [listings, setListings] = useState<Listing[]>([]);
-  const [loading, setLoading] = useState(true);
   const [, setSelectedListing] = useState<Listing | null>(null);
 
-  useEffect(() => {
-    const fetchPendingListings = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('listings')
-          .select('*')
-          .eq('status', 'pending')
-          .order('created_at', { ascending: false });
-
-        if (error) throw error;
-        setListings(data || []);
-      } catch (error) {
-        console.error('Error fetching pending listings:', error);
-        toast.error('Erreur lors du chargement des annonces');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    // Initial fetch
-    fetchPendingListings();
-
-    // Subscribe to changes
-    const channel = supabase
-      .channel('pending_listings')
-      .on('postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'listings',
-          filter: 'status=eq.pending'
-        },
-        () => {
-          fetchPendingListings();
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, []);
+  // ✅ React Query hooks - remplace tout le code useEffect
+  const { data: listings = [], isLoading: loading } = usePendingListings();
+  const approveMutation = useApproveListing();
+  const rejectMutation = useRejectListing();
 
   const handleApprove = async (listing: Listing) => {
     try {
@@ -73,10 +34,11 @@ export default function PendingListings() {
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.error || 'Erreur lors de l\'approbation');
+        throw new Error(result.error || 'Erreur lors de l\'approb ation');
       }
 
-      setListings(listings.filter(l => l.id !== listing.id));
+      // Invalider le cache automatiquement via React Query
+      await approveMutation.mutateAsync(listing.id);
       toast.success('Annonce approuvée');
     } catch (error) {
       console.error('Error approving listing:', error);
@@ -106,7 +68,8 @@ export default function PendingListings() {
         throw new Error(result.error || 'Erreur lors du rejet');
       }
 
-      setListings(listings.filter(l => l.id !== listing.id));
+      // Invalider le cache automatiquement via React Query
+      await rejectMutation.mutateAsync({ listingId: listing.id });
       toast.success('Annonce rejetée');
     } catch (error) {
       console.error('Error rejecting listing:', error);
