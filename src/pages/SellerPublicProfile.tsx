@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import {
@@ -68,9 +68,10 @@ export default function SellerPublicProfile() {
         if (id) {
             fetchSellerData();
         }
-    }, [id]);
+    }, [id, fetchSellerData]);
 
-    const fetchSellerData = async () => {
+
+    const fetchSellerData = useCallback(async () => {
         try {
             setLoading(true);
 
@@ -121,7 +122,7 @@ export default function SellerPublicProfile() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [id]);
 
     const handleProofImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
