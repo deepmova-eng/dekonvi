@@ -372,7 +372,7 @@ export default function ProductDetails() {
             <h2>Vendeur</h2>
 
             <Link
-              to={`/profile/${listing.seller_id}`}
+              to={`/seller/${listing.seller_id}`}
               className="group block"
               style={{ textDecoration: 'none' }}
             >
