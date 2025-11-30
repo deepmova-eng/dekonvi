@@ -64,13 +64,7 @@ export default function SellerPublicProfile() {
     });
     const [submittingReview, setSubmittingReview] = useState(false);
 
-    useEffect(() => {
-        if (id) {
-            fetchSellerData();
-        }
-    }, [id, fetchSellerData]);
-
-
+    // Define fetchSellerData BEFORE useEffect
     const fetchSellerData = useCallback(async () => {
         try {
             setLoading(true);
@@ -123,6 +117,13 @@ export default function SellerPublicProfile() {
             setLoading(false);
         }
     }, [id]);
+
+    useEffect(() => {
+        if (id) {
+            fetchSellerData();
+        }
+    }, [id, fetchSellerData]);
+
 
     const handleProofImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
