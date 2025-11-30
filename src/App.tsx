@@ -19,6 +19,7 @@ import Profile from './pages/Profile';
 import Favorites from './pages/Favorites';
 import ProductDetails from './pages/ProductDetails';
 import SellerProfile from './pages/SellerProfile';
+import SellerPublicProfile from './pages/SellerPublicProfile';
 import AdminPanel from './pages/AdminPanel';
 import MonitoringDashboard from './pages/admin/Monitoring';
 import Categories from './pages/Categories';
@@ -114,6 +115,7 @@ export default function App() {
           <Route path="/category/:categoryId" element={<CategoryPage />} />
           <Route path="/listings/:id" element={<ProductDetails />} />
           <Route path="/profile/:id" element={<SellerProfile />} />
+          <Route path="/seller/:id" element={<SellerPublicProfile />} />
 
           {/* Protected Routes - Require Login */}
           <Route
