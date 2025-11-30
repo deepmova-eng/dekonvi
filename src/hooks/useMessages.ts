@@ -36,28 +36,52 @@ export function useConversations(userId: string | undefined) {
         return []
       }
 
-      // 1.5. Filter out deleted conversations
+      // 1.5. Filter out deleted conversations (only if NO messages after deleted_at)
       const { data: deletions, error: deletionsError } = await supabase
         .from('conversation_deletions')
-        .select('conversation_id')
+        .select('conversation_id, deleted_at')
         .eq('user_id', userId)
 
       if (deletionsError) {
         console.error('Error fetching deletions:', deletionsError)
       }
 
-      const deletedConversationIds = new Set(deletions?.map(d => d.conversation_id) || [])
-      const visibleConversations = conversations.filter(
-        conv => !deletedConversationIds.has(conv.id)
+      // Map for quick access: conversation_id → deleted_at
+      const deletionMap = new Map(
+        deletions?.map(d => [d.conversation_id, d.deleted_at]) || []
       )
+
+      // Filter conversations: only hide if deleted AND no new messages after deletion
+      const visibleConversations = await Promise.all(
+        conversations.map(async (conv) => {
+          const deletedAt = deletionMap.get(conv.id)
+
+          // Conversation never deleted → Always show
+          if (!deletedAt) return conv
+
+          // Conversation deleted → Check if messages AFTER deletion
+          const { data: newMessages } = await supabase
+            .from('messages')
+            .select('id')
+            .eq('conversation_id', conv.id)
+            .gt('created_at', deletedAt)
+            .limit(1)
+
+          // If new messages → Show, otherwise → Hide (return null)
+          return newMessages && newMessages.length > 0 ? conv : null
+        })
+      )
+
+      // Remove null conversations (deleted without new messages)
+      const activeConversations = visibleConversations.filter(conv => conv !== null) as any[]
 
       console.log('🔍 [useConversations] After filtering deletions:', {
         total: conversations.length,
-        deleted: deletedConversationIds.size,
-        visible: visibleConversations.length
+        deleted: deletionMap.size,
+        visible: activeConversations.length
       })
 
-      if (visibleConversations.length === 0) {
+      if (activeConversations.length === 0) {
         return []
       }
 
@@ -65,7 +89,7 @@ export function useConversations(userId: string | undefined) {
       const userIds = new Set<string>()
       const listingIds = new Set<string>()
 
-      visibleConversations.forEach(conv => {
+      activeConversations.forEach(conv => {
         userIds.add(conv.user1_id)
         userIds.add(conv.user2_id)
         if (conv.listing_id) listingIds.add(conv.listing_id)
@@ -94,7 +118,7 @@ export function useConversations(userId: string | undefined) {
       })
 
       // 5. Enrich conversations
-      const enrichedConversations = visibleConversations.map(conv => ({
+      const enrichedConversations = activeConversations.map(conv => ({
         ...conv,
         user1: profiles?.find(p => p.id === conv.user1_id),
         user2: profiles?.find(p => p.id === conv.user2_id),
