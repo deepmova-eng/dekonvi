@@ -387,6 +387,21 @@
     flex-shrink: 0;
 }
 
+/* ==================== SECTION VENDEUR ULTRA PREMIUM ==================== */
+
+.seller-premium-card:hover .voir-profil-badge {
+    opacity: 1 !important;
+}
+
+.seller-premium-card:hover h4 {
+    color: #2DD181 !important;
+}
+
+.seller-premium-card:hover svg[stroke] {
+    color: #2DD181 !important;
+    transform: translateX(4px);
+}
+
 .rating-text {
     font-size: var(--font-base);
     font-weight: var(--font-semibold);
