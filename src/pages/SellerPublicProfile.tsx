@@ -6,8 +6,6 @@ import {
     MapPin,
     Calendar,
     Package,
-    MessageCircle,
-    Phone,
     ArrowLeft,
     CheckCircle,
     TrendingUp,
@@ -57,7 +55,6 @@ export default function SellerPublicProfile() {
     const [listings, setListings] = useState<Listing[]>([]);
     const [reviews, setReviews] = useState<Review[]>([]);
     const [loading, setLoading] = useState(true);
-    const [showPhone, setShowPhone] = useState(false);
     const [showReviewModal, setShowReviewModal] = useState(false);
     const [reviewFormData, setReviewFormData] = useState({
         rating: 5,
@@ -358,8 +355,8 @@ export default function SellerPublicProfile() {
                                                 <Star
                                                     key={i}
                                                     className={`h-6 w-6 ${i < Math.floor(averageRating)
-                                                            ? 'text-yellow-400 fill-yellow-400'
-                                                            : 'text-gray-300 fill-gray-300'
+                                                        ? 'text-yellow-400 fill-yellow-400'
+                                                        : 'text-gray-300 fill-gray-300'
                                                         }`}
                                                 />
                                             ))}
