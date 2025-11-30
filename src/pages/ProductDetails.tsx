@@ -10,7 +10,8 @@ import {
   Shield,
   MessageCircle,
   Phone,
-  ArrowLeft
+  ArrowLeft,
+  User
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -296,6 +297,15 @@ export default function ProductDetails() {
                 >
                   <MessageCircle size={20} />
                   Envoyer un message
+                </button>
+
+                {/* Bouton premium profil vendeur */}
+                <button
+                  className="btn btn--seller-profile btn--large"
+                  onClick={() => navigate(`/profile/${listing.seller_id}`)}
+                >
+                  <User size={20} />
+                  Voir le profil
                 </button>
 
                 {listing.contact_phone && !listing.hide_phone && (
