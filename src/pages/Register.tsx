@@ -277,8 +277,13 @@ export default function Register({ onBack, onLoginClick }: RegisterProps) {
         <button
           type="submit"
           disabled={loading}
-          className={`w-full py-3 rounded-full bg-primary-500 text-white font-medium transition-colors ${loading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-primary-600'
+          className={`w-full py-4 rounded-full font-semibold text-white text-lg transition-all shadow-lg ${loading
+              ? 'bg-gray-400 cursor-not-allowed'
+              : 'bg-primary-500 hover:bg-primary-600 hover:shadow-xl active:scale-[0.98]'
             }`}
+          style={{
+            background: loading ? undefined : 'linear-gradient(135deg, #2DD181 0%, #27ae60 100%)',
+          }}
         >
           {loading ? 'Création du compte...' : 'Créer mon compte'}
         </button>
