@@ -42,7 +42,7 @@ export function useApproveListing() {
         mutationFn: async (listingId: string) => {
             const { error } = await supabase
                 .from('listings')
-                .update({ status: 'active' })
+                .update({ status: 'active' as const })
                 .eq('id', listingId);
 
             if (error) throw error;
@@ -73,7 +73,7 @@ export function useRejectListing() {
             const { error } = await supabase
                 .from('listings')
                 .update({
-                    status: 'rejected',
+                    status: 'rejected' as const,
                     rejection_reason: reason
                 })
                 .eq('id', listingId);
@@ -121,7 +121,7 @@ export function useBanUser() {
         mutationFn: async (userId: string) => {
             const { error } = await supabase
                 .from('profiles')
-                .update({ is_banned: true })
+                .update({ is_banned: true as const })
                 .eq('id', userId);
 
             if (error) throw error;
@@ -144,7 +144,7 @@ export function useUnbanUser() {
         mutationFn: async (userId: string) => {
             const { error } = await supabase
                 .from('profiles')
-                .update({ is_banned: false })
+                .update({ is_banned: false as const })
                 .eq('id', userId);
 
             if (error) throw error;
@@ -196,7 +196,7 @@ export function useApproveReview() {
         mutationFn: async (reviewId: string) => {
             const { error } = await supabase
                 .from('reviews')
-                .update({ status: 'approved' })
+                .update({ status: 'approved' as const })
                 .eq('id', reviewId);
 
             if (error) throw error;
@@ -219,7 +219,7 @@ export function useRejectReview() {
         mutationFn: async (reviewId: string) => {
             const { error } = await supabase
                 .from('reviews')
-                .update({ status: 'rejected' })
+                .update({ status: 'rejected' as const })
                 .eq('id', reviewId);
 
             if (error) throw error;
@@ -272,7 +272,7 @@ export function useApprovePremiumRequest() {
         mutationFn: async (requestId: string) => {
             const { error } = await supabase
                 .from('premium_requests')
-                .update({ status: 'approved' })
+                .update({ status: 'approved' as const })
                 .eq('id', requestId);
 
             if (error) throw error;
@@ -328,7 +328,7 @@ export function useResolveReport() {
         mutationFn: async (reportId: string) => {
             const { error } = await supabase
                 .from('reports')
-                .update({ status: 'resolved' })
+                .update({ status: 'resolved' as const })
                 .eq('id', reportId);
 
             if (error) throw error;
