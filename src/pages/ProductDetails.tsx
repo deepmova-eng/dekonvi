@@ -361,7 +361,7 @@ export default function ProductDetails() {
               </div>
 
               {/* Actions principales */}
-              <div className="product-actions">
+              <div className="product-actions mobile-action-bar">
                 <button
                   className="btn btn--primary btn--large"
                   onClick={handleSendMessage}
