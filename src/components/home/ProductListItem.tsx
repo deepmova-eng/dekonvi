@@ -53,7 +53,7 @@ export default function ProductListItem({ listing }: ProductListItemProps) {
     };
 
     return (
-        <Link to={`/ listings / ${listing.id} `} className="product-list-item">
+        <Link to={`/listings/${listing.id}`} className="product-list-item">
             {/* Image */}
             <div className="product-list-item__image-container">
                 <OptimizedImage
