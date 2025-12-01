@@ -85,7 +85,7 @@ export default function ProductListItem({ listing }: ProductListItemProps) {
                 {/* Bouton favori */}
                 <button
                     onClick={handleFavoriteClick}
-                    className={`product - list - item__favorite ${isFavorite ? 'active' : ''} `}
+                    className={`product-list-item__favorite ${isFavorite ? 'active' : ''}`}
                     aria-label={isFavorite ? 'Retirer des favoris' : 'Ajouter aux favoris'}
                 >
                     <Heart size={18} fill={isFavorite ? 'currentColor' : 'none'} />

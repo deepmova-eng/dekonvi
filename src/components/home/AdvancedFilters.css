@@ -76,12 +76,16 @@
     opacity: 0;
     transform: translateY(-10px);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+    /* CRITICAL: Prevent blocking clicks when closed */
 }
 
 .advanced-filters__panel.open {
     max-height: 500px;
     opacity: 1;
     transform: translateY(0);
+    pointer-events: auto;
+    /* Re-enable clicks when open */
 }
 
 .advanced-filters__content {
