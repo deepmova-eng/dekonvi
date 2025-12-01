@@ -205,9 +205,20 @@
 /* Responsive */
 @media (max-width: 640px) {
     .advanced-filters__panel {
-        width: calc(100vw - 32px);
+        /* Force positioning relative to viewport, not parent */
+        position: fixed;
         left: 50%;
+        top: 120px;
+        /* Below header/search bar */
         transform: translateX(-50%) translateY(-10px);
+
+        /* Ensure it doesn't overflow screen */
+        width: 92vw;
+        max-width: 350px;
+
+        /* Ensure it's above everything */
+        z-index: 1000;
+        margin: 0;
     }
 
     .advanced-filters__panel.open {
