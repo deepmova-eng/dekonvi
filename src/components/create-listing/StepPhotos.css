@@ -242,3 +242,44 @@
 .photo-tips li:last-child {
     margin-bottom: 0;
 }
+
+/* ============================================
+   MOBILE RESPONSIVE
+   ============================================ */
+
+@media (max-width: 640px) {
+
+    /* Reduce photo tips box to make it less intrusive */
+    .photo-tips {
+        margin-top: 24px;
+        padding: 12px 16px;
+    }
+
+    .photo-tips h4 {
+        font-size: 13px;
+        margin: 0 0 8px 0;
+    }
+
+    .photo-tips ul {
+        padding-left: 16px;
+    }
+
+    .photo-tips li {
+        font-size: 12px;
+        margin-bottom: 6px;
+        line-height: 1.4;
+    }
+
+    /* Reduce upload zone padding on mobile */
+    .upload-zone {
+        padding: 40px 24px;
+    }
+
+    .upload-zone h3 {
+        font-size: 18px;
+    }
+
+    .upload-zone p {
+        font-size: 14px;
+    }
+}
