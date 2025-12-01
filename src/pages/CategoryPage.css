@@ -178,13 +178,17 @@
 }
 
 .price-inputs {
-    display: flex;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 10px;
+    width: 100%;
     align-items: center;
-    gap: 12px;
 }
 
 .price-inputs input {
-    flex: 1;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
 }
 
 /* Sort bar */
