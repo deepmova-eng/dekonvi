@@ -1,0 +1,35 @@
+/* Mobile First */
+.favorites-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    /* Force 2 colonnes égales */
+    gap: 16px;
+    /* Espace entre les cartes */
+    padding: 16px;
+    /* Marges sur les côtés */
+}
+
+/* Ajustement de l'image pour qu'elle reste proportionnée */
+.favorites-grid .product-card__image-container {
+    height: 160px !important;
+    /* Force height on mobile */
+    width: 100%;
+}
+
+.favorites-grid .product-card__image {
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+}
+
+/* Ajustement Desktop (optionnel, pour en avoir 4 ou 5) */
+@media (min-width: 768px) {
+    .favorites-grid {
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    }
+
+    .favorites-grid .product-card__image-container {
+        height: 200px !important;
+        /* Larger images on desktop */
+    }
+}

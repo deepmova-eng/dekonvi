@@ -5,6 +5,7 @@ import { ChevronLeft, Heart } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useSupabase } from '../contexts/SupabaseContext';
 import { ProductCardSkeleton } from '../components/common/ProductCardSkeleton';
+import './Favorites.css';
 
 interface FavoritesProps {
   onProductSelect: (id: string) => void;
@@ -32,7 +33,7 @@ export default function Favorites({ onProductSelect }: FavoritesProps) {
           <h1 className="text-2xl font-bold">Favoris</h1>
         </div>
         <div className="px-4 py-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
               <ProductCardSkeleton key={i} />
             ))}
@@ -101,7 +102,7 @@ export default function Favorites({ onProductSelect }: FavoritesProps) {
           </div>
         )}
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="favorites-grid">
           {favoriteListings.map((listing: any) => (
             <ProductCard
               key={listing.id}
