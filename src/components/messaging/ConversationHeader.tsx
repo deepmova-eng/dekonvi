@@ -20,7 +20,7 @@ export function ConversationHeader({
 }: ConversationHeaderProps) {
 
     return (
-        <div className="sticky top-0 z-50 bg-white border-b border-gray-200" style={{ paddingTop: '18px', paddingBottom: '18px' }}>
+        <div className="sticky top-0 z-[1000] bg-white border-b border-gray-200 relative" style={{ paddingTop: '18px', paddingBottom: '18px' }}>
 
             <div className="px-4 md:px-6 flex items-center justify-between gap-3">
                 {/* Left section: Back button (mobile) + Avatar + User info */}
@@ -29,8 +29,13 @@ export function ConversationHeader({
                     {/* Mobile back button */}
                     {showMobileBack && onMobileBack && (
                         <button
-                            onClick={onMobileBack}
-                            className="md:hidden flex items-center justify-center w-8 h-8 rounded-full hover:bg-gray-100 transition-colors"
+                            onClick={(e) => {
+                                e.stopPropagation()
+                                console.log("🔙 Retour cliqué !")
+                                onMobileBack()
+                            }}
+                            className="md:hidden flex items-center justify-center w-8 h-8 rounded-full hover:bg-gray-100 transition-colors relative z-[99999] pointer-events-auto cursor-pointer"
+                            style={{ position: 'relative', zIndex: 99999 }}
                             aria-label="Retour"
                         >
                             <ArrowLeft size={20} className="text-gray-700" />

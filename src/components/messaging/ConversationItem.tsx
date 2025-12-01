@@ -65,7 +65,11 @@ export function ConversationItem({ conv, isActive, currentUserId, onSelect, onDe
     }
 
     const listing = conv.listing
-    const lastMessage = conv.last_message?.[0]
+
+    // CRITICAL: Use last_message_at as primary source, fallback to created_at
+    // This ensures we show the actual last message time, not conversation creation time
+    const timestamp = conv.last_message_at || conv.created_at
+    const displayMessage = conv.last_message || "Démarrer la discussion"
     const unreadCount = conv.unread_count || 0
 
     return (
@@ -115,15 +119,12 @@ export function ConversationItem({ conv, isActive, currentUserId, onSelect, onDe
                     <div className="conv-content">
                         <div className="conv-header">
                             <span className="conv-name">{listing?.title || 'Annonce'}</span>
-                            {lastMessage && (
-                                <span className="conv-time">{getTimeAgo(lastMessage.created_at)}</span>
-                            )}
+                            <span className="conv-time">{getTimeAgo(timestamp)}</span>
                         </div>
 
                         <div className="conv-footer">
                             <p className="conv-preview">
-                                {lastMessage?.sender_id === currentUserId && 'Vous: '}
-                                {lastMessage?.content || 'Aucun message'}
+                                {displayMessage}
                             </p>
                             {unreadCount > 0 && (
                                 <div className="unread-badge">{unreadCount}</div>

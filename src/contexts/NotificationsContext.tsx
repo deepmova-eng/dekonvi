@@ -78,18 +78,24 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
 
         fetchNotifications();
 
-        // Subscribe to real-time changes
+        // Subscribe to real-time changes with wildcard approach
         const channel = supabase
             .channel('notifications_changes')
             .on(
-                'postgres_changes',
+                'postgres_changes' as any,  // Bypass strict typing
                 {
-                    event: '*',
+                    event: '*',  // Listen to all events
                     schema: 'public',
                     table: 'notifications',
-                    filter: `user_id=eq.${user.id}`
-                },
-                (payload) => {
+                    // NO FILTER - Manual client-side filtering to avoid binding mismatch
+                } as any,
+                (payload: any) => {
+                    // Client-side filtering: only process notifications for this user
+                    const notification = payload.new || payload.old
+                    if (!notification || notification.user_id !== user.id) {
+                        return  // Ignore notifications for other users
+                    }
+
                     if (payload.eventType === 'INSERT') {
                         const newNotification = payload.new as Notification;
 

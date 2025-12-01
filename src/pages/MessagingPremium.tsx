@@ -50,35 +50,70 @@ export default function MessagingPremium() {
     }
 
     return (
-        <div className={`messaging-premium ${isMobileViewingChat ? 'mobile-viewing-chat' : ''}`}>
-
-            {/* Sidebar - Cachée sur mobile si chat ouvert */}
-            <div className="sidebar-wrapper">
-                <ConversationSidebar
-                    conversations={conversations}
-                    activeId={activeConversationId}
-                    onSelect={(id) => {
-                        setActiveConversationId(id)
-                        setIsMobileViewingChat(true)
-                    }}
-                    currentUserId={user?.id || ''}
-                    activeListing={conversations.find(c => c.id === activeConversationId)?.listing}
-                    onDeleteConversation={handleConversationDeleted}
-                />
-            </div>
-
-            {/* Chat */}
-            {activeConversationId && (
-                <div className="chat-wrapper">
+        <>
+            {/* MOBILE VIEW - Mutually exclusive: either sidebar OR chat */}
+            <div className="md:hidden h-screen w-full bg-white">
+                {isMobileViewingChat && activeConversationId ? (
                     <ChatWindow
-                        key={activeConversationId}
                         conversationId={activeConversationId}
                         currentUserId={user?.id || ''}
-                        onMobileBack={() => setIsMobileViewingChat(false)}
+                        onMobileBack={() => {
+                            console.log("📱 PARENT : Fermeture du chat demandée")
+                            setIsMobileViewingChat(false)
+                            console.log("📱 PARENT : setIsMobileViewingChat(false) appelé")
+                        }}
                         onConversationDeleted={handleConversationDeleted}
                     />
+                ) : (
+                    <ConversationSidebar
+                        conversations={conversations}
+                        activeId={activeConversationId}
+                        onSelect={(id) => {
+                            setActiveConversationId(id)
+                            setIsMobileViewingChat(true)
+                        }}
+                        currentUserId={user?.id || ''}
+                        activeListing={conversations.find(c => c.id === activeConversationId)?.listing}
+                        onDeleteConversation={handleConversationDeleted}
+                    />
+                )}
+            </div>
+
+            {/* DESKTOP VIEW - Side by side layout */}
+            <div className="hidden md:flex h-screen w-full bg-gray-50">
+                {/* Sidebar - Fixed width */}
+                <div className="w-[380px] flex-shrink-0 border-r bg-white">
+                    <ConversationSidebar
+                        conversations={conversations}
+                        activeId={activeConversationId}
+                        onSelect={(id) => {
+                            setActiveConversationId(id)
+                            setIsMobileViewingChat(true)
+                        }}
+                        currentUserId={user?.id || ''}
+                        activeListing={conversations.find(c => c.id === activeConversationId)?.listing}
+                        onDeleteConversation={handleConversationDeleted}
+                    />
                 </div>
-            )}
-        </div>
+
+                {/* Chat - Remaining space */}
+                <div className="flex-1 relative overflow-hidden">
+                    {activeConversationId ? (
+                        <ChatWindow
+                            conversationId={activeConversationId}
+                            currentUserId={user?.id || ''}
+                            onMobileBack={() => setIsMobileViewingChat(false)}
+                            onConversationDeleted={handleConversationDeleted}
+                        />
+                    ) : (
+                        <div className="flex flex-col items-center justify-center h-full text-gray-400">
+                            <div className="text-6xl mb-4">💬</div>
+                            <h3 className="text-xl font-semibold text-gray-600">Sélectionnez une conversation</h3>
+                            <p className="text-sm mt-2">Choisissez une conversation pour commencer</p>
+                        </div>
+                    )}
+                </div>
+            </div>
+        </>
     )
 }

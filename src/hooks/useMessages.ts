@@ -1,9 +1,12 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQuery, useMutation } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
 import { toast } from 'react-hot-toast'
+import * as Sentry from '@sentry/react'
+import { useEffect } from 'react'
 
 export function useConversations(userId: string | undefined) {
-  return useQuery({
+
+  const query = useQuery({
     queryKey: ['conversations', userId],
     queryFn: async () => {
       console.log('🔍 [useConversations] Fetching for user:', userId)
@@ -135,6 +138,59 @@ export function useConversations(userId: string | undefined) {
     refetchOnMount: true,
     refetchOnWindowFocus: true,
   })
+
+  // ❌ REALTIME DÉSACTIVÉ - Revenir au polling pour éviter les erreurs
+  // Le polling avec refetchInterval: 5000ms est déjà très performant
+
+  /*
+  // Setup Realtime subscription for conversation updates
+  useEffect(() => {
+    if (!userId) return
+
+    console.log('🔌 [useConversations] Setting up Realtime listener for user:', userId)
+
+    const channel = supabase
+      .channel('conversations_list')
+      .on(
+        'postgres_changes' as any,  // Bypass strict typing
+        {
+          event: '*', // Listen to all events: INSERT, UPDATE, DELETE
+          schema: 'public',
+          table: 'conversations',
+          // NO FILTER - Manual filtering in JavaScript to avoid binding mismatch
+        } as any,
+        (payload: any) => {
+          try {
+            console.log('🔥 [useConversations] Realtime event:', payload.eventType, payload)
+
+            // Manual filtering: check if this update involves the current user
+            const record = payload.new || payload.old
+
+            if (record && (record.user1_id === userId || record.user2_id === userId)) {
+              console.log('🔄 [useConversations] Conversation update for current user, refetching...')
+              query.refetch()
+            } else {
+              console.log('🔄 [useConversations] Conversation not for current user, ignoring')
+            }
+          } catch (error) {
+            console.error('🔥 [useConversations] Error processing Realtime event:', error)
+          }
+        }
+      )
+      .subscribe((status: any) => {
+        console.log('🔌 [useConversations] Subscription status:', status)
+      })
+
+    return () => {
+      console.log('🔌 [useConversations] Cleaning up Realtime listener')
+      supabase.removeChannel(channel)
+    }
+  }, [userId, query.refetch])
+  */
+
+  // ✅ POLLING ACTIF avec refetchInterval dans useQuery
+
+  return query
 }
 
 export function useMessages(conversationId: string | undefined) {
