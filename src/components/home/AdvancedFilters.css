@@ -216,6 +216,10 @@
         width: 92vw;
         max-width: 350px;
 
+        /* Prevent vertical overflow on small screens */
+        max-height: 80vh;
+        overflow-y: auto;
+
         /* Ensure it's above everything */
         z-index: 1000;
         margin: 0;
