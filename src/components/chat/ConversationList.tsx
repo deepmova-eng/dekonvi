@@ -15,6 +15,17 @@ export default function ConversationList({ onSelectConversation, selectedId }: C
   const { data: conversations = [], isLoading: loading, error } = useConversations(currentUser?.id);
   const markAsRead = useMarkMessagesAsRead();
 
+  // DEBUG: Log what we receive from the hook
+  React.useEffect(() => {
+    console.log('🐛 [ConversationList] Render with:', {
+      currentUserId: currentUser?.id,
+      conversationsReceived: conversations,
+      conversationsLength: conversations?.length,
+      loading,
+      error
+    });
+  }, [conversations, loading, error, currentUser?.id]);
+
   // Marquer comme lu quand on change de conversation
   React.useEffect(() => {
     if (selectedId) {
@@ -50,6 +61,7 @@ export default function ConversationList({ onSelectConversation, selectedId }: C
   };
 
   if (loading) {
+    console.log('🐛 [ConversationList] Showing loading state');
     return (
       <div className="divide-y divide-gray-100">
         {[1, 2, 3, 4, 5].map((i) => (
@@ -60,6 +72,7 @@ export default function ConversationList({ onSelectConversation, selectedId }: C
   }
 
   if (error) {
+    console.error('🐛 [ConversationList] Error state:', error);
     return (
       <div className="text-center py-10">
         <p className="text-red-500">Erreur lors du chargement des conversations</p>
@@ -68,6 +81,7 @@ export default function ConversationList({ onSelectConversation, selectedId }: C
   }
 
   if (!conversations || conversations.length === 0) {
+    console.log('🐛 [ConversationList] Showing empty state - conversations:', conversations);
     return (
       <div className="text-center py-10 px-4">
         <div className="flex justify-center mb-4">

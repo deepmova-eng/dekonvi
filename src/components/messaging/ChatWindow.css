@@ -1,6 +1,5 @@
 /* ========================================
-   MINIMAL CSS - CHAT WINDOW
-   Most styles migrated to Tailwind CSS
+   CHAT WINDOW LAYOUT - FLEXBOX STRUCTURE
    ======================================== */
 
 .chat-window {
@@ -48,9 +47,11 @@
 /* Mobile viewport handling */
 @media (max-width: 1024px) {
     .chat-window {
-        height: 100vh;
+        height: 100dvh;
+        /* Dynamic viewport height for mobile keyboard */
     }
 
+    /* Fallback for browsers that don't support dvh */
     @supports not (height: 100dvh) {
         .chat-window {
             height: calc(var(--vh, 1vh) * 100);

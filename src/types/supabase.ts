@@ -106,23 +106,46 @@ export interface Database {
       conversations: {
         Row: {
           id: string
+          user1_id: string
+          user2_id: string
           listing_id: string
-          participants: string[]
           created_at: string
-          last_message: Json | null
-          unread_count: number
+          updated_at: string
+          // New fields added in migration 20241201
+          last_message: string | null
+          last_message_at: string | null
         }
         Insert: {
           id?: string
+          user1_id: string
+          user2_id: string
           listing_id: string
-          participants: string[]
           created_at?: string
-          last_message?: Json | null
-          unread_count?: number
+          updated_at?: string
+          last_message?: string | null
+          last_message_at?: string | null
         }
         Update: {
-          last_message?: Json | null
-          unread_count?: number
+          updated_at?: string
+          last_message?: string | null
+          last_message_at?: string | null
+        }
+      }
+      conversation_deletions: {
+        Row: {
+          id: string
+          conversation_id: string
+          user_id: string
+          deleted_at: string
+        }
+        Insert: {
+          id?: string
+          conversation_id: string
+          user_id: string
+          deleted_at?: string
+        }
+        Update: {
+          deleted_at?: string
         }
       }
       messages: {
@@ -133,6 +156,7 @@ export interface Database {
           content: string
           created_at: string
           read: boolean
+          images: string[] | null  // Support for image attachments
         }
         Insert: {
           id?: string
@@ -141,9 +165,11 @@ export interface Database {
           content: string
           created_at?: string
           read?: boolean
+          images?: string[] | null
         }
         Update: {
           read?: boolean
+          images?: string[] | null
         }
       }
       reports: {

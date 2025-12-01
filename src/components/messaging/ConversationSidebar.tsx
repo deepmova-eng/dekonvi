@@ -22,8 +22,16 @@ export function ConversationSidebar({ conversations, activeId, onSelect, current
     const [conversationToDelete, setConversationToDelete] = useState<string | null>(null)
 
     const filteredConversations = conversations.filter(conv => {
-        const otherUser = conv.other_user
-        return otherUser?.name?.toLowerCase().includes(searchQuery.toLowerCase())
+        // FIX: Calculate otherUser from user1/user2 (hook returns these, not other_user)
+        const otherUser = conv.user1_id === currentUserId ? conv.user2 : conv.user1
+        const listing = conv.listing
+
+        // Search in both username and listing title
+        const userName = otherUser?.name?.toLowerCase() || ''
+        const listingTitle = listing?.title?.toLowerCase() || ''
+        const query = searchQuery.toLowerCase()
+
+        return userName.includes(query) || listingTitle.includes(query)
     })
 
     const getTimeAgo = (date: string) => {
