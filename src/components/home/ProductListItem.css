@@ -212,8 +212,22 @@
     }
 
     .product-list-item__description {
+        /* On reset le display pour éviter les conflits flexbox */
+        display: block !important;
+
+        /* La trinité pour couper le texte sur 1 ligne */
+        white-space: nowrap;
+        /* Interdit le retour à la ligne */
+        overflow: hidden;
+        /* Cache ce qui dépasse */
+        text-overflow: ellipsis;
+        /* Ajoute les "..." */
+
+        /* Sécurité largeur */
+        width: 100%;
+        max-width: 100%;
+
+        /* Keep font size adjustment */
         font-size: 13px;
-        -webkit-line-clamp: 1;
-        line-clamp: 1;
     }
 }
