@@ -135,6 +135,7 @@ export function useConversations(userId: string | undefined) {
     enabled: !!userId,
     staleTime: 0, // Always fetch fresh
     gcTime: 0, // Don't cache
+    refetchInterval: 3000, // Polling every 3 seconds
     refetchOnMount: true,
     refetchOnWindowFocus: true,
   })
