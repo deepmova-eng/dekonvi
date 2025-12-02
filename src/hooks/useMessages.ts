@@ -1,4 +1,4 @@
-import { useQuery, useMutation } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
 import { toast } from 'react-hot-toast'
 import * as Sentry from '@sentry/react'
@@ -249,7 +249,7 @@ export function useMessages(conversationId: string | undefined) {
   })
 }
 
-import * as Sentry from "@sentry/react"
+
 
 // ... imports
 
@@ -348,6 +348,7 @@ export function useSendMessage() {
 
 export function useMarkMessagesAsRead() {
   const queryClient = useQueryClient()
+
 
   return useMutation({
     mutationFn: async (conversationId: string) => {

@@ -8,6 +8,7 @@ interface ConversationHeaderProps {
     onMenuClick: () => void
     onMobileBack?: () => void
     showMobileBack?: boolean
+    loading?: boolean
 }
 
 export function ConversationHeader({
@@ -16,7 +17,8 @@ export function ConversationHeader({
     lastActivity,
     onMenuClick,
     onMobileBack,
-    showMobileBack = false
+    showMobileBack = false,
+    loading = false
 }: ConversationHeaderProps) {
 
     return (
@@ -42,32 +44,48 @@ export function ConversationHeader({
                         </button>
                     )}
 
-                    {/* Avatar */}
-                    <div className="flex-shrink-0">
-                        {otherUserAvatar ? (
-                            <img
-                                src={otherUserAvatar}
-                                alt={otherUserName}
-                                className="w-10 h-10 rounded-full object-cover"
-                            />
-                        ) : (
-                            <div className="w-10 h-10 rounded-full bg-emerald-500 flex items-center justify-center text-white font-semibold text-base">
-                                {otherUserName.charAt(0).toUpperCase()}
-                            </div>
-                        )}
-                    </div>
+                    {/* Loading Skeleton */}
+                    {loading ? (
+                        <div className="flex items-center gap-3 flex-1">
+                            {/* Avatar Skeleton */}
+                            <div className="w-10 h-10 rounded-full bg-gray-200 animate-pulse flex-shrink-0" />
 
-                    {/* User info */}
-                    <div className="flex flex-col min-w-0">
-                        <h3 className="font-semibold text-gray-900 text-sm truncate">
-                            {otherUserName}
-                        </h3>
-                        {lastActivity && (
-                            <span className="text-xs md:text-sm text-gray-500 truncate">
-                                {lastActivity}
-                            </span>
-                        )}
-                    </div>
+                            {/* Text Skeleton */}
+                            <div className="flex flex-col gap-2 flex-1">
+                                <div className="h-4 w-32 bg-gray-200 animate-pulse rounded" />
+                                <div className="h-3 w-20 bg-gray-100 animate-pulse rounded" />
+                            </div>
+                        </div>
+                    ) : (
+                        <>
+                            {/* Avatar */}
+                            <div className="flex-shrink-0">
+                                {otherUserAvatar ? (
+                                    <img
+                                        src={otherUserAvatar}
+                                        alt={otherUserName}
+                                        className="w-10 h-10 rounded-full object-cover"
+                                    />
+                                ) : (
+                                    <div className="w-10 h-10 rounded-full bg-emerald-500 flex items-center justify-center text-white font-semibold text-base">
+                                        {otherUserName.charAt(0).toUpperCase()}
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* User info */}
+                            <div className="flex flex-col min-w-0">
+                                <h3 className="font-semibold text-gray-900 text-sm truncate">
+                                    {otherUserName}
+                                </h3>
+                                {lastActivity && (
+                                    <span className="text-xs md:text-sm text-gray-500 truncate">
+                                        {lastActivity}
+                                    </span>
+                                )}
+                            </div>
+                        </>
+                    )}
                 </div>
 
                 {/* Right section: Menu button */}

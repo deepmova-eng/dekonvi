@@ -7,6 +7,7 @@ import { ConversationHeader } from './ConversationHeader'
 import { DateSeparator } from './DateSeparator'
 import { uploadMessageImage, validateImage } from '../../lib/imageUpload'
 import { getRelativeTime } from '../../lib/timeUtils'
+import { useMarkMessagesAsRead } from '../../hooks/useMessages'
 import './ChatWindow.css'
 
 interface Props {
@@ -27,9 +28,11 @@ export function ChatWindow({ conversationId, currentUserId, onMobileBack, onConv
     const [selectedImages, setSelectedImages] = useState<File[]>([])
     const [previewUrls, setPreviewUrls] = useState<string[]>([])
     const [uploading, setUploading] = useState(false)
+    const [loadingUser, setLoadingUser] = useState(false)
     const messagesEndRef = useRef<HTMLDivElement>(null)
-    const subscriptionRef = useRef<any>(null)
     const fileInputRef = useRef<HTMLInputElement>(null)
+    const { mutate: markAsRead } = useMarkMessagesAsRead()
+
 
     // Fetch messages
     const fetchMessages = useCallback(async () => {
@@ -72,6 +75,8 @@ export function ChatWindow({ conversationId, currentUserId, onMobileBack, onConv
         if (!conversationId || !currentUserId) return
 
         try {
+            setLoadingUser(true) // Start loading
+
             // Récupère la conversation avec l'annonce liée
             const { data: conv, error: convError } = await supabase
                 .from('conversations')
@@ -111,6 +116,8 @@ export function ChatWindow({ conversationId, currentUserId, onMobileBack, onConv
             }
         } catch (error) {
             console.error('❌ Error fetching user:', error)
+        } finally {
+            setLoadingUser(false) // Stop loading
         }
     }, [conversationId, currentUserId])
 
@@ -355,43 +362,10 @@ export function ChatWindow({ conversationId, currentUserId, onMobileBack, onConv
 
         fetchMessages()
         fetchOtherUser()
-    }, [conversationId, currentUserId, fetchMessages, fetchOtherUser])
 
-    // ✅ MARK MESSAGES AS READ when opening conversation
-    useEffect(() => {
-        if (!conversationId || !currentUserId) return
-
-        const markMessagesAsRead = async () => {
-            try {
-                // Mark all unread messages in this conversation as read
-                // Note: messages table has sender_id, not receiver_id
-                // So we mark messages where we're NOT the sender (i.e., we're the receiver)
-                const { data, error } = await supabase
-                    .from('messages')
-                    .update({ read: true })
-                    .eq('conversation_id', conversationId)
-                    .neq('sender_id', currentUserId)  // NOT the sender = receiver
-                    .eq('read', false)  // Optimization: only update unread messages
-
-                if (error) {
-                    // Don't log 400 errors if there simply were no messages to update
-                    if (error.code !== 'PGRST116') {  // PGRST116 = No rows found
-                        console.error('❌ [ChatWindow] Error marking messages as read:', {
-                            error,
-                            conversationId,
-                            currentUserId
-                        });
-                    }
-                } else {
-                    console.log('✅ [ChatWindow] Marked messages as read for conversation:', conversationId);
-                }
-            } catch (error) {
-                console.error('❌ [ChatWindow] Exception marking messages as read:', error);
-            }
-        }
-
-        markMessagesAsRead()
-    }, [conversationId, currentUserId])
+        // 🔥 CRITIQUE : Marquer les messages comme lus quand on ouvre la conversation
+        markAsRead(conversationId)
+    }, [conversationId, currentUserId, fetchMessages, fetchOtherUser, markAsRead])
 
     // Scroll to bottom when messages change
     useEffect(() => {
@@ -585,6 +559,7 @@ export function ChatWindow({ conversationId, currentUserId, onMobileBack, onConv
                     onMenuClick={() => setShowMenu(!showMenu)}
                     onMobileBack={onMobileBack}
                     showMobileBack={true}
+                    loading={loadingUser}
                 />
 
                 {/* Menu dropdown */}
