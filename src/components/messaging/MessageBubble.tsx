@@ -37,17 +37,17 @@ export function MessageBubble({
                 animate-fadeIn
             `}
         >
-            {/* Bulle de message */}
+            {/* Bulle de message - Plus organique et moderne */}
             <div
                 className={`
-                    px-3 py-2 
-                    rounded-2xl 
+                    px-5 py-3 
+                    rounded-3xl 
                     inline-block
                     max-w-full
                     break-words
                     ${isOwn
-                        ? 'bg-emerald-50 text-gray-900 rounded-br-sm'
-                        : 'bg-white border border-gray-200 text-gray-900 rounded-bl-sm'
+                        ? 'bg-[#2DD181] text-white rounded-tr-none'
+                        : 'bg-[#f3f4f6] text-gray-800 rounded-tl-none'
                     }
                     ${isSending ? 'opacity-60' : ''}
                 `}

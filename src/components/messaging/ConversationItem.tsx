@@ -105,25 +105,28 @@ export function ConversationItem({ conv, isActive, currentUserId, onSelect, onDe
                         }
                     }}
                 >
-                    {/* Listing Image */}
-                    <div className="conv-avatar-wrapper">
+                    {/* Listing Image - Plus rond et moderne */}
+                    <div className="flex-shrink-0">
                         <img
                             src={listing?.images?.[0] || '/placeholder-product.png'}
                             alt={listing?.title || 'Annonce'}
-                            className="conv-avatar"
-                            style={{ objectFit: 'cover' }}
+                            className="w-12 h-12 rounded-xl object-cover border border-gray-100"
                         />
                     </div>
 
-                    {/* Content */}
-                    <div className="conv-content">
-                        <div className="conv-header">
-                            <span className="conv-name">{listing?.title || 'Annonce'}</span>
-                            <span className="conv-time">{getTimeAgo(timestamp)}</span>
+                    {/* Content - Meilleure hiérarchie visuelle */}
+                    <div className="flex-1 min-w-0">
+                        <div className="flex justify-between items-baseline">
+                            <h3 className="font-bold text-gray-900 truncate">
+                                {listing?.title || 'Annonce'}
+                            </h3>
+                            <span className="text-xs text-gray-400 whitespace-nowrap ml-2">
+                                {getTimeAgo(timestamp)}
+                            </span>
                         </div>
 
-                        <div className="conv-footer">
-                            <p className="conv-preview">
+                        <div className="flex items-center gap-2 mt-1">
+                            <p className="text-sm text-gray-500 truncate flex-1">
                                 {displayMessage}
                             </p>
                             {unreadCount > 0 && (
