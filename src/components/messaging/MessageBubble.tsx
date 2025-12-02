@@ -1,3 +1,5 @@
+import React from 'react'
+
 interface MessageBubbleProps {
     content: string
     isOwn: boolean
@@ -8,7 +10,7 @@ interface MessageBubbleProps {
     deliveredAt?: string | null
 }
 
-export function MessageBubble({
+export const MessageBubble = React.memo(function MessageBubble({
     content,
     isOwn,
     timestamp,
@@ -60,7 +62,7 @@ export function MessageBubble({
                                 key={idx}
                                 src={imageUrl}
                                 alt={`Image ${idx + 1}`}
-                                className="max-w-[300px] max-h-[400px] md:max-w-[300px] sm:max-w-[200px] sm:max-h-[300px] rounded-lg object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                                className="w-[280px] h-[200px] rounded-lg object-cover cursor-pointer hover:opacity-90 transition-opacity bg-gray-100"
                                 onClick={() => window.open(imageUrl, '_blank')}
                             />
                         ))}
@@ -91,4 +93,4 @@ export function MessageBubble({
             </span>
         </div>
     )
-}
+})

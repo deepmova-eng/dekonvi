@@ -365,19 +365,41 @@ export function ChatWindow({ conversationId, currentUserId, onMobileBack, onConv
 
         // 🔥 CRITIQUE : Marquer les messages comme lus quand on ouvre la conversation
         markAsRead(conversationId)
+
+        // Reset scroll tracker for new conversation
+        isAtBottomRef.current = true
     }, [conversationId, currentUserId, fetchMessages, fetchOtherUser, markAsRead])
+
+    const isAtBottomRef = useRef(true) // Default to true for first load
+
+    // Handle scroll to track if user is at bottom
+    const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+        const { scrollTop, scrollHeight, clientHeight } = e.currentTarget
+        // Tolerance of 10px
+        const isAtBottom = Math.abs(scrollHeight - scrollTop - clientHeight) < 10
+        isAtBottomRef.current = isAtBottom
+    }
 
     // Scroll to bottom when messages change
     useEffect(() => {
         // Only auto-scroll if there are many messages (3+)
-        // This prevents whitespace when there's only 1-2 messages
         if (messages.length >= 3) {
-            scrollToBottom()
+            // Smart Auto-Scroll: Only scroll if user was already at bottom or it's the first load (implied by default true)
+            // Note: We might want to force it on conversation change, but isAtBottomRef persists. 
+            // Better strategy: Reset isAtBottomRef to true when conversationId changes? 
+            // Actually, for this specific request: "if (isAtBottom || isFirstLoad)"
+
+            if (isAtBottomRef.current) {
+                scrollToBottom('auto')
+            }
         }
     }, [messages])
 
-    const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    const scrollToBottom = (behavior: ScrollBehavior = 'smooth') => {
+        // Use requestAnimationFrame to ensure scroll happens after render cycle
+        requestAnimationFrame(() => {
+            messagesEndRef.current?.scrollIntoView({ behavior })
+        })
     }
 
     const handleSend = async () => {
@@ -575,7 +597,10 @@ export function ChatWindow({ conversationId, currentUserId, onMobileBack, onConv
             </div>
 
             {/* ROW 2: Messages - Takes all remaining space (1fr) + Scrollable */}
-            <div className="overflow-y-auto min-h-0 relative bg-white pointer-events-auto">
+            <div
+                className="overflow-y-auto min-h-0 relative bg-white pointer-events-auto"
+                onScroll={handleScroll}
+            >
                 <div className="flex flex-col p-4 space-y-2">
                     {messages.map((message, index) => {
                         const isOwn = message.sender_id === currentUserId
