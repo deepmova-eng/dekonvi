@@ -109,11 +109,22 @@ export default function BottomNav({
           showBadge={true}
           badgeCount={unreadCount}
         />
+        {/* Dynamic Profile Button */}
         <NavItem
-          icon={<User size={24} />}
-          label="Mon Compte"
+          icon={
+            user?.user_metadata?.avatar_url ? (
+              <img
+                src={user.user_metadata.avatar_url}
+                alt="Profile"
+                className="w-6 h-6 rounded-full object-cover"
+              />
+            ) : (
+              <User size={24} className={user ? "text-primary-500" : ""} />
+            )
+          }
+          label={user ? "Profil" : "Mon Compte"}
           isActive={activeTab === 'profile'}
-          onClick={() => navigate('/profile')}
+          onClick={() => navigate(user ? '/profile' : '/login')}
           orientation={orientation}
         />
       </div>

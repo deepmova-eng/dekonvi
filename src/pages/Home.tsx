@@ -141,8 +141,7 @@ export default function Home({ onProductSelect, searchQuery = '' }: HomeProps) {
             <div className="bg-white border-b sticky top-[72px] z-50">
                 <div className="max-w-7xl mx-auto px-2 sm:px-4 py-4">
                     <div className="flex items-center gap-4">
-                        {/* DEKONVI Title */}
-                        <h1 className="text-2xl font-bold text-gray-900">DEKONVI</h1>
+                        {/* DEKONVI Title - Hidden on mobile, logo in navbar is enough */}
 
                         {/* Search Bar */}
                         <div className="flex-1 relative">
@@ -165,21 +164,6 @@ export default function Home({ onProductSelect, searchQuery = '' }: HomeProps) {
                     </div>
                 </div>
             </div>
-
-            {/* Mobile Search Bar - Visible only on mobile */}
-            < div className="lg:hidden bg-white border-b px-4 py-3" >
-                <div className="flex items-center bg-gray-100 rounded-lg p-3">
-                    <Search className="text-gray-400 w-5 h-5" />
-                    <input
-                        type="text"
-                        placeholder="Rechercher..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="flex-1 ml-2 bg-transparent outline-none text-gray-700 placeholder-gray-500"
-                    />
-                    <Camera className="text-gray-400 w-5 h-5" />
-                </div>
-            </div >
 
             {/* Advertising Slider - Hide during search */}
             {!searchTerm && <HeroSlider />}

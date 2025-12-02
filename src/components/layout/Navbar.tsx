@@ -196,8 +196,8 @@ export default function Navbar() {
                 {/* ACTIONS (droite) */}
                 <div className="navbar-actions">
 
-                    {/* Barre de recherche */}
-                    <div className="search-box">
+                    {/* Barre de recherche - Hidden on mobile, use Hero search instead */}
+                    <div className="search-box hidden md:flex">
                         <Search size={18} className="search-icon" />
                         <input
                             type="text"
@@ -213,13 +213,13 @@ export default function Navbar() {
                             <NotificationBell />
 
                             {/* Bouton Publier */}
-                            <Link to="/create-premium" className="btn-publish">
+                            <Link to="/create-premium" className="btn-publish hidden md:flex">
                                 <PlusCircle size={18} />
                                 <span>Publier</span>
                             </Link>
 
                             {/* Menu utilisateur */}
-                            <div className="user-menu">
+                            <div className="user-menu hidden md:block">
                                 <button
                                     className="user-avatar"
                                     onClick={(e) => {
@@ -269,9 +269,9 @@ export default function Navbar() {
                         </Link>
                     )}
 
-                    {/* Menu mobile toggle */}
+                    {/* Menu mobile toggle - Hidden on mobile, only for desktop */}
                     <button
-                        className="mobile-menu-toggle"
+                        className="mobile-menu-toggle hidden md:block"
                         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                     >
                         {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
