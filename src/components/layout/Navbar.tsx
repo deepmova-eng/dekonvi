@@ -16,6 +16,7 @@ import {
     X
 } from 'lucide-react'
 import { categories } from '../../config/categories'
+import NotificationBell from '../notifications/NotificationBell'
 import './Navbar.css'
 
 const TYPING_PHRASES = [
@@ -187,7 +188,6 @@ export default function Navbar() {
                             >
                                 <MessageCircle size={18} />
                                 <span>Messages</span>
-                                <span className="notification-badge">3</span>
                             </Link>
                         </>
                     )}
@@ -209,6 +209,9 @@ export default function Navbar() {
 
                     {user ? (
                         <>
+                            {/* Notifications */}
+                            <NotificationBell />
+
                             {/* Bouton Publier */}
                             <Link to="/create-premium" className="btn-publish">
                                 <PlusCircle size={18} />

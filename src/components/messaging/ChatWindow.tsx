@@ -357,6 +357,42 @@ export function ChatWindow({ conversationId, currentUserId, onMobileBack, onConv
         fetchOtherUser()
     }, [conversationId, currentUserId, fetchMessages, fetchOtherUser])
 
+    // ✅ MARK MESSAGES AS READ when opening conversation
+    useEffect(() => {
+        if (!conversationId || !currentUserId) return
+
+        const markMessagesAsRead = async () => {
+            try {
+                // Mark all unread messages in this conversation as read
+                // Note: messages table has sender_id, not receiver_id
+                // So we mark messages where we're NOT the sender (i.e., we're the receiver)
+                const { data, error } = await supabase
+                    .from('messages')
+                    .update({ read: true })
+                    .eq('conversation_id', conversationId)
+                    .neq('sender_id', currentUserId)  // NOT the sender = receiver
+                    .eq('read', false)  // Optimization: only update unread messages
+
+                if (error) {
+                    // Don't log 400 errors if there simply were no messages to update
+                    if (error.code !== 'PGRST116') {  // PGRST116 = No rows found
+                        console.error('❌ [ChatWindow] Error marking messages as read:', {
+                            error,
+                            conversationId,
+                            currentUserId
+                        });
+                    }
+                } else {
+                    console.log('✅ [ChatWindow] Marked messages as read for conversation:', conversationId);
+                }
+            } catch (error) {
+                console.error('❌ [ChatWindow] Exception marking messages as read:', error);
+            }
+        }
+
+        markMessagesAsRead()
+    }, [conversationId, currentUserId])
+
     // Scroll to bottom when messages change
     useEffect(() => {
         // Only auto-scroll if there are many messages (3+)

@@ -385,22 +385,51 @@ export function useUnreadMessagesCount(
 
       // console.log('🔍 [UnreadCount] Fetching for user:', userId)
 
-      // Récupérer les conversations de l'utilisateur
+      // 🔥 FIX: Get soft-deleted conversations WITH deletion dates
+      const { data: deletedConvs } = await (supabase as any)
+        .from('conversation_deletions')
+        .select('conversation_id, deleted_at')
+        .eq('user_id', userId)
+
+      // Create map of conversation_id -> deleted_at
+      const deletionDates = new Map(
+        deletedConvs?.map((d: any) => [d.conversation_id, d.deleted_at]) || []
+      )
+
+      // Récupérer les conversations de l'utilisateur WITH last_message_at
       const { data: conversations, error: convError } = await supabase
         .from('conversations')
-        .select('id')
+        .select('id, last_message_at')
         .or(`user1_id.eq.${userId},user2_id.eq.${userId}`)
 
       if (convError || !conversations) return 0
 
-      const conversationIds = conversations.map(c => c.id)
+      // 🔥 FIX: Filter out soft-deleted conversations
+      // BUT allow "resurrected" conversations (last_message_at > deleted_at)
+      const activeConversationIds = conversations
+        .filter(conv => {
+          const deletedAt = deletionDates.get(conv.id);
 
-      if (conversationIds.length === 0) return 0
+          // If not deleted, keep it
+          if (!deletedAt) return true;
+
+          // If no last message, exclude (old deleted conversation)
+          if (!conv.last_message_at) return false;
+
+          // 🔥 RESURRECTION CHECK: If last message is AFTER deletion, keep it
+          const lastMsgDate = new Date(conv.last_message_at);
+          const deleteDate = new Date(deletedAt);
+
+          return lastMsgDate > deleteDate; // Keep if resurrected
+        })
+        .map(c => c.id)
+
+      if (activeConversationIds.length === 0) return 0
 
       // Compter combien de conversations ONT au moins 1 message non lu
       let countWithUnread = 0
 
-      for (const convId of conversationIds) {
+      for (const convId of activeConversationIds) {
         const { count } = await supabase
           .from('messages')
           .select('*', { count: 'exact', head: true })
@@ -418,7 +447,9 @@ export function useUnreadMessagesCount(
       return countWithUnread
     },
     enabled: !!userId,
-    staleTime: 1000 * 5, // 5 seconds
-    refetchInterval: options?.refetchInterval ?? 5000, // 5 seconds by default
+    staleTime: 0, // Always consider data stale so refetchInterval works properly
+    refetchInterval: options?.refetchInterval ?? 3000, // 3 seconds for better responsiveness
+    refetchOnWindowFocus: true, // Refetch when window regains focus
+    refetchOnReconnect: true, // Refetch when internet reconnects
   })
 }

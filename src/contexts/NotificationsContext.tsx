@@ -58,7 +58,8 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
 
         const fetchNotifications = async () => {
             try {
-                const { data, error } = await supabase
+                // Fetch all notifications for the user
+                const { data: allNotifications, error } = await supabase
                     .from('notifications' as any)
                     .select('*')
                     .eq('user_id', user.id)
@@ -67,8 +68,60 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
 
                 if (error) throw error;
 
-                setNotifications(data || []);
-                setUnreadCount(data?.filter(n => !n.read).length || 0);
+                // 🔥 FIX: Filter out message notifications from soft-deleted conversations
+                // BUT allow "resurrected" conversations (new messages after deletion)
+                let filteredNotifications = allNotifications || [];
+
+                if (filteredNotifications.length > 0) {
+                    // Get conversation deletions WITH deletion dates
+                    const { data: deletedConvs } = await (supabase as any)
+                        .from('conversation_deletions')
+                        .select('conversation_id, deleted_at')
+                        .eq('user_id', user.id);
+
+                    // Create map of conversation_id -> deleted_at
+                    const deletionDates = new Map(
+                        deletedConvs?.map((d: any) => [d.conversation_id, d.deleted_at]) || []
+                    );
+
+                    // Filter out notifications for deleted conversations
+                    // UNLESS the notification is newer than the deletion (resurrected conversation)
+                    filteredNotifications = filteredNotifications.filter(notification => {
+                        // Keep non-message notifications
+                        if (notification.type !== 'message') return true;
+
+                        // For message notifications, check if conversation is deleted
+                        // Extract conversation ID from link (format: /messages?conversation=XYZ)
+                        if (notification.link) {
+                            const match = notification.link.match(/[?&]conversation(?:Id)?=([^&]*)/);
+                            if (match && match[1]) {
+                                const convId = match[1];
+                                const deletedAt = deletionDates.get(convId);
+
+                                // If not deleted, keep it
+                                if (!deletedAt) return true;
+
+                                // 🔥 RESURRECTION CHECK: If notification is AFTER deletion, keep it
+                                // This handles cases where user deletes a conversation but then receives new messages
+                                const notifDate = new Date(notification.created_at);
+                                const deleteDate = new Date(deletedAt);
+
+                                if (notifDate > deleteDate) {
+                                    // console.log('📨 [Notifications] Resurrected conversation:', convId);
+                                    return true; // Keep - conversation was resurrected
+                                }
+
+                                // Otherwise, hide it (deleted and no new activity)
+                                return false;
+                            }
+                        }
+
+                        return true; // Keep if we can't extract conversation ID
+                    });
+                }
+
+                setNotifications(filteredNotifications);
+                setUnreadCount(filteredNotifications.filter(n => !n.read).length);
             } catch (error) {
                 console.error('Error fetching notifications:', error);
             } finally {
@@ -89,7 +142,7 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
                     table: 'notifications',
                     // NO FILTER - Manual client-side filtering to avoid binding mismatch
                 } as any,
-                (payload: any) => {
+                async (payload: any) => {  // Made async to allow await
                     // Client-side filtering: only process notifications for this user
                     const notification = payload.new || payload.old
                     if (!notification || notification.user_id !== user.id) {
@@ -98,6 +151,28 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
 
                     if (payload.eventType === 'INSERT') {
                         const newNotification = payload.new as Notification;
+
+                        // 🔥 FIX: Check if this notification is for a deleted conversation
+                        if (newNotification.type === 'message' && newNotification.link) {
+                            const match = newNotification.link.match(/[?&]conversation(?:Id)?=([^&]*)/);
+                            if (match && match[1]) {
+                                const convId = match[1];
+
+                                // Check if conversation is deleted
+                                const { data: deletion } = await (supabase as any)
+                                    .from('conversation_deletions')
+                                    .select('id')
+                                    .eq('conversation_id', convId)
+                                    .eq('user_id', user.id)
+                                    .maybeSingle();
+
+                                // Skip this notification if conversation is deleted
+                                if (deletion) {
+                                    console.log('🔕 [Notifications] Skipping notification from deleted conversation:', convId);
+                                    return;
+                                }
+                            }
+                        }
 
                         // Check if user is currently viewing this conversation
                         const currentPath = window.location.pathname;
@@ -186,8 +261,15 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
             )
             .subscribe();
 
+        // 🔥 POLLING BACKUP: Refetch notifications every 10 seconds as backup to Realtime
+        // This ensures badge updates even if Realtime has issues
+        const pollingInterval = setInterval(() => {
+            fetchNotifications();
+        }, 10000); // 10 seconds
+
         return () => {
             supabase.removeChannel(channel);
+            clearInterval(pollingInterval);
         };
     }, [user]);
 

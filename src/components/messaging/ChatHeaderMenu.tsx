@@ -59,6 +59,16 @@ export function ChatHeaderMenu({ listingId, otherUserId, conversationId, onClose
             const { data: { user } } = await supabase.auth.getUser()
             if (!user) throw new Error('User not authenticated')
 
+            // 🔥 FIX: Mark all received messages as read BEFORE soft delete
+            // This prevents the notification counter from counting messages in deleted conversations
+            // Note: messages table has sender_id, not receiver_id
+            await supabase
+                .from('messages')
+                .update({ read: true })
+                .eq('conversation_id', conversationId)
+                .neq('sender_id', user.id)  // NOT the sender = receiver
+                .eq('read', false)  // Optimization: only update unread messages
+
             // Soft delete: delete old entry then insert new one
             // This avoids RLS policy issues with upsert
 
