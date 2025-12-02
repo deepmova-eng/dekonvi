@@ -30,11 +30,21 @@ export default function NotificationList({ onClose }: NotificationListProps) {
     };
 
     return (
-        <div className="notification-dropdown">
-            <div className="notification-header">
-                <h3>Notifications</h3>
+        <div className="
+            /* Mobile: Fixed full-width */
+            fixed left-4 right-4 top-20 z-50
+            max-h-[80vh] overflow-y-auto
+            
+            /* Desktop: Absolute dropdown */
+            md:absolute md:right-0 md:top-full md:left-auto md:w-96 md:mt-2
+            
+            /* Common styling */
+            bg-white rounded-xl shadow-2xl border border-gray-100
+        ">
+            <div className="flex items-center justify-between p-4 border-b border-gray-200">
+                <h3 className="text-lg font-bold text-gray-900">Notifications</h3>
                 {notifications.length > 0 && (
-                    <button onClick={() => markAllAsRead()} className="mark-all-read">
+                    <button onClick={() => markAllAsRead()} className="text-sm text-blue-600 font-semibold hover:text-blue-700">
                         Tout marquer comme lu
                     </button>
                 )}
@@ -52,26 +62,39 @@ export default function NotificationList({ onClose }: NotificationListProps) {
                         {/* Unread Section */}
                         {notifications.some(n => !n.read) && (
                             <div className="notification-section">
-                                <h4 className="section-title">Non lues</h4>
+                                <h4 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3 mt-4 px-4">Nouveau</h4>
                                 {notifications.filter(n => !n.read).map((notification) => (
                                     <div
                                         key={notification.id}
                                         onClick={() => handleNotificationClick(notification)}
-                                        className="notification-item unread"
+                                        className="flex items-start gap-4 p-4 border-b border-gray-50 bg-blue-50 hover:bg-blue-100 cursor-pointer transition-colors"
                                     >
-                                        <div className="notification-icon">
-                                            {notification.type === 'premium' ? '🚀' :
-                                                notification.type === 'message' ? '💬' : '🔔'}
+                                        {/* Icon Circle */}
+                                        <div className={`h-10 w-10 rounded-full flex items-center justify-center flex-shrink-0 ${notification.type === 'premium' ? 'bg-purple-100 text-purple-600' :
+                                            notification.type === 'message' ? 'bg-green-100 text-green-600' :
+                                                'bg-blue-100 text-blue-600'
+                                            }`}>
+                                            <span className="text-lg">
+                                                {notification.type === 'premium' ? '🚀' :
+                                                    notification.type === 'message' ? '💬' : '🔔'}
+                                            </span>
                                         </div>
-                                        <div className="notification-content">
-                                            <p className="notification-text">{notification.content}</p>
-                                            <span className="notification-time">
+
+                                        {/* Content */}
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-sm text-gray-900 font-medium leading-snug">
+                                                {notification.content}
+                                            </p>
+                                            <span className="text-xs text-gray-400 mt-1 block">
                                                 {formatDistanceToNow(new Date(notification.created_at), {
                                                     addSuffix: true,
                                                     locale: fr
                                                 })}
                                             </span>
                                         </div>
+
+                                        {/* Unread Indicator */}
+                                        <div className="h-2 w-2 rounded-full bg-blue-500 flex-shrink-0 mt-1"></div>
                                     </div>
                                 ))}
                             </div>
@@ -80,20 +103,30 @@ export default function NotificationList({ onClose }: NotificationListProps) {
                         {/* Read Section */}
                         {notifications.some(n => n.read) && (
                             <div className="notification-section">
-                                <h4 className="section-title">Lues</h4>
+                                <h4 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3 mt-4 px-4">Plus tôt</h4>
                                 {notifications.filter(n => n.read).map((notification) => (
                                     <div
                                         key={notification.id}
                                         onClick={() => handleNotificationClick(notification)}
-                                        className="notification-item"
+                                        className="flex items-start gap-4 p-4 border-b border-gray-50 bg-white hover:bg-gray-50 cursor-pointer transition-colors"
                                     >
-                                        <div className="notification-icon">
-                                            {notification.type === 'premium' ? '🚀' :
-                                                notification.type === 'message' ? '💬' : '🔔'}
+                                        {/* Icon Circle */}
+                                        <div className={`h-10 w-10 rounded-full flex items-center justify-center flex-shrink-0 ${notification.type === 'premium' ? 'bg-purple-100 text-purple-600' :
+                                            notification.type === 'message' ? 'bg-green-100 text-green-600' :
+                                                'bg-blue-100 text-blue-600'
+                                            }`}>
+                                            <span className="text-lg">
+                                                {notification.type === 'premium' ? '🚀' :
+                                                    notification.type === 'message' ? '💬' : '🔔'}
+                                            </span>
                                         </div>
-                                        <div className="notification-content">
-                                            <p className="notification-text">{notification.content}</p>
-                                            <span className="notification-time">
+
+                                        {/* Content */}
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-sm text-gray-600 leading-snug">
+                                                {notification.content}
+                                            </p>
+                                            <span className="text-xs text-gray-400 mt-1 block">
                                                 {formatDistanceToNow(new Date(notification.created_at), {
                                                     addSuffix: true,
                                                     locale: fr
