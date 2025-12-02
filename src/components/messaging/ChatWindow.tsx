@@ -573,7 +573,7 @@ export function ChatWindow({ conversationId, currentUserId, onMobileBack, onConv
         <div className="fixed inset-0 z-[9999] flex flex-col bg-white h-[100dvh] w-full overscroll-none md:static md:h-full md:w-auto md:z-auto">
 
             {/* ROW 1: Header - Auto height based on content */}
-            <div className="flex-none z-[1000] border-b bg-white pointer-events-auto relative">
+            <div className="flex-none z-[1000] border-b bg-white pointer-events-auto relative pt-[env(safe-area-inset-top)]">
                 <ConversationHeader
                     otherUserName={otherUser?.name || 'Utilisateur'}
                     otherUserAvatar={otherUser?.avatar_url}
