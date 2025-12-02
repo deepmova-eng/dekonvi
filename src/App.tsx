@@ -93,9 +93,16 @@ export default function App() {
     location.pathname.startsWith('/login') ||
     location.pathname.startsWith('/register');
 
-  // Cacher SEULEMENT la navbar du haut sur /messages SI on est sur mobile
-  // Sur desktop, on veut toujours voir la navbar même sur /messages
-  const hideTopNav = hideNavigation || (location.pathname.startsWith('/messages') && isMobile);
+  // Mobile-Native UX: Masquer la navbar Logo partout SAUF sur la page d'accueil
+  // Chaque page a son propre header contextuel (Favoris, Messages, Profil, etc.)
+  // Sur desktop, on garde la navbar partout
+  const hideTopNav = hideNavigation ||
+    (isMobile && (
+      location.pathname.startsWith('/messages') ||
+      location.pathname.startsWith('/favorites') ||
+      location.pathname === '/profile' ||
+      location.pathname.startsWith('/create')
+    ));
 
   return (
     <div className="min-h-screen bg-gray-50 pb-16 md:pb-0">
@@ -104,7 +111,10 @@ export default function App() {
       {/* Desktop Navigation - Hide on /messages for immersive chat */}
       {!hideTopNav && <Navbar />}
 
-      <main className={location.pathname.startsWith('/messages') ? 'min-h-[calc(100vh-4rem)]' : 'max-w-7xl mx-auto min-h-[calc(100vh-4rem)]'}>
+      <main className={`${location.pathname.startsWith('/messages')
+          ? 'min-h-[calc(100vh-4rem)]'
+          : 'max-w-7xl mx-auto min-h-[calc(100vh-4rem)]'
+        } ${!hideTopNav ? 'pt-20' : 'pt-0'}`}>
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<Home onProductSelect={(id) => navigate(`/listings/${id}`)} />} />

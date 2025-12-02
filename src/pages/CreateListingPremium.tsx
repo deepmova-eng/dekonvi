@@ -252,7 +252,7 @@ export default function CreateListingPremium() {
 
             {/* Simple back button */}
             <div className="simple-header">
-                <button className="back-button" onClick={() => navigate(-1)}>
+                <button className="back-button" onClick={() => navigate('/', { replace: true })}>
                     <ArrowLeft size={20} />
                     Retour
                 </button>

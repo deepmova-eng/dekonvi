@@ -167,17 +167,11 @@ export default function Profile({
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-20">
+    <div className="min-h-screen bg-gray-50">
       {/* Header Profile */}
       <div className="bg-white p-4 sm:p-6">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
           <div className="flex items-center space-x-2 sm:space-x-4 w-full sm:w-auto">
-            <button
-              onClick={handleBackToHome}
-              className="p-2 hover:bg-gray-100 rounded-full transition-colors mr-2"
-            >
-              <ChevronLeft className="w-6 h-6 text-gray-600" />
-            </button>
             <div className="relative group">
               <div className="h-20 w-20 bg-gray-200 rounded-full flex items-center justify-center overflow-hidden">
                 {user.user_metadata?.avatar_url ? (

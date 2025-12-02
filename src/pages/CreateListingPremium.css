@@ -5,8 +5,7 @@
 .create-listing-page {
     min-height: 100vh;
     background: linear-gradient(135deg, #F9FAFB 0%, #F3F4F6 100%);
-    padding-top: 72px;
-    /* Navbar height */
+    /* Navbar hidden on mobile - no padding needed */
 }
 
 /* Simple header with back button */
