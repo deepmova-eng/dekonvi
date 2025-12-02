@@ -102,50 +102,52 @@ export function ConversationSidebar({ conversations, activeId, onSelect, current
     }
 
     return (
-        <div className="conversation-sidebar">
+        <div className="fixed inset-0 z-40 flex flex-col bg-white h-[100dvh] w-full overscroll-none md:static md:h-full md:w-auto md:z-auto">
 
-            {/* Header */}
-            <div className="sidebar-header">
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 8px 0 24px' }}>
-                    <h2>Messages</h2>
-                    <button
-                        className="header-menu-btn"
-                        onClick={() => setShowMenu(!showMenu)}
-                    >
-                        <MoreVertical size={20} />
-                    </button>
+            {/* Header - Fixed at top */}
+            <div className="flex-none pt-[env(safe-area-inset-top)]">
+                <div className="sidebar-header">
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 8px 0 24px' }}>
+                        <h2>Messages</h2>
+                        <button
+                            className="header-menu-btn"
+                            onClick={() => setShowMenu(!showMenu)}
+                        >
+                            <MoreVertical size={20} />
+                        </button>
 
-                    {/* Menu dropdown */}
-                    {showMenu && (
-                        <SidebarMenu
-                            onClose={() => setShowMenu(false)}
-                            conversationCount={conversations.length}
-                        />
-                    )}
+                        {/* Menu dropdown */}
+                        {showMenu && (
+                            <SidebarMenu
+                                onClose={() => setShowMenu(false)}
+                                conversationCount={conversations.length}
+                            />
+                        )}
+                    </div>
+                </div>
+
+                {/* Product Card - Context de la conversation active */}
+                {activeListing && (
+                    <div className="px-4 py-3">
+                        <ProductCard listing={activeListing} />
+                    </div>
+                )}
+
+                {/* Search */}
+                <div className="sidebar-search">
+                    <Search size={18} className="search-icon" />
+                    <input
+                        type="text"
+                        placeholder="Rechercher une conversation..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="search-input"
+                    />
                 </div>
             </div>
 
-            {/* Product Card - Context de la conversation active */}
-            {activeListing && (
-                <div className="px-4 py-3">
-                    <ProductCard listing={activeListing} />
-                </div>
-            )}
-
-            {/* Search */}
-            <div className="sidebar-search">
-                <Search size={18} className="search-icon" />
-                <input
-                    type="text"
-                    placeholder="Rechercher une conversation..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="search-input"
-                />
-            </div>
-
-            {/* Conversations list */}
-            <div className="conversations-list">
+            {/* Conversations list - Scrollable */}
+            <div className="flex-1 overflow-y-auto overflow-x-hidden min-h-0 pb-20">
                 {filteredConversations.length === 0 ? (
                     <div className="empty-conversations">
                         <p>Aucune conversation trouvée</p>
