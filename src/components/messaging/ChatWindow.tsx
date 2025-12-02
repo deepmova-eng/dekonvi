@@ -570,7 +570,7 @@ export function ChatWindow({ conversationId, currentUserId, onMobileBack, onConv
     }
 
     return (
-        <div className="fixed inset-0 z-[9999] h-[100dvh] w-full bg-white md:static md:h-full md:w-auto md:z-auto grid grid-rows-[auto_1fr_auto] overflow-hidden">
+        <div className="fixed inset-0 z-[9999] flex flex-col bg-white h-[100dvh] w-full overscroll-none md:static md:h-full md:w-auto md:z-auto">
 
             {/* ROW 1: Header - Auto height based on content */}
             <div className="flex-none z-[1000] border-b bg-white pointer-events-auto relative">
@@ -598,7 +598,7 @@ export function ChatWindow({ conversationId, currentUserId, onMobileBack, onConv
 
             {/* ROW 2: Messages - Takes all remaining space (1fr) + Scrollable */}
             <div
-                className="overflow-y-auto min-h-0 relative bg-white pointer-events-auto"
+                className="flex-1 overflow-y-auto overflow-x-hidden min-h-0 relative bg-white pointer-events-auto"
                 onScroll={handleScroll}
             >
                 <div className="flex flex-col p-4 space-y-2">
@@ -639,7 +639,7 @@ export function ChatWindow({ conversationId, currentUserId, onMobileBack, onConv
             </div>
 
             {/* ROW 3: Input - Auto height, stuck at bottom */}
-            <div className="flex-none z-20 bg-white border-t px-4 py-3 w-full pointer-events-auto">
+            <div className="flex-none z-20 bg-white border-t px-4 py-3 w-full pointer-events-auto pb-safe">
                 <div className="flex items-center gap-3">
                     {/* Input file caché */}
                     <input
