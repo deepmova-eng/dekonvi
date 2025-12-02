@@ -33,12 +33,10 @@ export function DateSeparator({ date }: DateSeparatorProps) {
     }
 
     return (
-        <div className="flex justify-center my-1 md:my-4">
-            <div className="bg-gray-100 px-3 py-1 rounded-full">
-                <span className="text-xs text-gray-500 font-medium">
-                    {formatDate(date)}
-                </span>
-            </div>
+        <div className="flex justify-center my-4">
+            <span className="text-xs font-medium text-gray-400 bg-gray-50 px-3 py-1 rounded-full">
+                {formatDate(date)}
+            </span>
         </div>
     )
 }
