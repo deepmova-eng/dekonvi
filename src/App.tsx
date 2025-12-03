@@ -97,6 +97,7 @@ export default function App() {
     (isMobile && (
       location.pathname.startsWith('/messages') ||
       location.pathname.startsWith('/favorites') ||
+      location.pathname.startsWith('/seller/') ||
       location.pathname === '/profile' ||
       location.pathname.startsWith('/create')
     ));
