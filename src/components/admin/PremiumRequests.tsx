@@ -118,7 +118,7 @@ export default function PremiumRequests() {
               <div className="flex items-center space-x-4">
                 <button
                   onClick={() => handleApprove(request)}
-                  className="bg-primary-500 text-white px-4 py-2 rounded-lg hover:bg-primary-600 transition-colors"
+                  className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors"
                 >
                   <Check className="w-5 h-5" />
                 </button>
