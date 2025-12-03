@@ -243,42 +243,18 @@ export function usePremiumRequests() {
     return useQuery({
         queryKey: ['admin', 'premium-requests'],
         queryFn: async () => {
-            // Fetch premium requests first
-            const { data: requests, error } = await supabase
+            const { data, error } = await supabase
                 .from('premium_requests')
-                .select('*')
+                .select(`
+                    *,
+                    user:profiles!user_id(name, email),
+                    listing:listings!listing_id(title)
+                `)
                 .eq('status', 'pending')
                 .order('created_at', { ascending: false });
 
             if (error) throw error;
-            if (!requests || requests.length === 0) return [];
-
-            // Fetch related data manually
-            const enrichedRequests = await Promise.all(
-                requests.map(async (request) => {
-                    // Fetch user profile
-                    const { data: user } = await supabase
-                        .from('profiles')
-                        .select('name, email')
-                        .eq('id', request.user_id)
-                        .single();
-
-                    // Fetch listing
-                    const { data: listing } = await supabase
-                        .from('listings')
-                        .select('title')
-                        .eq('id', request.listing_id)
-                        .single();
-
-                    return {
-                        ...request,
-                        user,
-                        listing
-                    };
-                })
-            );
-
-            return enrichedRequests;
+            return data || [];
         },
         staleTime: 1000 * 30,
     });
