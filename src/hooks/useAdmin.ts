@@ -250,6 +250,9 @@ export function usePremiumRequests() {
           profiles:user_id (
             name,
             email
+          ),
+          listings:listing_id (
+            title
           )
         `)
                 .eq('status', 'pending')
