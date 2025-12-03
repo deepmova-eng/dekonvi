@@ -405,12 +405,12 @@ export default function UserListings({
               </button>
               <button
                 onClick={confirmAction.type === 'delete' ? confirmDelete : confirmBoost}
-                className={`px-4 py-2 text-white rounded-lg transition-colors ${confirmAction.type === 'delete'
+                className={`px-6 py-3 text-white font-bold rounded-lg transition-colors ${confirmAction.type === 'delete'
                   ? 'bg-red-500 hover:bg-red-600'
-                  : 'bg-primary-500 hover:bg-primary-600'
+                  : 'bg-green-600 hover:bg-green-700'
                   }`}
               >
-                {confirmAction.type === 'delete' ? 'Supprimer' : 'Confirmer'}
+                {confirmAction.type === 'delete' ? 'Supprimer' : 'Booster pour 5000 FCFA'}
               </button>
             </div>
           </div>
