@@ -1,5 +1,5 @@
 -- ═══════════════════════════════════════════════════════════
--- FIX URGENT : Forcer la modération des annonces
+-- FIX URGENT : Forcer la modération des annonces (CORRECTED)
 -- Date: 2024-12-03
 -- Objectif: Empêcher les annonces de s'auto-publier sans validation admin
 -- ═══════════════════════════════════════════════════════════
@@ -11,23 +11,14 @@
 ALTER TABLE public.listings 
 ALTER COLUMN status SET DEFAULT 'pending';
 
--- Vérification
-SELECT column_default 
-FROM information_schema.columns 
-WHERE table_name = 'listings' 
-AND column_name = 'status';
--- Résultat attendu : 'pending'::text
-
 -- ═══════════════════════════════════════════════════════════
 -- FIX 2 : Trigger pour forcer 'pending' à l'insertion
 -- ═══════════════════════════════════════════════════════════
 
--- Ce trigger empêche les utilisateurs de s'auto-valider en envoyant status='active'
 CREATE OR REPLACE FUNCTION public.force_listing_pending_on_insert()
 RETURNS TRIGGER AS $$
 BEGIN
   -- Force le statut à 'pending' pour toute nouvelle annonce
-  -- Sauf si l'utilisateur est admin (optionnel, à activer si besoin)
   NEW.status := 'pending';
   
   RAISE NOTICE 'Nouvelle annonce forcée en statut pending : %', NEW.id;
@@ -44,11 +35,12 @@ CREATE TRIGGER enforce_pending_status
   EXECUTE FUNCTION public.force_listing_pending_on_insert();
 
 -- ═══════════════════════════════════════════════════════════
--- FIX 3 : RLS Policy - Interdire la modification du status
+-- FIX 3 : RLS Policies - DROP puis CREATE
 -- ═══════════════════════════════════════════════════════════
 
--- Supprimer l'ancienne policy d'insert si elle existe
+-- Supprimer les anciennes policies d'insert
 DROP POLICY IF EXISTS "Users can create listings" ON public.listings;
+DROP POLICY IF EXISTS "Users can create listings with pending status" ON public.listings;
 
 -- Nouvelle policy INSERT : interdit de définir un status autre que 'pending'
 CREATE POLICY "Users can create listings with pending status"
@@ -60,9 +52,11 @@ CREATE POLICY "Users can create listings with pending status"
     AND (status IS NULL OR status = 'pending')
   );
 
--- Policy UPDATE : seuls les admins peuvent changer le status
+-- Supprimer l'ancienne policy d'update
 DROP POLICY IF EXISTS "Users can update their listings" ON public.listings;
+DROP POLICY IF EXISTS "Users can update their listings except status" ON public.listings;
 
+-- Policy UPDATE : empêche la modification du status
 CREATE POLICY "Users can update their listings except status"
   ON public.listings
   FOR UPDATE
@@ -70,9 +64,13 @@ CREATE POLICY "Users can update their listings except status"
   USING (auth.uid() = seller_id)
   WITH CHECK (
     auth.uid() = seller_id
-    -- Empêche la modification du status (il reste tel quel)
+    -- Le status ne peut pas être modifié par l'utilisateur
     AND status = (SELECT status FROM public.listings WHERE id = listings.id)
   );
+
+-- Supprimer l'ancienne policy admin
+DROP POLICY IF EXISTS "Admins can update all listings" ON public.listings;
+DROP POLICY IF EXISTS "Admins can update all listings including status" ON public.listings;
 
 -- Policy pour les admins : peuvent tout modifier
 CREATE POLICY "Admins can update all listings including status"
@@ -90,12 +88,16 @@ CREATE POLICY "Admins can update all listings including status"
 -- VÉRIFICATION
 -- ═══════════════════════════════════════════════════════════
 
+-- Vérifier le default
+SELECT column_default 
+FROM information_schema.columns 
+WHERE table_name = 'listings' 
+AND column_name = 'status';
+
 -- Vérifier les policies
 SELECT 
   policyname,
-  cmd as command,
-  qual as using_clause,
-  with_check
+  cmd as command
 FROM pg_policies
 WHERE tablename = 'listings'
 ORDER BY policyname;
@@ -108,24 +110,6 @@ SELECT
 FROM information_schema.triggers
 WHERE event_object_table = 'listings'
 AND trigger_name = 'enforce_pending_status';
-
--- ═══════════════════════════════════════════════════════════
--- TEST (Optionnel)
--- ═══════════════════════════════════════════════════════════
-
-/*
--- Test 1 : Essayer de créer une annonce avec status='active' (doit échouer ou être forcée à pending)
--- Connectez-vous en tant qu'utilisateur normal, puis :
-
-INSERT INTO public.listings (seller_id, title, price, status)
-VALUES (auth.uid(), 'Test Auto-Validation', 100, 'active');
-
--- Vérifier le statut (doit être 'pending')
-SELECT id, title, status FROM public.listings WHERE title = 'Test Auto-Validation';
-
--- Nettoyer
-DELETE FROM public.listings WHERE title = 'Test Auto-Validation';
-*/
 
 -- ═══════════════════════════════════════════════════════════
 -- FIN DE LA MIGRATION
