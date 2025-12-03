@@ -112,28 +112,25 @@ export default function ProductCard({ listing }: ProductCardProps) {
                     loading="lazy"
                 />
 
-                {/* Badges Container */}
+                {/* Badges Container - Left and Right positioning */}
                 <div className="product-card__badges">
-                    {/* Badge Premium */}
-                    {((listing as any).is_premium || listing.isPremium) && (
-                        <span className="product-card__badge product-card__badge--premium">
-                            Premium
-                        </span>
-                    )}
+                    {/* Left side - Premium */}
+                    <div>
+                        {((listing as any).is_premium || listing.isPremium) && (
+                            <span className="product-card__badge product-card__badge--premium">
+                                Premium
+                            </span>
+                        )}
+                    </div>
 
-                    {/* Badge Nouveau */}
-                    {isNew() && (
-                        <span className="product-card__badge product-card__badge--new">
-                            Nouveau
-                        </span>
-                    )}
-
-                    {/* Badge Urgent */}
-                    {((listing as any).is_urgent || listing.isUrgent) && (
-                        <span className="product-card__badge product-card__badge--urgent">
-                            Urgent
-                        </span>
-                    )}
+                    {/* Right side - Nouveau */}
+                    <div>
+                        {isNew() && (
+                            <span className="product-card__badge product-card__badge--new">
+                                Nouveau
+                            </span>
+                        )}
+                    </div>
                 </div>
 
                 {/* Bouton favori */}

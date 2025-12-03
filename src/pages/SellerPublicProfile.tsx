@@ -9,12 +9,13 @@ import {
     MapPin,
     Calendar,
     Package,
-    ArrowLeft,
+    ChevronLeft,
     CheckCircle,
     TrendingUp,
     X,
     Upload,
-    Info
+    Info,
+    Check
 } from 'lucide-react';
 import ProductCard from '../components/home/ProductCard';
 
@@ -62,6 +63,7 @@ export default function SellerPublicProfile() {
     const loading = sellerLoading || listingsLoading || reviewsLoading;
 
     const [showReviewModal, setShowReviewModal] = useState(false);
+    const [showAllReviews, setShowAllReviews] = useState(false);
     const [reviewFormData, setReviewFormData] = useState({
         rating: 5,
         comment: '',
@@ -197,21 +199,33 @@ export default function SellerPublicProfile() {
         (new Date().getTime() - new Date(seller.created_at).getTime()) / (1000 * 60 * 60 * 24 * 30)
     );
 
+    // Format member since text
+    const getMemberSinceText = () => {
+        if (memberSinceMonths < 1) {
+            return "Nouveau membre";
+        }
+        return `${memberSinceMonths} Mois`;
+    };
+
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-gray-50 pb-20">
 
-            {/* Hero Header - Transparent */}
-            <div className="bg-transparent">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-
-                    {/* Back Button */}
+            {/* Clean Header - Just Back Button */}
+            <div className="sticky top-0 z-40 bg-white border-b border-gray-200">
+                <div className="max-w-7xl mx-auto px-4 py-3">
                     <button
                         onClick={() => navigate(-1)}
-                        className="flex items-center space-x-2 text-gray-700 hover:text-gray-900 mb-6 transition-colors"
+                        className="flex items-center space-x-2 text-gray-700 hover:text-gray-900 transition-colors"
                     >
-                        <ArrowLeft className="h-5 w-5" />
-                        <span>Retour</span>
+                        <ChevronLeft className="h-6 w-6" />
+                        <span className="font-medium">Retour</span>
                     </button>
+                </div>
+            </div>
+
+            {/* Hero Header */}
+            <div className="bg-white">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
                     {/* Seller Info */}
                     <div className="flex flex-col md:flex-row items-start md:items-center space-y-6 md:space-y-0 md:space-x-8">
@@ -241,26 +255,26 @@ export default function SellerPublicProfile() {
                         {/* Info + Stats */}
                         <div className="flex-1">
                             {/* Name + Rating */}
-                            <div className="mb-4">
-                                <h1 className="text-4xl font-bold mb-2">{seller.name}</h1>
+                            <div className="mb-6">
+                                <h1 className="text-3xl font-bold mb-3">{seller.name}</h1>
 
                                 {reviews.length > 0 && (
-                                    <div className="flex items-center space-x-3">
-                                        <div className="flex items-center space-x-1">
+                                    <div className="flex items-center space-x-2">
+                                        <div className="flex items-center space-x-0.5">
                                             {[...Array(5)].map((_, i) => (
                                                 <Star
                                                     key={i}
-                                                    className={`h-5 w-5 ${i < Math.floor(averageRating)
-                                                        ? 'text-yellow-500 fill-yellow-500'
+                                                    className={`h-4 w-4 ${i < Math.floor(averageRating)
+                                                        ? 'text-yellow-400 fill-yellow-400'
                                                         : 'text-gray-300 fill-gray-300'
                                                         }`}
                                                 />
                                             ))}
                                         </div>
-                                        <span className="text-xl font-semibold text-gray-900">
+                                        <span className="text-base font-semibold text-gray-900">
                                             {averageRating.toFixed(1)}
                                         </span>
-                                        <span className="text-gray-700">
+                                        <span className="text-gray-500 text-sm">
                                             ({reviews.length} avis)
                                         </span>
                                     </div>
@@ -268,77 +282,49 @@ export default function SellerPublicProfile() {
                             </div>
 
                             {/* Quick Stats Grid */}
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
 
                                 {/* Stat 1 - Annonces */}
-                                <div className="bg-white/90 backdrop-blur-sm rounded-lg p-4 border border-emerald-200">
+                                <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
                                     <div className="flex items-center space-x-2 mb-1">
-                                        <Package className="h-5 w-5 text-emerald-600" />
-                                        <span className="text-2xl font-bold text-gray-900">{listings.length}</span>
+                                        <Package className="h-6 w-6 text-gray-600" />
+                                        <span className="text-xl font-bold text-gray-900">{listings.length}</span>
                                     </div>
-                                    <p className="text-sm text-gray-600">Annonces</p>
+                                    <p className="text-xs text-gray-600">Annonces</p>
                                 </div>
 
                                 {/* Stat 2 - Membre depuis */}
-                                <div className="bg-white/90 backdrop-blur-sm rounded-lg p-4 border border-emerald-200">
+                                <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
                                     <div className="flex items-center space-x-2 mb-1">
-                                        <Calendar className="h-5 w-5 text-emerald-600" />
-                                        <span className="text-2xl font-bold text-gray-900">{memberSinceMonths}</span>
+                                        <Calendar className="h-6 w-6 text-gray-600" />
+                                        <span className="text-xl font-bold text-gray-900">
+                                            {memberSinceMonths < 1 ? "✨" : memberSinceMonths}
+                                        </span>
                                     </div>
-                                    <p className="text-sm text-gray-600">Mois</p>
+                                    <p className="text-xs text-gray-600">{getMemberSinceText()}</p>
                                 </div>
 
                                 {/* Stat 3 - Taux réponse */}
-                                <div className="bg-white/90 backdrop-blur-sm rounded-lg p-4 border border-emerald-200">
+                                <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
                                     <div className="flex items-center space-x-2 mb-1">
-                                        <TrendingUp className="h-5 w-5 text-emerald-600" />
-                                        <span className="text-2xl font-bold text-gray-900">{responseRate}%</span>
+                                        <TrendingUp className="h-6 w-6 text-gray-600" />
+                                        <span className="text-xl font-bold text-gray-900">{responseRate}%</span>
                                     </div>
-                                    <p className="text-sm text-gray-600">Réponses</p>
+                                    <p className="text-xs text-gray-600">Réponse</p>
                                 </div>
 
                                 {/* Stat 4 - Localisation */}
-                                <div className="bg-white/90 backdrop-blur-sm rounded-lg p-4 border border-emerald-200">
+                                <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
                                     <div className="flex items-center space-x-2 mb-1">
-                                        <MapPin className="h-5 w-5 text-emerald-600" />
-                                        <span className="text-lg font-bold text-gray-900 truncate">{seller.location || 'Lomé'}</span>
+                                        <MapPin className="h-6 w-6 text-gray-600" />
+                                        <span className="text-base font-bold text-gray-900 truncate">{seller.location || 'Lomé'}</span>
                                     </div>
-                                    <p className="text-sm text-gray-600">Ville</p>
+                                    <p className="text-xs text-gray-600">Ville</p>
                                 </div>
 
                             </div>
 
-                            {/* Rating Display */}
-                            <div className="mt-6">
-                                {reviews.length > 0 ? (
-                                    <div className="flex items-center space-x-4">
-                                        <div className="flex items-center space-x-1">
-                                            {[...Array(5)].map((_, i) => (
-                                                <Star
-                                                    key={i}
-                                                    className={`h-6 w-6 ${i < Math.floor(averageRating)
-                                                        ? 'text-yellow-400 fill-yellow-400'
-                                                        : 'text-gray-300 fill-gray-300'
-                                                        }`}
-                                                />
-                                            ))}
-                                        </div>
-                                        <div className="flex items-center space-x-2">
-                                            <span className="text-2xl font-bold text-gray-900">
-                                                {averageRating.toFixed(1)}
-                                            </span>
-                                            <span className="text-lg text-gray-500">
-                                                ({reviews.length} {reviews.length > 1 ? 'avis' : 'avis'})
-                                            </span>
-                                        </div>
-                                    </div>
-                                ) : (
-                                    <div className="flex items-center space-x-2 text-gray-500">
-                                        <Star className="h-5 w-5" />
-                                        <span>Aucun avis pour le moment</span>
-                                    </div>
-                                )}
-                            </div>
+                            {/* SUPPRIMÉ : Duplicate Rating Display */}
 
                         </div>
                     </div>
@@ -348,16 +334,16 @@ export default function SellerPublicProfile() {
             {/* Main Content */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
 
-                {/* Annonces Section */}
+                {/* Annonces Section - Style Vinted */}
                 <section className="mb-16">
-                    <div className="flex items-center justify-between mb-8">
-                        <h2 className="text-3xl font-bold text-gray-900">
+                    <div className="flex items-center justify-between mb-6" style={{ marginTop: '32px' }}>
+                        <h2 className="text-2xl font-bold text-gray-900">
                             Annonces actives ({listings.length})
                         </h2>
                     </div>
 
                     {listings.length > 0 ? (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                        <div className="grid grid-cols-2 gap-4">
                             {listings.map((listing) => (
                                 <ProductCard key={listing.id} listing={listing} />
                             ))}
@@ -386,7 +372,7 @@ export default function SellerPublicProfile() {
                                 Avis clients {reviews.length > 0 && `(${reviews.length})`}
                             </h2>
                             {reviews.length > 0 && (
-                                <div className="flex items-center space-x-3">
+                                <div className="flex flex-wrap items-center gap-2">
                                     <div className="flex items-center space-x-1">
                                         {[...Array(5)].map((_, i) => (
                                             <Star
@@ -398,94 +384,107 @@ export default function SellerPublicProfile() {
                                             />
                                         ))}
                                     </div>
-                                    <span className="text-2xl font-bold text-gray-900">
+                                    <span className="text-2xl font-bold text-gray-900 whitespace-nowrap">
                                         {averageRating.toFixed(1)}
                                     </span>
-                                    <span className="text-gray-500">sur 5</span>
+                                    <span className="text-gray-500 whitespace-nowrap">sur 5</span>
                                 </div>
                             )}
                         </div>
 
-                        {/* Bouton Laisser un avis */}
+                        {/* Bouton Laisser un avis - Outline Style */}
                         <button
                             onClick={() => setShowReviewModal(true)}
-                            className="flex items-center space-x-2 px-6 py-3 bg-emerald-600 text-white font-semibold rounded-lg hover:bg-emerald-700 transition-colors shadow-md"
+                            className="flex items-center space-x-2 px-5 py-2.5 bg-white text-gray-700 font-medium rounded-lg border border-gray-300 hover:bg-gray-50 hover:border-gray-400 transition-colors text-sm"
                         >
-                            <Star className="h-5 w-5" />
+                            <Star className="h-4 w-4" />
                             <span>Laisser un avis</span>
                         </button>
                     </div>
 
-                    {/* Liste des avis */}
+                    {/* Liste des avis - Limit to 3 unless 'Show All' clicked */}
                     {reviews.length > 0 ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            {reviews.map((review) => (
-                                <div
-                                    key={review.id}
-                                    className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200 hover:shadow-lg transition-shadow"
-                                >
-                                    {/* Header avis - Acheteur + Date */}
-                                    <div className="flex items-start justify-between mb-4">
-                                        <div className="flex items-center space-x-3">
-                                            {/* Avatar acheteur */}
-                                            <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center">
-                                                <span className="text-gray-600 font-semibold text-lg">
-                                                    {review.profiles?.name?.[0]?.toUpperCase() || 'A'}
-                                                </span>
+                        <>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {(showAllReviews ? reviews : reviews.slice(0, 3)).map((review) => (
+                                    <div
+                                        key={review.id}
+                                        className="bg-white rounded-2xl p-4 shadow-sm border border-gray-200 hover:shadow-lg transition-shadow"
+                                    >
+                                        {/* Header avis - Acheteur + Date */}
+                                        <div className="flex items-start justify-between mb-4">
+                                            <div className="flex items-center space-x-3">
+                                                {/* Avatar acheteur */}
+                                                <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center">
+                                                    <span className="text-gray-600 font-semibold text-lg">
+                                                        {review.profiles?.name?.[0]?.toUpperCase() || 'A'}
+                                                    </span>
+                                                </div>
+                                                <div>
+                                                    <p className="font-semibold text-gray-900">
+                                                        {review.profiles?.name || 'Acheteur vérifié'}
+                                                    </p>
+                                                    <p className="text-sm text-gray-500">
+                                                        {new Date(review.created_at).toLocaleDateString('fr-FR', {
+                                                            day: 'numeric',
+                                                            month: 'long',
+                                                            year: 'numeric'
+                                                        })}
+                                                    </p>
+                                                </div>
                                             </div>
-                                            <div>
-                                                <p className="font-semibold text-gray-900">
-                                                    {review.profiles?.name || 'Acheteur vérifié'}
-                                                </p>
-                                                <p className="text-sm text-gray-500">
-                                                    {new Date(review.created_at).toLocaleDateString('fr-FR', {
-                                                        day: 'numeric',
-                                                        month: 'long',
-                                                        year: 'numeric'
-                                                    })}
-                                                </p>
+
+                                            {/* Étoiles */}
+                                            <div className="flex items-center space-x-0.5">
+                                                {[...Array(5)].map((_, i) => (
+                                                    <Star
+                                                        key={i}
+                                                        className={`h-4 w-4 ${i < review.rating
+                                                            ? 'text-yellow-400 fill-yellow-400'
+                                                            : 'text-gray-300 fill-gray-300'
+                                                            }`}
+                                                    />
+                                                ))}
                                             </div>
                                         </div>
 
-                                        {/* Étoiles */}
-                                        <div className="flex items-center space-x-0.5">
-                                            {[...Array(5)].map((_, i) => (
-                                                <Star
-                                                    key={i}
-                                                    className={`h-4 w-4 ${i < review.rating
-                                                        ? 'text-yellow-400 fill-yellow-400'
-                                                        : 'text-gray-300 fill-gray-300'
-                                                        }`}
+                                        {/* Commentaire */}
+                                        <p className="text-gray-700 leading-relaxed mb-4">
+                                            {review.comment}
+                                        </p>
+
+                                        {/* Photo preuve - Thumbnail avec overlay minimal */}
+                                        {review.proof_image_url && (
+                                            <div className="relative w-20 h-20 rounded-lg overflow-hidden group cursor-pointer flex-shrink-0">
+                                                <img
+                                                    src={review.proof_image_url}
+                                                    alt="Photo du produit reçu"
+                                                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                                                    onClick={() => window.open(review.proof_image_url, '_blank')}
                                                 />
-                                            ))}
-                                        </div>
-                                    </div>
 
-                                    {/* Commentaire */}
-                                    <p className="text-gray-700 leading-relaxed mb-4">
-                                        {review.comment}
-                                    </p>
-
-                                    {/* Photo preuve - CRITIQUE */}
-                                    {review.proof_image_url && (
-                                        <div className="relative h-64 rounded-xl overflow-hidden group cursor-pointer">
-                                            <img
-                                                src={review.proof_image_url}
-                                                alt="Photo du produit reçu"
-                                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                                                onClick={() => window.open(review.proof_image_url, '_blank')}
-                                            />
-
-                                            {/* Badge "Preuve vérifiée" */}
-                                            <div className="absolute top-3 right-3 px-3 py-1.5 bg-green-500 text-white text-xs font-semibold rounded-full flex items-center space-x-1 shadow-lg">
-                                                <CheckCircle className="h-3 w-3" />
-                                                <span>Preuve vérifiée</span>
+                                                {/* Badge "Preuve vérifiée" - Overlay with white border for contrast */}
+                                                <div className="absolute bottom-1 right-1 bg-green-500 rounded-full p-1 shadow-md border-2 border-white">
+                                                    <Check className="h-3 w-3 text-white" />
+                                                </div>
                                             </div>
-                                        </div>
-                                    )}
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+
+                            {/* Button to show all reviews if > 3 */}
+                            {reviews.length > 3 && !showAllReviews && (
+                                <div className="text-center mt-6">
+                                    <button
+                                        onClick={() => setShowAllReviews(true)}
+                                        className="px-6 py-3 bg-white text-gray-700 font-medium rounded-lg border border-gray-300 hover:bg-gray-50 hover:border-gray-400 transition-colors"
+                                    >
+                                        Voir les {reviews.length} avis
+                                    </button>
                                 </div>
-                            ))}
-                        </div>
+                            )}
+                        </>
                     ) : (
                         /* Empty state si 0 avis */
                         <div className="text-center py-16 bg-white rounded-2xl border-2 border-dashed border-gray-300">
@@ -515,8 +514,8 @@ export default function SellerPublicProfile() {
             {/* ═══════════════════════════════════════════════ */}
 
             {showReviewModal && (
-                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 pt-20">
-                    <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[9999] p-4 pt-20 pb-24">
+                    <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[85vh] overflow-y-auto shadow-2xl">
 
                         {/* Header */}
                         <div className="sticky top-0 bg-white border-b border-gray-200 p-6 flex items-center justify-between">
@@ -646,7 +645,7 @@ export default function SellerPublicProfile() {
                         </div>
 
                         {/* Footer */}
-                        <div className="sticky bottom-0 bg-gray-50 border-t border-gray-200 p-6 flex items-center justify-end space-x-4">
+                        <div className="sticky bottom-0 bg-gray-50 border-t border-gray-200 p-6 pb-8 flex items-center justify-end space-x-4">
                             <button
                                 onClick={() => setShowReviewModal(false)}
                                 className="px-6 py-3 text-gray-700 font-semibold hover:bg-gray-200 rounded-lg transition-colors"

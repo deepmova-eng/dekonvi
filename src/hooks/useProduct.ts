@@ -34,6 +34,8 @@ export function useProduct(productId: string) {
         );
 
         // Fetch product with seller data
+        // NOTE: No status filter here - RLS policies handle access control
+        // Admins & owners can see pending, public sees only active
         const productQuery = supabase
           .from('listings')
           .select(`
@@ -48,7 +50,6 @@ export function useProduct(productId: string) {
             )
           `)
           .eq('id', productId)
-          .eq('status', 'active') // Only show active listings
           .single();
 
         const { data, error: productError } = await Promise.race([
