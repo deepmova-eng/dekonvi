@@ -208,7 +208,7 @@ export default function UserListings({
 
       const boostData = {
         listing_id: listingId,
-        seller_id: user!.id,
+        user_id: user!.id,  // Fixed: use user_id instead of seller_id
         duration: 30,
         price: 5000
       };
