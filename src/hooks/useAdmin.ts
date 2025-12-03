@@ -243,18 +243,42 @@ export function usePremiumRequests() {
     return useQuery({
         queryKey: ['admin', 'premium-requests'],
         queryFn: async () => {
-            const { data, error } = await supabase
+            // Fetch premium requests first
+            const { data: requests, error } = await supabase
                 .from('premium_requests')
-                .select(`
-                    *,
-                    user:profiles!user_id(name, email),
-                    listing:listings!listing_id(title)
-                `)
+                .select('*')
                 .eq('status', 'pending')
                 .order('created_at', { ascending: false });
 
             if (error) throw error;
-            return data || [];
+            if (!requests || requests.length === 0) return [];
+
+            // Fetch related data manually (PostgREST join syntax doesn't work in this config)
+            const enrichedRequests = await Promise.all(
+                requests.map(async (request) => {
+                    // Fetch user profile
+                    const { data: user } = await supabase
+                        .from('profiles')
+                        .select('name, email')
+                        .eq('id', request.user_id)
+                        .single();
+
+                    // Fetch listing
+                    const { data: listing } = await supabase
+                        .from('listings')
+                        .select('title')
+                        .eq('id', request.listing_id)
+                        .single();
+
+                    return {
+                        ...request,
+                        user,
+                        listing
+                    };
+                })
+            );
+
+            return enrichedRequests;
         },
         staleTime: 1000 * 30,
     });
