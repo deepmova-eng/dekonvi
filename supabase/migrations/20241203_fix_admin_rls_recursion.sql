@@ -11,7 +11,7 @@
 
 -- SOLUTION :
 -- Créer une fonction SECURITY DEFINER is_admin() qui bypasse les RLS
--- lors de sa vérification.
+-- lors de sa vérification. IMPORTANT: dans le schéma public, pas auth.
 
 -- ═══════════════════════════════════════════════════════════
 -- ÉTAPE 1 : Supprimer les policies UPDATE problématiques
@@ -28,7 +28,7 @@ DROP POLICY IF EXISTS "Sellers can update own listings (no status change)" ON pu
 
 -- Cette fonction s'exécute avec les privilèges du créateur (DEFINER),
 -- ce qui bypasse les RLS policies et évite la récursion
-CREATE OR REPLACE FUNCTION auth.is_admin()
+CREATE OR REPLACE FUNCTION public.is_admin()
 RETURNS BOOLEAN AS $$
 BEGIN
   RETURN EXISTS (
@@ -46,8 +46,8 @@ CREATE POLICY "Admins can update everything"
   ON public.listings
   FOR UPDATE
   TO authenticated
-  USING ( auth.is_admin() )
-  WITH CHECK ( auth.is_admin() );
+  USING ( public.is_admin() )
+  WITH CHECK ( public.is_admin() );
 
 -- ═══════════════════════════════════════════════════════════
 -- ÉTAPE 4 : Policy Vendeur - Update limité (pas de status change)
@@ -72,7 +72,8 @@ SELECT
   proname as function_name,
   prosecdef as is_security_definer
 FROM pg_proc
-WHERE proname = 'is_admin';
+WHERE proname = 'is_admin'
+AND pronamespace = (SELECT oid FROM pg_namespace WHERE nspname = 'public');
 
 -- Vérifier les policies UPDATE
 SELECT 
@@ -86,7 +87,7 @@ AND cmd = 'UPDATE'
 ORDER BY policyname;
 
 -- Résultat attendu : 2 policies
--- - Admins can update everything (USING: is_admin())
+-- - Admins can update everything (USING: public.is_admin())
 -- - Sellers can update own listings (no status change)
 
 -- ═══════════════════════════════════════════════════════════
