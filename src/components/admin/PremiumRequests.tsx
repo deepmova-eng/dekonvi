@@ -6,8 +6,8 @@ import type { Database } from '../../types/supabase';
 import toast from 'react-hot-toast';
 
 type PremiumRequest = Database['public']['Tables']['premium_requests']['Row'] & {
-  listings?: { title: string } | null;
-  profiles?: { name: string } | null;
+  listing?: { title: string } | null;
+  user?: { name: string; email: string } | null;
 };
 
 export default function PremiumRequests() {
@@ -104,11 +104,11 @@ export default function PremiumRequests() {
                 <div className="flex items-center space-x-2">
                   <Sparkles className="w-5 h-5 text-amber-500" />
                   <h3 className="font-medium text-gray-900">
-                    {request.listings?.title || 'Annonce supprimée'}
+                    {request.listing?.title || 'Annonce supprimée'}
                   </h3>
                 </div>
                 <p className="text-sm text-gray-500">
-                  Par {request.profiles?.name} • {new Date(request.created_at).toLocaleDateString()}
+                  Par {request.user?.name} • {new Date(request.created_at).toLocaleDateString()}
                 </p>
                 <div className="flex items-center mt-2 text-sm text-gray-600">
                   <span>{request.duration} jours • {request.price.toLocaleString('fr-FR')} FCFA</span>
@@ -118,7 +118,7 @@ export default function PremiumRequests() {
               <div className="flex items-center space-x-4">
                 <button
                   onClick={() => handleApprove(request)}
-                  className="bg-primary-500 text-white px-4 py-2 rounded-lg hover:bg-primary-600 transition-colors"
+                  className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors"
                 >
                   <Check className="w-5 h-5" />
                 </button>
