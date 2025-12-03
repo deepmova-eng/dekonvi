@@ -247,13 +247,8 @@ export function usePremiumRequests() {
                 .from('premium_requests')
                 .select(`
           *,
-          profiles:user_id (
-            name,
-            email
-          ),
-          listings:listing_id (
-            title
-          )
+          user:user_id(name, email),
+          listing:listing_id(title)
         `)
                 .eq('status', 'pending')
                 .order('created_at', { ascending: false });
