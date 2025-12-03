@@ -195,21 +195,14 @@ export default function Login({ onBack, onRegisterClick }: LoginProps) {
               {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
             </button>
           </div>
-          <button
-            type="button"
-            className="text-sm text-gray-600 hover:text-primary-500 mt-2"
-            onClick={() => {/* TODO: Implement password reset */ }}
-          >
-            Mot de passe oublié
-          </button>
         </div>
 
         <button
           type="submit"
           disabled={loading}
           className={`w-full py-4 rounded-full font-semibold text-white text-lg transition-all shadow-lg ${loading
-              ? 'bg-gray-400 cursor-not-allowed'
-              : 'bg-primary-500 hover:bg-primary-600 hover:shadow-xl active:scale-[0.98]'
+            ? 'bg-gray-400 cursor-not-allowed'
+            : 'bg-primary-500 hover:bg-primary-600 hover:shadow-xl active:scale-[0.98]'
             }`}
           style={{
             background: loading ? undefined : 'linear-gradient(135deg, #2DD181 0%, #27ae60 100%)',
@@ -217,7 +210,7 @@ export default function Login({ onBack, onRegisterClick }: LoginProps) {
         >
           {loading ? 'Connexion...' : 'Se connecter'}
         </button>
-      </form>
+      </form >
 
       <button
         onClick={onRegisterClick}
@@ -226,6 +219,6 @@ export default function Login({ onBack, onRegisterClick }: LoginProps) {
         <span className="text-gray-900 font-medium">Créer un compte</span>
         <ArrowRight className="text-primary-500" />
       </button>
-    </div>
+    </div >
   );
 }

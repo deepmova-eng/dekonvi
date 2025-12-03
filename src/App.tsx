@@ -11,14 +11,12 @@ import ProtectedRoute from './components/ProtectedRoute';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
-import Messages from './pages/Messages';
 import MessagingPremium from './pages/MessagingPremium';
 import CreateListing from './pages/CreateListing';
 import CreateListingPremium from './pages/CreateListingPremium';
 import Profile from './pages/Profile';
 import Favorites from './pages/Favorites';
 import ProductDetails from './pages/ProductDetails';
-import SellerProfile from './pages/SellerProfile';
 import SellerPublicProfile from './pages/SellerPublicProfile';
 import AdminPanel from './pages/AdminPanel';
 import MonitoringDashboard from './pages/admin/Monitoring';
@@ -30,7 +28,6 @@ export default function App() {
   const { user } = useSupabase();
   const location = useLocation();
   const navigate = useNavigate();
-  const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
 
   // Track page views
   useEffect(() => {
@@ -112,8 +109,8 @@ export default function App() {
       {!hideTopNav && <Navbar />}
 
       <main className={`${location.pathname.startsWith('/messages')
-          ? 'min-h-[calc(100vh-4rem)]'
-          : 'max-w-7xl mx-auto min-h-[calc(100vh-4rem)]'
+        ? 'min-h-[calc(100vh-4rem)]'
+        : 'max-w-7xl mx-auto min-h-[calc(100vh-4rem)]'
         } ${!hideTopNav ? 'pt-20' : 'pt-0'}`}>
         <Routes>
           {/* Public Routes */}
@@ -124,7 +121,8 @@ export default function App() {
           <Route path="/categories/:slug" element={<CategoryListings />} />
           <Route path="/category/:categoryId" element={<CategoryPage />} />
           <Route path="/listings/:id" element={<ProductDetails />} />
-          <Route path="/profile/:id" element={<SellerProfile />} />
+          {/* Redirect old /profile/:id to /seller/:id */}
+          <Route path="/profile/:id" element={<Navigate to={`/seller/${window.location.pathname.split('/').pop()}`} replace />} />
           <Route path="/seller/:id" element={<SellerPublicProfile />} />
 
           {/* Protected Routes - Require Login */}

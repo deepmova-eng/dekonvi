@@ -1,13 +1,12 @@
 import { useRef, useEffect } from 'react'
-import { MessageSquarePlus, CheckCheck, Settings, HelpCircle } from 'lucide-react'
+import { MessageSquarePlus, Settings, HelpCircle } from 'lucide-react'
 import './SidebarMenu.css'
 
 interface Props {
     onClose: () => void
-    conversationCount: number
 }
 
-export function SidebarMenu({ onClose, conversationCount }: Props) {
+export function SidebarMenu({ onClose }: Props) {
     const menuRef = useRef<HTMLDivElement>(null)
 
     // Ferme le menu si on clique ailleurs
@@ -25,17 +24,6 @@ export function SidebarMenu({ onClose, conversationCount }: Props) {
     const handleNewMessage = () => {
         alert('Pour démarrer une conversation, cliquez sur "Contacter" depuis une annonce')
         onClose()
-    }
-
-    const handleMarkAllRead = async () => {
-        try {
-            // TODO: Implémenter mark all as read dans Supabase
-            alert(`${conversationCount} conversations marquées comme lues`)
-            onClose()
-        } catch (error) {
-            console.error('Error marking as read:', error)
-            alert('Erreur lors du marquage')
-        }
     }
 
     const handleSettings = () => {
@@ -57,11 +45,6 @@ export function SidebarMenu({ onClose, conversationCount }: Props) {
             </button>
 
             <div className="menu-divider" />
-
-            <button className="menu-item" onClick={handleMarkAllRead}>
-                <CheckCheck size={18} />
-                <span>Tout marquer comme lu</span>
-            </button>
 
             <button className="menu-item" onClick={handleSettings}>
                 <Settings size={18} />

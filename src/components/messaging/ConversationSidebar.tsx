@@ -120,7 +120,6 @@ export function ConversationSidebar({ conversations, activeId, onSelect, current
                         {showMenu && (
                             <SidebarMenu
                                 onClose={() => setShowMenu(false)}
-                                conversationCount={conversations.length}
                             />
                         )}
                     </div>
