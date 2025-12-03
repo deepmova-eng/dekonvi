@@ -66,22 +66,21 @@ export default function NotificationList({ onClose }: NotificationListProps) {
                                 {notifications.filter(n => !n.read).map((notification) => (
                                     <div
                                         key={notification.id}
-                                        onClick={() => handleNotificationClick(notification)}
-                                        className="flex items-start gap-4 p-4 border-b border-gray-50 bg-blue-50 hover:bg-blue-100 cursor-pointer transition-colors"
+                                        className="flex items-start gap-4 p-4 border-b border-gray-50 bg-blue-50 hover:bg-blue-100 transition-colors relative"
                                     >
-                                        {/* Icon Circle */}
-                                        <div className={`h-10 w-10 rounded-full flex items-center justify-center flex-shrink-0 ${notification.type === 'premium' ? 'bg-purple-100 text-purple-600' :
-                                            notification.type === 'message' ? 'bg-green-100 text-green-600' :
-                                                'bg-blue-100 text-blue-600'
-                                            }`}>
+                                        {/* 1. COLUMN LEFT: Icon Circle */}
+                                        <div className="flex-none h-10 w-10 rounded-full flex items-center justify-center bg-blue-100 text-blue-600">
                                             <span className="text-lg">
                                                 {notification.type === 'premium' ? '🚀' :
                                                     notification.type === 'message' ? '💬' : '🔔'}
                                             </span>
                                         </div>
 
-                                        {/* Content */}
-                                        <div className="flex-1 min-w-0">
+                                        {/* 2. COLUMN MIDDLE: Content Text */}
+                                        <div
+                                            className="flex-1 pr-2 cursor-pointer"
+                                            onClick={() => handleNotificationClick(notification)}
+                                        >
                                             <p className="text-sm text-gray-900 font-medium leading-snug">
                                                 {notification.content}
                                             </p>
@@ -93,8 +92,17 @@ export default function NotificationList({ onClose }: NotificationListProps) {
                                             </span>
                                         </div>
 
-                                        {/* Unread Indicator */}
-                                        <div className="h-2 w-2 rounded-full bg-blue-500 flex-shrink-0 mt-1"></div>
+                                        {/* 3. COLUMN RIGHT: Delete Button */}
+                                        <button
+                                            onClick={(e) => handleDelete(e, notification.id)}
+                                            className="flex-none p-1 mt-1 text-gray-400 hover:text-red-500 transition-colors"
+                                            aria-label="Supprimer"
+                                        >
+                                            <X className="h-4 w-4" />
+                                        </button>
+
+                                        {/* Unread Indicator - Positioned relative to container */}
+                                        <div className="absolute top-4 right-12 h-2 w-2 rounded-full bg-blue-500"></div>
                                     </div>
                                 ))}
                             </div>
@@ -107,22 +115,21 @@ export default function NotificationList({ onClose }: NotificationListProps) {
                                 {notifications.filter(n => n.read).map((notification) => (
                                     <div
                                         key={notification.id}
-                                        onClick={() => handleNotificationClick(notification)}
-                                        className="flex items-start gap-4 p-4 border-b border-gray-50 bg-white hover:bg-gray-50 cursor-pointer transition-colors"
+                                        className="flex items-start gap-4 p-4 border-b border-gray-50 bg-white hover:bg-gray-50 transition-colors"
                                     >
-                                        {/* Icon Circle */}
-                                        <div className={`h-10 w-10 rounded-full flex items-center justify-center flex-shrink-0 ${notification.type === 'premium' ? 'bg-purple-100 text-purple-600' :
-                                            notification.type === 'message' ? 'bg-green-100 text-green-600' :
-                                                'bg-blue-100 text-blue-600'
-                                            }`}>
+                                        {/* 1. COLUMN LEFT: Icon Circle */}
+                                        <div className="flex-none h-10 w-10 rounded-full flex items-center justify-center bg-gray-100 text-gray-600">
                                             <span className="text-lg">
                                                 {notification.type === 'premium' ? '🚀' :
                                                     notification.type === 'message' ? '💬' : '🔔'}
                                             </span>
                                         </div>
 
-                                        {/* Content */}
-                                        <div className="flex-1 min-w-0">
+                                        {/* 2. COLUMN MIDDLE: Content Text */}
+                                        <div
+                                            className="flex-1 pr-2 cursor-pointer"
+                                            onClick={() => handleNotificationClick(notification)}
+                                        >
                                             <p className="text-sm text-gray-600 leading-snug">
                                                 {notification.content}
                                             </p>
@@ -133,6 +140,15 @@ export default function NotificationList({ onClose }: NotificationListProps) {
                                                 })}
                                             </span>
                                         </div>
+
+                                        {/* 3. COLUMN RIGHT: Delete Button */}
+                                        <button
+                                            onClick={(e) => handleDelete(e, notification.id)}
+                                            className="flex-none p-1 mt-1 text-gray-400 hover:text-red-500 transition-colors"
+                                            aria-label="Supprimer"
+                                        >
+                                            <X className="h-4 w-4" />
+                                        </button>
                                     </div>
                                 ))}
                             </div>
