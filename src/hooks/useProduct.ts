@@ -48,6 +48,7 @@ export function useProduct(productId: string) {
             )
           `)
           .eq('id', productId)
+          .eq('status', 'active') // Only show active listings
           .single();
 
         const { data, error: productError } = await Promise.race([
