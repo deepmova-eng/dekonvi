@@ -32,7 +32,7 @@ interface Review {
     rating: number;
     comment: string;
     created_at: string;
-    buyer_id: string;
+    reviewer_id: string;
     proof_image_url?: string;
     profiles?: {
         name: string;
@@ -103,28 +103,42 @@ export default function SellerPublicProfile() {
         try {
             setSubmittingReview(true);
 
-            // Upload photo preuve
+            // 1. Générer un nom de fichier PROPRE (Sanitization)
+            // On ignore le nom original pour éviter les accents/espaces
             const fileExt = reviewFormData.proofImage.name.split('.').pop();
-            const fileName = `${user.id}-${Date.now()}.${fileExt}`;
-            const filePath = `reviews/${fileName}`;
+            const fileName = `${Date.now()}_${Math.random().toString(36).substring(2)}.${fileExt}`;
+            const filePath = `${fileName}`; // À la racine du bucket
 
-            const { error: uploadError } = await supabase.storage
-                .from('reviews')
-                .upload(filePath, reviewFormData.proofImage);
+            console.log('🔼 Tentative Upload vers : review-proofs /', filePath);
 
-            if (uploadError) throw uploadError;
+            // 2. Upload vers le BON bucket (review-proofs)
+            const { data: uploadData, error: uploadError } = await supabase.storage
+                .from('review-proofs') // ⚠️ CORRIGÉ: était 'reviews'
+                .upload(filePath, reviewFormData.proofImage, {
+                    cacheControl: '3600',
+                    upsert: false
+                });
 
-            // Get public URL
+            if (uploadError) {
+                console.error('❌ Erreur Upload Storage:', uploadError);
+                throw uploadError;
+            }
+
+            console.log('✅ Upload réussi:', uploadData);
+
+            // 3. Récupérer l'URL publique
             const { data: { publicUrl } } = supabase.storage
-                .from('reviews')
+                .from('review-proofs')
                 .getPublicUrl(filePath);
+
+            console.log('🔗 URL publique:', publicUrl);
 
             // Create review
             const { error: reviewError } = await supabase
                 .from('reviews')
                 .insert({
                     seller_id: id,
-                    buyer_id: user.id,
+                    reviewer_id: user.id, // ⚠️ CORRIGÉ: était 'buyer_id'
                     rating: reviewFormData.rating,
                     comment: reviewFormData.comment,
                     proof_image_url: publicUrl,

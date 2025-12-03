@@ -172,7 +172,7 @@ export function usePendingReviews() {
                 .from('reviews')
                 .select(`
           *,
-          profiles:buyer_id (
+          reviewer:profiles!reviewer_id (
             name
           )
         `)

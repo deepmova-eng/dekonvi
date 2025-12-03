@@ -17,6 +17,7 @@ import {
 } from 'lucide-react'
 import { categories } from '../../config/categories'
 import NotificationBell from '../notifications/NotificationBell'
+import { useUnreadMessagesCount } from '../../hooks/useMessages'
 import './Navbar.css'
 
 const TYPING_PHRASES = [
@@ -38,6 +39,9 @@ export default function Navbar() {
     const [typingPlaceholder, setTypingPlaceholder] = useState('')
     const [currentPhraseIndex, setCurrentPhraseIndex] = useState(0)
     const [isTyping, setIsTyping] = useState(true)
+
+    // Unread messages count
+    const { data: unreadMessagesCount = 0 } = useUnreadMessagesCount(user?.id)
 
     // Detect scroll + progress bar
     useEffect(() => {
@@ -185,9 +189,34 @@ export default function Navbar() {
                             <Link
                                 to="/messages"
                                 className={`nav-link ${isActive('/messages') ? 'active' : ''}`}
+                                style={{ position: 'relative' }}
                             >
                                 <MessageCircle size={18} />
                                 <span>Messages</span>
+                                {unreadMessagesCount > 0 && (
+                                    <span
+                                        style={{
+                                            position: 'absolute',
+                                            top: '-4px',
+                                            right: '-4px',
+                                            backgroundColor: '#ef4444',
+                                            color: 'white',
+                                            borderRadius: '10px',
+                                            padding: '2px 6px',
+                                            fontSize: '11px',
+                                            fontWeight: '600',
+                                            minWidth: '18px',
+                                            height: '18px',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            border: '2px solid white',
+                                            boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                                        }}
+                                    >
+                                        {unreadMessagesCount > 9 ? '9+' : unreadMessagesCount}
+                                    </span>
+                                )}
                             </Link>
                         </>
                     )}

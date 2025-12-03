@@ -68,6 +68,7 @@ export default function ProductCard({ listing }: ProductCardProps) {
         }
 
         toggleFavorite({
+            userId: user.id,
             listingId: listing.id,
             isFavorite: !!isFavorite,
         });

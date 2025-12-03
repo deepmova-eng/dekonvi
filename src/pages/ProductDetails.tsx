@@ -82,7 +82,7 @@ export default function ProductDetails() {
           .from('reviews')
           .select(`
             *,
-            profiles:buyer_id (
+            reviewer:profiles!reviewer_id (
               name
             )
           `)
@@ -107,6 +107,7 @@ export default function ProductDetails() {
     }
 
     toggleFavorite({
+      userId: user.id,
       listingId: id!,
       isFavorite: !!isFavorite,
     });

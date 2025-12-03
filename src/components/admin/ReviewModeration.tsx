@@ -7,9 +7,8 @@ import type { Database } from '../../types/supabase';
 import toast from 'react-hot-toast';
 
 type Review = Database['public']['Tables']['reviews']['Row'] & {
-    profiles: {
+    reviewer: {
         name: string;
-        email: string;
     };
     listings: {
         title: string;
@@ -97,8 +96,10 @@ export default function ReviewModeration() {
                                 <div className="flex-1 space-y-4">
                                     <div className="flex justify-between items-start">
                                         <div>
-                                            <h3 className="font-semibold text-lg">{review.profiles.name}</h3>
-                                            <p className="text-sm text-gray-500">{review.profiles.email}</p>
+                                            <h3 className="font-semibold text-lg">{review.reviewer?.name || 'Utilisateur'}</h3>
+                                            <p className="text-sm text-gray-500">
+                                                Avis #{review.id.slice(0, 8)}
+                                            </p>
                                         </div>
                                         <div className="flex items-center bg-yellow-50 px-3 py-1 rounded-full">
                                             <Star className="w-4 h-4 text-yellow-400 fill-yellow-400 mr-1" />

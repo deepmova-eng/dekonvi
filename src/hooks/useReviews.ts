@@ -4,7 +4,7 @@ import { supabase } from '../lib/supabase';
 export interface Review {
     id: string;
     seller_id: string;
-    buyer_id: string;
+    reviewer_id: string;
     rating: number;
     comment: string;
     proof_image_url: string | null;
@@ -30,7 +30,7 @@ export function useSellerReviews(sellerId: string | undefined) {
                 .from('reviews')
                 .select(`
           *,
-          profiles:buyer_id (
+          reviewer:profiles!reviewer_id (
             name
           )
         `)
@@ -69,7 +69,7 @@ export function useSubmitReview() {
                 .from('reviews')
                 .insert({
                     ...reviewData,
-                    buyer_id: user.id,
+                    reviewer_id: user.id,
                     status: 'pending',
                 })
                 .select()

@@ -26,6 +26,7 @@ export default function ProductListItem({ listing }: ProductListItemProps) {
         }
 
         toggleFavorite({
+            userId: user.id,
             listingId: listing.id,
             isFavorite: !!isFavorite,
         });
