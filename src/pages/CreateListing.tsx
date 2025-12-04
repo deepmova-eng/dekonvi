@@ -7,13 +7,14 @@ import { useSupabase } from '../contexts/SupabaseContext';
 import { useCreateListing, useUpdateListing } from '../hooks/useListings';
 import { categories } from '../config/categories';
 import toast from 'react-hot-toast';
+import { Condition } from '../services/listingService';
 
 const CONDITIONS = [
-  { value: 'new', label: 'Neuf' },
-  { value: 'like-new', label: 'Comme neuf' },
-  { value: 'good', label: 'Bon état' },
-  { value: 'fair', label: 'État correct' },
-  { value: 'poor', label: 'À bricoler' }
+  { value: 'neuf' as Condition, label: 'Neuf' },
+  { value: 'comme-neuf' as Condition, label: 'Comme neuf' },
+  { value: 'bon-etat' as Condition, label: 'Bon état' },
+  { value: 'etat-correct' as Condition, label: 'État correct' },
+  { value: 'a-renover' as Condition, label: 'À bricoler' }
 ];
 
 interface ListingForm {
@@ -23,7 +24,7 @@ interface ListingForm {
   category: string;
   subcategory: string;
   location: string;
-  condition: string;
+  condition: Condition;
   delivery_available: boolean;
   contact_phone: string;
   hide_phone: boolean;
@@ -44,18 +45,18 @@ export default function CreateListing() {
   const [existingImages, setExistingImages] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
 
-  const { register, handleSubmit, formState: { errors }, setValue, watch } = useForm<ListingForm>({
+  const { register, handleSubmit, formState: { errors }, setValue, watch, reset } = useForm<ListingForm>({
     defaultValues: {
-      title: editingListing?.title || '',
-      description: editingListing?.description || '',
-      price: editingListing?.price || '',
-      category: editingListing?.category || '',
-      subcategory: editingListing?.subcategory || '',
-      location: editingListing?.location || '',
-      condition: editingListing?.condition || 'good',
-      delivery_available: editingListing?.delivery_available || false,
-      contact_phone: editingListing?.contact_phone || '',
-      hide_phone: editingListing?.hide_phone || false
+      title: '',
+      description: '',
+      price: 0,
+      category: '',
+      subcategory: '',
+      location: '',
+      condition: 'bon-etat',
+      delivery_available: false,
+      contact_phone: '',
+      hide_phone: false
     }
   });
 
@@ -68,6 +69,30 @@ export default function CreateListing() {
       setValue('subcategory', '');
     }
   }, [selectedCategory, setValue, isEditing]);
+
+  // Load editing data when in edit mode
+  useEffect(() => {
+    if (isEditing && editingListing) {
+      // Reset form with listing data
+      reset({
+        title: editingListing.title || '',
+        description: editingListing.description || '',
+        price: editingListing.price || 0,
+        category: editingListing.category || '',
+        subcategory: editingListing.subcategory || '',
+        location: editingListing.location || '',
+        condition: editingListing.condition || 'bon-etat',
+        delivery_available: editingListing.delivery_available || false,
+        contact_phone: editingListing.contact_phone || '',
+        hide_phone: editingListing.hide_phone || false
+      });
+
+      // Load existing images
+      if (editingListing.images) {
+        setExistingImages(editingListing.images);
+      }
+    }
+  }, [isEditing, editingListing, reset]);
 
   useEffect(() => {
     // Load saved draft if not editing
@@ -83,10 +108,8 @@ export default function CreateListing() {
           console.error('Error loading draft', e);
         }
       }
-    } else if (editingListing?.images) {
-      setExistingImages(editingListing.images);
     }
-  }, [isEditing, editingListing, setValue]);
+  }, [isEditing, setValue]);
 
   // Save draft on change
   useEffect(() => {

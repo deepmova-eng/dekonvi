@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { useSupabase } from '../contexts/SupabaseContext'
 import { supabase } from '../lib/supabase'
 import {
@@ -19,6 +19,7 @@ import { StepPricing } from '../components/create-listing/StepPricing'
 import { StepReview } from '../components/create-listing/StepReview'
 import { uploadImages } from '../utils/uploadImages'
 import './CreateListingPremium.css'
+import toast from 'react-hot-toast'
 
 const STEPS = [
     { id: 1, name: 'Catégorie', icon: Package },
@@ -30,9 +31,14 @@ const STEPS = [
 
 export default function CreateListingPremium() {
     const navigate = useNavigate()
+    const location = useLocation()
     const { user } = useSupabase()
     const [currentStep, setCurrentStep] = useState(1)
     const [isLoading, setIsLoading] = useState(false)
+
+    // Check if editing existing listing
+    const editingListing = location.state?.listing
+    const isEditing = !!editingListing
 
     const [formData, setFormData] = useState({
         category: '',
@@ -49,10 +55,73 @@ export default function CreateListingPremium() {
         dynamic_fields: {},
     })
 
+    //  Load editing data when in edit mode
+    useEffect(() => {
+        if (isEditing && editingListing) {
+            // Map database condition back to form values
+            const conditionMapping: Record<string, string> = {
+                'neuf': 'new',
+                'comme-neuf': 'like-new',
+                'bon-etat': 'good',
+                'etat-correct': 'fair',
+                'a-renover': 'poor',
+            }
+
+            // Reverse map database category to form category ID
+            const categoryReverseMapping: Record<string, string> = {
+                'high-tech': 'electronics',
+                'mode': 'fashion',
+                'maison': 'home',
+                'vehicules': 'vehicles',
+                'loisirs': 'books',
+                'autres': 'other',
+            }
+
+            //Parse location field (format: "City, Location")
+            const [city, ...locationParts] = (editingListing.location || '').split(',')
+
+            // Transform existing image URLs to objects with preview for StepPhotos
+            const existingImagesAsObjects = (editingListing.images || [])
+                .filter((url: string) => url && typeof url === 'string') // Filter out invalid URLs
+                .map((url: string, index: number) => ({
+                    id: `existing-${index}-${Date.now()}`, // Unique ID
+                    preview: url,
+                    file: null,  // No file object for existing URLs
+                    isExisting: true
+                }))
+
+            console.log('🖼️ Images chargées:', existingImagesAsObjects)
+
+            setFormData({
+                category: categoryReverseMapping[editingListing.category] || editingListing.category || '',
+                subcategory: editingListing.subcategory || '',
+                title: editingListing.title || '',
+                description: editingListing.description || '',
+                condition: conditionMapping[editingListing.condition] || 'new',
+                images: existingImagesAsObjects,
+                price: editingListing.price?.toString() || '',
+                negotiable: false,
+                shipping_available: editingListing.delivery_available || false,
+                city: city?.trim() || '',
+                location: locationParts.join(',').trim() || '',
+                dynamic_fields: editingListing.dynamic_fields || {},
+            })
+
+            console.log('✅ Données chargées pour édition:', {
+                category: categoryReverseMapping[editingListing.category],
+                subcategory: editingListing.subcategory,
+                imagesCount: existingImagesAsObjects.length,
+                originalListing: editingListing
+            })
+        }
+    }, [isEditing, editingListing])
+
     const updateFormData = (field: string, value: any) => {
         setFormData(prev => ({ ...prev, [field]: value }))
-        // Auto-save to localStorage
-        localStorage.setItem('draft_listing', JSON.stringify({ ...formData, [field]: value }))
+        // Auto-save to localStorage (skip in edit mode)
+        if (!isEditing) {
+            localStorage.setItem('draft_listing', JSON.stringify({ ...formData, [field]: value }))
+        }
     }
 
 
@@ -166,17 +235,16 @@ export default function CreateListingPremium() {
               background: white;
               padding: 32px 48px;
               border-radius: 16px;
-              box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-              z-index: 9999;
+              box-shadow: 0 20px 60px rgba(0,0,3);\n              z-index: 9999;
               text-align: center;
             `
             loadingMessage.innerHTML = `
               <div style="font-size: 48px; margin-bottom: 16px;">📤</div>
               <div style="font-size: 18px; font-weight: 600; color: #111827; margin-bottom: 8px;">
-                Upload des photos en cours...
+                ${isEditing ? 'Envoi des modifications...' : 'Upload des photos en cours...'}
               </div>
               <div style="font-size: 14px; color: #6B7280;">
-                Envoi de ${formData.images.length} photo(s) vers le serveur
+                ${isEditing ? 'Sauvegarde en cours' : `Envoi de ${formData.images.length} photo(s) vers le serveur`}
               </div>
             `
             document.body.appendChild(loadingMessage)
@@ -194,10 +262,25 @@ export default function CreateListingPremium() {
                 return
             }
 
-            // Upload des images vers Supabase Storage
-            console.log('📤 Upload de', formData.images.length, 'images vers Supabase...')
-            const imageUrls = await uploadImages(formData.images, user.id)
-            console.log('✅ Toutes les images uploadées:', imageUrls)
+            // Separate existing URLs from new File objects
+            // Images can be: {file: File, preview: string} OR {isExisting: true, preview: URL string}
+            const existingImageUrls = formData.images
+                .filter((img: any) => img.isExisting === true)
+                .map((img: any) => img.preview) // Extract URL from preview
+
+            const newImageObjects = formData.images
+                .filter((img: any) => img.file !== null && img.file !== undefined) // Keep complete objects
+
+            // Upload only new images to Supabase Storage
+            let newImageUrls: string[] = []
+            if (newImageObjects.length > 0) {
+                console.log('📤 Upload de', newImageObjects.length, 'nouvelles images vers Supabase...')
+                newImageUrls = await uploadImages(newImageObjects, user.id)
+                console.log('✅ Nouvelles images uploadées:', newImageUrls)
+            }
+
+            // Combine existing and new image URLs
+            const finalImageUrls = [...existingImageUrls, ...newImageUrls]
 
             // Combiner city et location en un seul champ location
             const locationString = formData.city + (formData.location ? `, ${formData.location}` : '')
@@ -206,61 +289,104 @@ export default function CreateListingPremium() {
             const dbCategory = mapCategoryToDb(formData.category)
             const dbCondition = mapConditionToDb(formData.condition)
 
-            // Créer l'annonce dans Supabase
-            // NOTE: Seuls les champs existants dans le schéma sont utilisés
-            const { data: listing, error } = await supabase
-                .from('listings')
-                .insert({
-                    seller_id: user.id,
-                    category: dbCategory,
-                    // subcategory n'existe pas dans la table
-                    title: formData.title,
-                    description: formData.description,
-                    condition: dbCondition as any, // Values in French
-                    price: parseFloat(formData.price),
-                    // negotiable n'existe pas dans la table
-                    delivery_available: formData.shipping_available,
-                    location: locationString,
-                    images: imageUrls,
-                    status: 'active',
-                    is_premium: false,
-                    hide_phone: false,
-                    dynamic_fields: formData.dynamic_fields || {},
+            // Prepare listing data
+            const listingData = {
+                category: dbCategory,
+                subcategory: formData.subcategory || '', // Save subcategory (empty string if not set)
+                title: formData.title,
+                description: formData.description,
+                condition: dbCondition as any,
+                price: parseFloat(formData.price),
+                delivery_available: formData.shipping_available,
+                location: locationString,
+                images: finalImageUrls,
+                hide_phone: false,
+                dynamic_fields: formData.dynamic_fields || {},
+            }
+
+            if (isEditing) {
+                // UPDATE existing listing
+                const { data: listing, error } = await supabase
+                    .from('listings')
+                    .update(listingData)
+                    .eq('id', editingListing.id)
+                    .select()
+                    .single()
+
+                if (error) throw error
+
+                // Remove loading message
+                const msg = document.getElementById('upload-progress')
+                if (msg) msg.remove()
+
+                // User feedback about re-moderation
+                toast('⏳ Vos modifications ont été envoyées pour validation.', {
+                    duration: 6000,
+                    style: {
+                        background: '#FEF3C7',
+                        color: '#92400E',
+                        fontWeight: '500',
+                    },
                 })
-                .select()
-                .single()
+                toast.success('Votre annonce sera bientôt visible après validation par un administrateur.')
 
-            if (error) throw error
+                // Redirect to listing details (with replace to avoid back button loop)
+                navigate(`/listings/${listing.id}`, { replace: true })
+            } else {
+                // CREATE new listing
+                const { data: listing, error } = await supabase
+                    .from('listings')
+                    .insert({
+                        seller_id: user.id,
+                        ...listingData,
+                        status: 'active',
+                        is_premium: false,
+                    })
+                    .select()
+                    .single()
 
-            // Succès : clear draft et redirection
-            localStorage.removeItem('draft_listing')
-            navigate(`/ listings / ${listing.id} `)
+                if (error) throw error
+
+                // Remove loading message
+                const msg = document.getElementById('upload-progress')
+                if (msg) msg.remove()
+
+                // Success : clear draft et redirection (with replace to avoid back button loop)
+                localStorage.removeItem('draft_listing')
+                navigate(`/listings/${listing.id}`, { replace: true })
+            }
 
         } catch (error: any) {
-            console.error('Error creating listing:', error)
-            alert(`Erreur lors de la création de l'annonce: ${error.message || 'Erreur inconnue'}`)
-        } finally {
-            setIsLoading(false)
-            // Supprime le message de progression
+            console.error('Error:', error)
             const msg = document.getElementById('upload-progress')
             if (msg) msg.remove()
+            alert(`Erreur lors de ${isEditing ? 'la mise à jour' : 'la création'} de l'annonce: ${error.message || 'Erreur inconnue'}`)
+        } finally {
+            setIsLoading(false)
         }
     }
 
     return (
-        <div className="create-listing-page">
+        <div className="create-listing-page" >
 
             {/* Simple back button */}
-            <div className="simple-header">
+            < div className="simple-header" >
                 <button className="back-button" onClick={() => navigate('/', { replace: true })}>
                     <ArrowLeft size={20} />
-                    Retour
+                    {isEditing ? 'Annuler les modifications' : 'Retour'}
                 </button>
             </div>
 
             <div className="create-listing-body">
                 <div className="container-centered">
                     <div className="form-card">
+
+                        {/* Page Title */}
+                        <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+                            <h1 style={{ fontSize: '24px', fontWeight: '700', color: '#111827', margin: 0 }}>
+                                {isEditing ? 'Modifier l\'annonce' : 'Créer une annonce'}
+                            </h1>
+                        </div>
 
                         {/* Step Indicator */}
                         <div className="step-indicator-wrapper">
@@ -334,12 +460,12 @@ export default function CreateListingPremium() {
                                 >
                                     {isLoading ? (
                                         <>
-                                            <span>Publication...</span>
+                                            <span>{isEditing ? 'Mise à jour...' : 'Publication...'}</span>
                                         </>
                                     ) : (
                                         <>
                                             <CheckCircle size={20} />
-                                            Publier l'annonce
+                                            {isEditing ? 'Mettre à jour' : 'Publier l\'annonce'}
                                         </>
                                     )}
                                 </button>
@@ -353,6 +479,6 @@ export default function CreateListingPremium() {
                     </div>
                 </div>
             </div>
-        </div>
+        </div >
     )
 }

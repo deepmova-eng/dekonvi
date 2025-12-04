@@ -167,8 +167,8 @@ export default function App() {
                   onCreateListing={handleCreateListing}
                   onEditingListing={(listing) => {
                     if (listing) {
-                      localStorage.setItem('editingListing', JSON.stringify(listing));
-                      navigate('/create-premium');
+                      // Navigate to CreateListingPremium.tsx with listing data in state
+                      navigate('/create-premium', { state: { listing } });
                     }
                   }}
                   onProductSelect={(id) => navigate(`/listings/${id}`)}

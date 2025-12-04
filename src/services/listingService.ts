@@ -104,6 +104,7 @@ export class ListingService {
 
     /**
      * Met à jour une annonce existante
+     * Note: Les modifications significatives déclenchent automatiquement une re-modération (statut pending)
      */
     static async update(id: string, updates: Partial<CreateListingData>) {
         try {
@@ -117,6 +118,12 @@ export class ListingService {
             if (error) {
                 throw error
             }
+
+            // Informer l'utilisateur que l'annonce passera en modération
+            toast('Votre annonce sera re-validée par un administrateur avant d\'être publiée.', {
+                duration: 5000,
+                icon: '⏳'
+            })
 
             return data
 
