@@ -11,6 +11,7 @@ import AdvancedFilters, { type FilterValues } from '../components/home/AdvancedF
 import Login from './Login';
 import Register from './Register';
 import { useInfiniteListings } from '../hooks/useListings';
+import { usePremiumListings } from '../hooks/usePremiumListings';
 import { useInfiniteScroll } from '../hooks/useInfiniteScroll';
 import { useDebounce } from '../hooks/useDebounce';
 import { categories } from '../config/categories';
@@ -72,6 +73,9 @@ export default function Home({ onProductSelect, searchQuery = '' }: HomeProps) {
     const debouncedMinPrice = useDebounce(filterValues.minPrice, 500);
     const debouncedMaxPrice = useDebounce(filterValues.maxPrice, 500);
 
+    // Fetch premium listings with Realtime subscription
+    const { listings: premiumListings } = usePremiumListings();
+
     const {
         data,
         fetchNextPage,
@@ -91,8 +95,7 @@ export default function Home({ onProductSelect, searchQuery = '' }: HomeProps) {
     // Flatten pages into single array
     const listings = data?.pages.flatMap(page => page.data) ?? [];
 
-    // Filter premium listings
-    const premiumListings = listings.filter(l => l.is_premium);
+    // Filter out premium listings from regular list (they're shown separately)
     const regularListings = listings.filter(l => !l.is_premium);
 
     // Infinite scroll sentinel

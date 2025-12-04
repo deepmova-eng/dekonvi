@@ -51,6 +51,28 @@ interface Listing {
     category: string;
 }
 
+// Component for review comment with text clamping
+function ReviewComment({ comment }: { comment: string }) {
+    const [isExpanded, setIsExpanded] = useState(false);
+    const isLongComment = comment.length > 200; // ~4 lines at 50 chars/line
+
+    return (
+        <div className="mb-4">
+            <p className={`text-gray-700 leading-relaxed ${!isExpanded && isLongComment ? 'line-clamp-4' : ''}`}>
+                {comment}
+            </p>
+            {isLongComment && (
+                <button
+                    onClick={() => setIsExpanded(!isExpanded)}
+                    className="text-emerald-600 hover:text-emerald-700 text-sm font-medium mt-1 transition-colors"
+                >
+                    {isExpanded ? 'Voir moins' : 'Voir plus'}
+                </button>
+            )}
+        </div>
+    );
+}
+
 export default function SellerPublicProfile() {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
@@ -448,10 +470,8 @@ export default function SellerPublicProfile() {
                                             </div>
                                         </div>
 
-                                        {/* Commentaire */}
-                                        <p className="text-gray-700 leading-relaxed mb-4">
-                                            {review.comment}
-                                        </p>
+                                        {/* Commentaire avec line-clamp */}
+                                        <ReviewComment comment={review.comment} />
 
                                         {/* Photo preuve - Thumbnail avec overlay minimal */}
                                         {review.proof_image_url && (

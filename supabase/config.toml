@@ -1,0 +1,16 @@
+# Supabase Project Configuration
+# https://supabase.com/docs/guides/functions/deploy#configuring-cron-schedules
+
+[functions.expire-premium-listings]
+verify_jwt = false  # Allow scheduled invocations without JWT
+
+# Cron schedule configuration
+[functions.expire-premium-listings.schedule]
+# Run daily at 00:00 UTC (midnight)
+# Cron expression: minute hour day month weekday
+cron = "0 0 * * *"
+region = "auto"  # Use auto-region for reliability
+
+# Environment variables (if needed)
+[functions.expire-premium-listings.env]
+# Add any env vars needed for the function
