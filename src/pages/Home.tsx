@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Camera, Grid3x3, List } from 'lucide-react';
 import { useSupabase } from '../contexts/SupabaseContext';
+import { supabase } from '../lib/supabase';
 import CategoryFilter from '../components/home/CategoryFilter';
 import { CategoriesSection } from '../components/home/CategoriesSection';
 import ProductCard from '../components/home/ProductCard';
@@ -27,6 +28,47 @@ interface HomeProps {
 export default function Home({ onProductSelect, searchQuery = '' }: HomeProps) {
     const { user, loading: authLoading } = useSupabase();
     const queryClient = useQueryClient();
+
+    // ✅ Realtime subscription for all listings - MUST be at the top!
+    // Subscribe on component mount, unsubscribe on unmount
+    useEffect(() => {
+        console.log('📡 [HOME] Setting up Realtime subscription for listings...');
+
+        const subscription = supabase
+            .channel('home-listings-realtime')
+            .on(
+                'postgres_changes',
+                {
+                    event: '*', // INSERT, UPDATE, DELETE
+                    schema: 'public',
+                    table: 'listings',
+                },
+                (payload) => {
+                    console.log('🔄 [HOME] Listing changed:', payload.eventType, payload.new || payload.old);
+
+                    // Force immediate refetch of ALL listings queries (including infinite ones)
+                    // Use predicate to match any query starting with ['listings']
+                    queryClient.refetchQueries({
+                        predicate: (query) => {
+                            const key = query.queryKey;
+                            return Array.isArray(key) && key[0] === 'listings';
+                        },
+                    });
+
+                    console.log('✅ [HOME] Triggered refetch of all listings queries');
+                }
+            )
+            .subscribe((status) => {
+                console.log('📡 [HOME] Subscription status:', status);
+            });
+
+        // Cleanup on unmount
+        return () => {
+            console.log('📡 [HOME] Cleaning up Realtime subscription...');
+            supabase.removeChannel(subscription);
+        };
+    }, []); // Empty deps - run once on mount
+
     const [selectedCategory, setSelectedCategory] = useState('all');
     const [selectedSubcategory, setSelectedSubcategory] = useState<string | undefined>();
     const [showLogin, setShowLogin] = useState(false);
@@ -95,7 +137,6 @@ export default function Home({ onProductSelect, searchQuery = '' }: HomeProps) {
     // Flatten pages into single array
     const listings = data?.pages.flatMap(page => page.data) ?? [];
 
-    // Filter out premium listings from regular list (they're shown separately)
     const regularListings = listings.filter(l => !l.is_premium);
 
     // Infinite scroll sentinel
