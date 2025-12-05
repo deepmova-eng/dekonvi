@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import { toast } from 'react-hot-toast'
 import { useSupabaseAuth } from './useSupabaseAuth'
@@ -7,6 +8,8 @@ import { useSupabaseAuth } from './useSupabaseAuth'
 
 export function useIsFavorite(listingId: string | undefined) {
     const { user } = useSupabaseAuth()
+    // Note: Realtime sync is handled by useFavoriteListings hook globally
+    // to avoid creating too many concurrent subscriptions
 
     return useQuery({
         queryKey: ['is-favorite', listingId, user?.id],
@@ -30,14 +33,59 @@ export function useIsFavorite(listingId: string | undefined) {
             return !!data
         },
         enabled: !!listingId && !!user,
-        staleTime: 1000 * 60 * 5, // ✅ Cache 5 minutes - prevents infinite re-renders
+        staleTime: 0, // ✅ Always refetch - ensures instant Realtime updates
         gcTime: 1000 * 60 * 10, // ✅ Keep in cache 10 minutes
-        refetchOnMount: false, // ✅ Don't refetch on every mount
+        refetchOnMount: 'always', // ✅ FORCE refetch EVERY time
         refetchOnWindowFocus: false, // ✅ Don't refetch on window focus
     })
 }
 
 export function useFavoriteListings(userId: string | undefined) {
+    const queryClient = useQueryClient()
+
+    // 🔥 Realtime subscription to invalidate cache on favorites changes
+    useEffect(() => {
+        if (!userId) return
+
+        console.log('[useFavoriteListings] Setting up Realtime subscription for user:', userId)
+
+        const channel = supabase
+            .channel('favorites_realtime')
+            .on(
+                'postgres_changes',
+                {
+                    event: '*', // Listen to INSERT, UPDATE, DELETE
+                    schema: 'public',
+                    table: 'favorites',
+                    filter: `user_id=eq.${userId}` // Only for this user
+                },
+                (payload) => {
+                    console.log('[useFavoriteListings] Realtime event:', payload)
+
+                    // Force immediate refetch of ALL is-favorite queries
+                    // This ensures heart icons update instantly across all pages
+                    queryClient.refetchQueries({
+                        queryKey: ['is-favorite'],
+                        exact: false // Match all is-favorite queries
+                    })
+
+                    // Invalidate favorite-listings query
+                    queryClient.invalidateQueries({ queryKey: ['favorite-listings', userId] })
+                }
+            )
+            .subscribe((status, err) => {
+                console.log('[useFavoriteListings] Subscription status:', status)
+                if (err) {
+                    console.error('[useFavoriteListings] Subscription error:', err)
+                }
+            })
+
+        return () => {
+            console.log('[useFavoriteListings] Cleaning up Realtime subscription')
+            supabase.removeChannel(channel)
+        }
+    }, [userId, queryClient])
+
     return useQuery({
         queryKey: ['favorite-listings', userId],
         queryFn: async () => {
@@ -75,9 +123,9 @@ export function useFavoriteListings(userId: string | undefined) {
             return listings || []
         },
         enabled: !!userId,
-        staleTime: 1000 * 60 * 5, // ✅ Cache 5 minutes
+        staleTime: 0, // ✅ Always refetch for instant updates
         gcTime: 1000 * 60 * 10, // ✅ Keep in cache 10 minutes
-        refetchOnMount: false,
+        refetchOnMount: 'always', // ✅ ALWAYS refetch when navigating to Favorites page
         refetchOnWindowFocus: false,
     })
 }
@@ -159,10 +207,16 @@ export function useToggleFavorite() {
             toast.error('Erreur lors de la modification des favoris')
         },
         onSuccess: (_, variables) => {
-            queryClient.invalidateQueries({ queryKey: ['favorites', variables.userId] })
-            queryClient.invalidateQueries({ queryKey: ['favorite-listings', variables.userId] })
-            queryClient.invalidateQueries({ queryKey: ['is-favorite', variables.listingId, variables.userId] })
-            toast.success(variables.isFavorite ? 'Retiré des favoris' : 'Ajouté aux favoris')
+            const { userId, listingId, isFavorite } = variables;
+
+            // ✅ DIRECT cache update with correct listing_id
+            // This fixes the issue where Realtime DELETE only provides favori ID, not listing_id
+            queryClient.setQueryData(['is-favorite', listingId, userId], !isFavorite);
+            console.log(`✅ [useToggleFavorite] Cache updated: is-favorite = ${!isFavorite} for listing:`, listingId)
+
+            // Invalidate lists
+            queryClient.invalidateQueries({ queryKey: ['favorites', userId] })
+            queryClient.invalidateQueries({ queryKey: ['favorite-listings', userId] })
         },
     })
 }
