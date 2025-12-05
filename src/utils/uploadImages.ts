@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabase'
+import { optimizeImage, OPTIMIZE_PRESETS } from './imageOptimizer'
 
 export async function uploadImages(images: any[], userId: string): Promise<string[]> {
     console.log('🔍 Starting upload for', images.length, 'images')
@@ -13,18 +14,20 @@ export async function uploadImages(images: any[], userId: string): Promise<strin
                 return image.preview
             }
 
-            // Génère un nom unique pour l'image
+            // ✅ OPTIMISER l'image AVANT upload (1200px, WebP, quality 0.8)
+            const optimizedFile = await optimizeImage(image.file, OPTIMIZE_PRESETS.PRODUCT)
+
+            // Génère un nom unique pour l'image (TOUJOURS .webp maintenant)
             const timestamp = Date.now()
             const randomString = Math.random().toString(36).substring(7)
-            const extension = image.file.name.split('.').pop()
-            const fileName = `${userId}/${timestamp}-${index}-${randomString}.${extension}`
+            const fileName = `${userId}/${timestamp}-${index}-${randomString}.webp`
 
             console.log(`📤 Upload image ${index + 1}/${images.length}:`, fileName)
 
             // Upload vers Supabase Storage (bucket "listings")
             const { data, error } = await supabase.storage
                 .from('listings')
-                .upload(fileName, image.file, {
+                .upload(fileName, optimizedFile, {
                     cacheControl: '3600',
                     upsert: false
                 })

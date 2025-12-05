@@ -41,9 +41,13 @@ export default function AdvertisementManager() {
       let imageUrl = editingAd?.image_url;
 
       if (newImage) {
+        // ✅ OPTIMISER l'image AVANT upload (1200px, WebP, quality 0.8)
+        const { optimizeImage, OPTIMIZE_PRESETS } = await import('../../utils/imageOptimizer');
+        const optimizedFile = await optimizeImage(newImage, OPTIMIZE_PRESETS.BANNER);
+
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from('advertisements')
-          .upload(`${Date.now()}-${newImage.name}`, newImage);
+          .upload(`${Date.now()}.webp`, optimizedFile);
 
         if (uploadError) throw uploadError;
 

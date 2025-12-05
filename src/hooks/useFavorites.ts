@@ -8,20 +8,10 @@ import { useSupabaseAuth } from './useSupabaseAuth'
 export function useIsFavorite(listingId: string | undefined) {
     const { user } = useSupabaseAuth()
 
-    console.log('🔍 [useIsFavorite] Hook called:', {
-        listingId,
-        userId: user?.id,
-        hasUser: !!user,
-        hasListing: !!listingId
-    })
-
     return useQuery({
         queryKey: ['is-favorite', listingId, user?.id],
         queryFn: async () => {
-            console.log('🔍 [useIsFavorite] Query executing:', { listingId, userId: user?.id })
-
             if (!listingId || !user) {
-                console.log('🔍 [useIsFavorite] Missing params, returning false')
                 return false
             }
 
@@ -33,90 +23,62 @@ export function useIsFavorite(listingId: string | undefined) {
                 .maybeSingle()
 
             if (error) {
-                console.error('🔍 [useIsFavorite] Error:', error)
+                console.error('[useIsFavorite] Error:', error)
                 return false
             }
 
-            const isFav = !!data
-            console.log('🔍 [useIsFavorite] Result:', {
-                isFavorite: isFav,
-                data,
-                listingId,
-                userId: user.id
-            })
-            return isFav
+            return !!data
         },
         enabled: !!listingId && !!user,
-        staleTime: 0, // Always fetch fresh
-        gcTime: 0, // Don't cache
-        refetchOnMount: true,
-        refetchOnWindowFocus: true,
+        staleTime: 1000 * 60 * 5, // ✅ Cache 5 minutes - prevents infinite re-renders
+        gcTime: 1000 * 60 * 10, // ✅ Keep in cache 10 minutes
+        refetchOnMount: false, // ✅ Don't refetch on every mount
+        refetchOnWindowFocus: false, // ✅ Don't refetch on window focus
     })
 }
 
 export function useFavoriteListings(userId: string | undefined) {
-    console.log('🔍 [useFavoriteListings] Hook called with userId:', userId)
-
     return useQuery({
         queryKey: ['favorite-listings', userId],
         queryFn: async () => {
-            console.log('🔍 [useFavoriteListings] Query executing for userId:', userId)
-
             if (!userId) {
-                console.log('🔍 [useFavoriteListings] No userId, returning []')
                 return []
             }
 
             // 1. Fetch favorite IDs
-            console.log('🔍 [useFavoriteListings] Fetching favorite IDs...')
             const { data: favoriteIds, error: favError } = await supabase
                 .from('favorites')
                 .select('listing_id')
                 .eq('user_id', userId)
 
-            console.log('🔍 [useFavoriteListings] Favorite IDs result:', {
-                count: favoriteIds?.length,
-                error: favError,
-                ids: favoriteIds?.map(f => f.listing_id)
-            })
-
             if (favError) {
-                console.error('🔍 [useFavoriteListings] Error fetching favorites:', favError)
+                console.error('[useFavoriteListings] Error fetching favorites:', favError)
                 throw favError
             }
             if (!favoriteIds || favoriteIds.length === 0) {
-                console.log('🔍 [useFavoriteListings] No favorites found, returning []')
                 return []
             }
 
             // 2. Fetch listings
             const listingIds = favoriteIds.map(f => f.listing_id)
-            console.log('🔍 [useFavoriteListings] Fetching listings for IDs:', listingIds)
 
             const { data: listings, error: listError } = await supabase
                 .from('listings')
                 .select('*')
                 .in('id', listingIds)
 
-            console.log('🔍 [useFavoriteListings] Listings result:', {
-                count: listings?.length,
-                error: listError,
-                listings
-            })
-
             if (listError) {
-                console.error('🔍 [useFavoriteListings] Error fetching listings:', listError)
+                console.error('[useFavoriteListings] Error fetching listings:', listError)
                 throw listError
             }
 
-            console.log('🔍 [useFavoriteListings] Returning:', listings)
             return listings || []
         },
         enabled: !!userId,
-        staleTime: 0, // Always fetch fresh
-        gcTime: 0, // Don't cache
-        refetchOnMount: true,
-        refetchOnWindowFocus: true,
+        staleTime: 1000 * 60 * 5, // ✅ Cache 5 minutes
+        gcTime: 1000 * 60 * 10, // ✅ Keep in cache 10 minutes
+        refetchOnMount: false,
+        refetchOnWindowFocus: false,
     })
 }
 

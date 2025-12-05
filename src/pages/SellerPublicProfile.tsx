@@ -127,10 +127,12 @@ export default function SellerPublicProfile() {
         try {
             setSubmittingReview(true);
 
-            // 1. Générer un nom de fichier PROPRE (Sanitization)
-            // On ignore le nom original pour éviter les accents/espaces
-            const fileExt = reviewFormData.proofImage.name.split('.').pop();
-            const fileName = `${Date.now()}_${Math.random().toString(36).substring(2)}.${fileExt}`;
+            // ✅ OPTIMISER l'image AVANT upload (800px, WebP, quality 0.7)
+            const { optimizeImage, OPTIMIZE_PRESETS } = await import('../utils/imageOptimizer');
+            const optimizedFile = await optimizeImage(reviewFormData.proofImage, OPTIMIZE_PRESETS.REVIEW_PROOF);
+
+            // 1. Générer un nom de fichier PROPRE (TOUJOURS .webp)
+            const fileName = `${Date.now()}_${Math.random().toString(36).substring(2)}.webp`;
             const filePath = `${fileName}`; // À la racine du bucket
 
             console.log('🔼 Tentative Upload vers : review-proofs /', filePath);
@@ -138,7 +140,7 @@ export default function SellerPublicProfile() {
             // 2. Upload vers le BON bucket (review-proofs)
             const { data: uploadData, error: uploadError } = await supabase.storage
                 .from('review-proofs') // ⚠️ CORRIGÉ: était 'reviews'
-                .upload(filePath, reviewFormData.proofImage, {
+                .upload(filePath, optimizedFile, {
                     cacheControl: '3600',
                     upsert: false
                 });

@@ -115,6 +115,8 @@ export default function HeroSlider() {
         };
     }, [ads.length, isPaused, nextSlide]);
 
+    // Images are already optimized at upload time, no transformation needed
+
     if (ads.length === 0) return null;
 
     return (
@@ -131,7 +133,10 @@ export default function HeroSlider() {
                         className={`slide ${index === currentIndex ? 'active' : ''}`}
                         data-slide={index}
                     >
-                        <img src={ad.image_url} alt={ad.title} />
+                        <img
+                            src={ad.image_url}
+                            alt={ad.title}
+                        />
                         <div className="slide-overlay"></div>
                         <div className="slide-content">
                             <h2>{ad.title}</h2>

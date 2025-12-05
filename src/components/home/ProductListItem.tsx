@@ -58,7 +58,7 @@ export default function ProductListItem({ listing }: ProductListItemProps) {
             {/* Image */}
             <div className="product-list-item__image-container">
                 <OptimizedImage
-                    src={listing.images?.[0] || '/placeholder.png'}
+                    src={listing.images?.[0] || '/placeholder-image.jpg'}
                     alt={listing.title}
                     aspectRatio="4/3"
                     loading="lazy"

@@ -43,6 +43,7 @@ export default function Profile({
     }
   };
 
+
   const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     try {
       if (!event.target.files || event.target.files.length === 0) {
@@ -50,16 +51,21 @@ export default function Profile({
       }
 
       const file = event.target.files[0];
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${user!.id}-${Math.random()}.${fileExt}`;
-      const filePath = `${fileName}`;
 
       setUploading(true);
 
-      // Upload image
+      // ✅ OPTIMISER l'image AVANT upload (400px, WebP, quality 0.8)
+      const { optimizeImage, OPTIMIZE_PRESETS } = await import('../utils/imageOptimizer');
+      const optimizedFile = await optimizeImage(file, OPTIMIZE_PRESETS.AVATAR);
+
+      // Générer nom de fichier avec extension .webp
+      const fileName = `${user!.id}-${Date.now()}.webp`;
+      const filePath = `${fileName}`;
+
+      // Upload image optimisée
       const { error: uploadError } = await supabase.storage
         .from('avatars')
-        .upload(filePath, file);
+        .upload(filePath, optimizedFile);
 
       if (uploadError) throw uploadError;
 

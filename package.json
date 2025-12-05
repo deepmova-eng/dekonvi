@@ -19,6 +19,7 @@
     "@supabase/supabase-js": "^2.39.7",
     "@tanstack/react-query": "^5.90.10",
     "@tanstack/react-query-devtools": "^5.91.0",
+    "browser-image-compression": "^2.0.2",
     "canvas-confetti": "^1.9.2",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",

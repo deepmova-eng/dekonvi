@@ -29,33 +29,25 @@ export default function Home({ onProductSelect, searchQuery = '' }: HomeProps) {
     const { user, loading: authLoading } = useSupabase();
     const queryClient = useQueryClient();
 
-    // ✅ Realtime subscription for all listings - MUST be at the top!
-    // Subscribe on component mount, unsubscribe on unmount
+    // ✅ Realtime subscription for NEW listings only (INSERT)
+    // UPDATE and DELETE handled by React Query staleTime
     useEffect(() => {
-        console.log('📡 [HOME] Setting up Realtime subscription for listings...');
+        console.log('📡 [HOME] Setting up Realtime subscription for NEW listings only...');
 
         const subscription = supabase
-            .channel('home-listings-realtime')
+            .channel('home-new-listings')
             .on(
                 'postgres_changes',
                 {
-                    event: '*', // INSERT, UPDATE, DELETE
+                    event: 'INSERT', // Only new listings - faster, less re-renders
                     schema: 'public',
                     table: 'listings',
                 },
                 (payload) => {
-                    console.log('🔄 [HOME] Listing changed:', payload.eventType, payload.new || payload.old);
+                    console.log('🆕 [HOME] New listing created:', payload.new);
 
-                    // Force immediate refetch of ALL listings queries (including infinite ones)
-                    // Use predicate to match any query starting with ['listings']
-                    queryClient.refetchQueries({
-                        predicate: (query) => {
-                            const key = query.queryKey;
-                            return Array.isArray(key) && key[0] === 'listings';
-                        },
-                    });
-
-                    console.log('✅ [HOME] Triggered refetch of all listings queries');
+                    // Refetch listings to show the new one
+                    queryClient.invalidateQueries({ queryKey: ['listings'] });
                 }
             )
             .subscribe((status) => {
@@ -67,7 +59,7 @@ export default function Home({ onProductSelect, searchQuery = '' }: HomeProps) {
             console.log('📡 [HOME] Cleaning up Realtime subscription...');
             supabase.removeChannel(subscription);
         };
-    }, []); // Empty deps - run once on mount
+    }, [queryClient]); // Add queryClient to deps
 
     const [selectedCategory, setSelectedCategory] = useState('all');
     const [selectedSubcategory, setSelectedSubcategory] = useState<string | undefined>();
@@ -267,7 +259,7 @@ export default function Home({ onProductSelect, searchQuery = '' }: HomeProps) {
                             </div>
                         </div>
 
-                        {loading ? (
+                        {loading && regularListings.length === 0 ? (
                             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
                                     {[...Array(10)].map((_, i) => (

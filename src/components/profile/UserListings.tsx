@@ -61,30 +61,21 @@ export default function UserListings({
 
     const fetchListings = async () => {
       try {
-        // Add timeout
-        const timeoutPromise = new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('Query timeout')), 3000)
-        );
-
-        const listingsQuery = supabase
+        // ✅ No timeout - let Supabase complete naturally
+        const { data, error } = await supabase
           .from('listings')
           .select('*')
           .eq('seller_id', user.id)
           .order('created_at', { ascending: false });
-
-        const { data, error } = await Promise.race([
-          listingsQuery,
-          timeoutPromise
-        ]) as any;
 
         if (error) throw error;
         setListings(data || []);
       } catch (error) {
         console.error('Error fetching listings:', error);
 
-        // Fallback to REST API
-        if (error instanceof Error && error.message === 'Query timeout') {
-          console.log('fetchListings timed out, using REST API fallback...');
+        // Fallback to REST API (network errors only)
+        if (error instanceof Error && error.message.includes('Failed to fetch')) {
+          console.log('fetchListings failed, using REST API fallback...');
           try {
             const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
             const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;

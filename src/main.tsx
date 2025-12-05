@@ -32,7 +32,9 @@ if (import.meta.env.PROD) {
       }),
     ],
 
-    tracesSampleRate: import.meta.env.PROD ? 0.1 : 1.0,
+    // Performance Monitoring
+    tracesSampleRate: 1.0,
+    tracePropagationTargets: ["localhost", /^https:\/\/yourserver\.io\/api/],
 
     // Session Replay
     replaysSessionSampleRate: 0.1,
@@ -49,7 +51,7 @@ if (import.meta.env.PROD) {
   reportWebVitals();
 }
 
-// Configuration React Query
+// Configurer QueryClient
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {

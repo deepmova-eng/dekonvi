@@ -106,7 +106,7 @@ export default function ProductCard({ listing }: ProductCardProps) {
             {/* Image container */}
             <div className="product-card__image-container">
                 <OptimizedImage
-                    src={listing.images?.[0] || '/placeholder.png'}
+                    src={listing.images?.[0] || '/placeholder-image.jpg'}
                     alt={listing.title}
                     className="product-card__image"
                     loading="lazy"

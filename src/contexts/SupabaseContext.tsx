@@ -53,19 +53,9 @@ export function SupabaseProvider({ children }: { children: ReactNode }) {
         setLoading(false);
       }
 
-      // 2. Background Verification
+      // 2. Background Verification - no timeout
       try {
-        // Try to get session with timeout
-        const timeoutPromise = new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('getSession timeout')), 10000)
-        );
-
-        const sessionPromise = supabase.auth.getSession();
-
-        const { data: { session } } = await Promise.race([
-          sessionPromise,
-          timeoutPromise
-        ]) as any;
+        const { data: { session } } = await supabase.auth.getSession();
 
         // Update user state with verified session
         setUser(session?.user ?? null);
@@ -77,12 +67,7 @@ export function SupabaseProvider({ children }: { children: ReactNode }) {
           setProfile(null);
         }
       } catch (error) {
-        // Only log real errors, not timeouts (which are expected and handled)
-        if (error instanceof Error && error.message === 'getSession timeout') {
-          console.log('[SupabaseContext] Session check timed out, using cached session');
-        } else {
-          console.error('Background session verification failed:', error);
-        }
+        console.error('Background session verification failed:', error);
       }
     };
 

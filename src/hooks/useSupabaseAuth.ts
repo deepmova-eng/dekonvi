@@ -11,17 +11,8 @@ export function useSupabaseAuth() {
   useEffect(() => {
     const initSession = async () => {
       try {
-        // Try with timeout
-        const timeoutPromise = new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('getSession timeout')), 3000)
-        );
-
-        const sessionPromise = supabase.auth.getSession();
-
-        const { data: { session } } = await Promise.race([
-          sessionPromise,
-          timeoutPromise
-        ]) as any;
+        // ✅ No timeout - let Supabase complete naturally
+        const { data: { session } } = await supabase.auth.getSession();
 
         setUser(session?.user ?? null);
         setLoading(false);

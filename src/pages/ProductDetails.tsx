@@ -268,6 +268,8 @@ export default function ProductDetails() {
     }
   };
 
+  // Images are already optimized at upload time, no transformation needed
+
   return (
     <div className="product-details-page">
       <div className="container">
@@ -285,7 +287,11 @@ export default function ProductDetails() {
           <div className="product-gallery">
             <div className="gallery-main">
               <img
-                src={listing.images?.[selectedImageIndex] || '/placeholder.png'}
+                src={
+                  listing.images?.[selectedImageIndex]
+                    ? listing.images[selectedImageIndex]
+                    : '/placeholder.png'
+                }
                 alt={listing.title}
                 className="gallery-main-image"
               />
@@ -321,7 +327,10 @@ export default function ProductDetails() {
                     className={`gallery-thumbnail ${index === selectedImageIndex ? 'active' : ''
                       }`}
                   >
-                    <img src={image} alt={`Photo ${index + 1}`} />
+                    <img
+                      src={image}
+                      alt={`Photo ${index + 1}`}
+                    />
                   </button>
                 ))}
               </div>

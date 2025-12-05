@@ -21,10 +21,11 @@ export default function OptimizedImage({
     const [isLoaded, setIsLoaded] = useState(false);
     const [isInView, setIsInView] = useState(loading === 'eager');
     const [error, setError] = useState(false);
-    const imgRef = useRef<HTMLImageElement>(null);
+    const containerRef = useRef<HTMLDivElement>(null);
+    const imageRef = useRef<HTMLImageElement>(null);
 
     useEffect(() => {
-        if (!imgRef.current || loading === 'eager') return;
+        if (!containerRef.current || loading === 'eager') return;
 
         const observer = new IntersectionObserver(
             (entries) => {
@@ -36,16 +37,23 @@ export default function OptimizedImage({
                 });
             },
             {
-                rootMargin: '50px', // Start loading 50px before image enters viewport
+                rootMargin: '50px',
             }
         );
 
-        observer.observe(imgRef.current);
+        observer.observe(containerRef.current);
 
         return () => {
             observer.disconnect();
         };
     }, [loading]);
+
+    useEffect(() => {
+        // Check if image is already loaded (e.g. from cache)
+        if (imageRef.current?.complete) {
+            handleLoad();
+        }
+    }, [isInView]); // Check when image is rendered
 
     const handleLoad = () => {
         setIsLoaded(true);
@@ -54,11 +62,13 @@ export default function OptimizedImage({
 
     const handleError = () => {
         setError(true);
+        // Even on error, we mark as loaded to remove placeholder/skeleton
+        setIsLoaded(true);
     };
 
     return (
         <div
-            ref={imgRef}
+            ref={containerRef}
             className={`optimized-image-container ${className}`}
             style={{ aspectRatio }}
         >
@@ -72,6 +82,7 @@ export default function OptimizedImage({
             {/* Actual image */}
             {isInView && !error && (
                 <img
+                    ref={imageRef}
                     src={src}
                     alt={alt}
                     className={`optimized-image ${isLoaded ? 'loaded' : 'loading'}`}
