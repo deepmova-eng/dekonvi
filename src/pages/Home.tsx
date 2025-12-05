@@ -29,25 +29,75 @@ export default function Home({ onProductSelect, searchQuery = '' }: HomeProps) {
     const { user, loading: authLoading } = useSupabase();
     const queryClient = useQueryClient();
 
-    // ✅ Realtime subscription for NEW listings only (INSERT)
-    // UPDATE and DELETE handled by React Query staleTime
+    // ✅ Realtime subscription COMPLET : INSERT, UPDATE, DELETE
+    // - INSERT: User creates new listing
+    // - UPDATE: Admin approves/rejects or user edits listing
+    // - DELETE: Admin or user deletes listing
     useEffect(() => {
-        console.log('📡 [HOME] Setting up Realtime subscription for NEW listings only...');
+        console.log('📡 [HOME] Setting up FULL Realtime subscription (INSERT, UPDATE, DELETE)...');
 
         const subscription = supabase
-            .channel('home-new-listings')
+            .channel('home-listings-realtime')
             .on(
                 'postgres_changes',
                 {
-                    event: 'INSERT', // Only new listings - faster, less re-renders
+                    event: 'INSERT',
                     schema: 'public',
                     table: 'listings',
                 },
                 (payload) => {
                     console.log('🆕 [HOME] New listing created:', payload.new);
 
-                    // Refetch listings to show the new one
-                    queryClient.invalidateQueries({ queryKey: ['listings'] });
+                    // Only invalidate if listing is already active (rare case: direct active creation)
+                    if ((payload.new as any).status === 'active') {
+                        console.log('✅ [HOME] New active listing, refreshing...');
+                        queryClient.invalidateQueries({
+                            queryKey: ['listings'],
+                            exact: false
+                        });
+                    }
+                }
+            )
+            .on(
+                'postgres_changes',
+                {
+                    event: 'UPDATE',
+                    schema: 'public',
+                    table: 'listings',
+                },
+                (payload) => {
+                    console.log('🔄 [HOME] Listing updated:', payload);
+
+                    const newStatus = (payload.new as any)?.status;
+                    const oldStatus = (payload.old as any)?.status;
+
+                    console.log('   📊 Status change:', { oldStatus, newStatus });
+
+                    // ⚠️ Solution finale: TOUJOURS rafraîchir sur UPDATE
+                    // React Query filtrera côté client (status='active')
+                    console.log('✅ [HOME] Listing updated, refreshing to sync UI...');
+                    queryClient.invalidateQueries({
+                        queryKey: ['listings'],
+                        exact: false
+                    });
+                }
+            )
+            .on(
+                'postgres_changes',
+                {
+                    event: 'DELETE',
+                    schema: 'public',
+                    table: 'listings',
+                },
+                (payload) => {
+                    console.log('🗑️ [HOME] Listing deleted:', payload.old);
+
+                    // Always refresh on delete to remove from UI
+                    console.log('✅ [HOME] Removing deleted listing from UI...');
+                    queryClient.invalidateQueries({
+                        queryKey: ['listings'],
+                        exact: false
+                    });
                 }
             )
             .subscribe((status) => {
@@ -59,7 +109,7 @@ export default function Home({ onProductSelect, searchQuery = '' }: HomeProps) {
             console.log('📡 [HOME] Cleaning up Realtime subscription...');
             supabase.removeChannel(subscription);
         };
-    }, [queryClient]); // Add queryClient to deps
+    }, [queryClient]);
 
     const [selectedCategory, setSelectedCategory] = useState('all');
     const [selectedSubcategory, setSelectedSubcategory] = useState<string | undefined>();
