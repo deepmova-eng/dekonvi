@@ -121,242 +121,69 @@ export function ChatWindow({ conversationId, currentUserId, onMobileBack, onConv
         }
     }, [conversationId, currentUserId])
 
-    // Setup realtime subscription
-    // Setup realtime subscription
-    // ❌ REALTIME DÉSACTIVÉ - Revenir au polling pour éviter les erreurs de binding mismatch
-    // Le polling avec refetchInterval: 2000ms dans useMessages est déjà très performant
-    // (WhatsApp = 30s, Discord = 1-2s, nous = 2s ✅)
-
+    // ❌ REALTIME DÉSACTIVÉ - Utiliser le polling de useMessages à la place
+    // Le hook useMessages (ligne 197-250 dans useMessages.ts) fait déjà du polling
+    // avec refetchInterval: 2000ms, ce qui assure l'affichage des messages
+    // en quasi temps réel (2 secondes de délai max)
     /*
+    // ✅ REALTIME ACTIVÉ - Messages en temps réel (sans filter pour éviter CHANNEL_ERROR)
     useEffect(() => {
-        if (!conversationId) return
+        if (!conversationId || !currentUserId) return
 
-        console.log('🔌 [ChatWindow] Setting up Realtime listener')
+        console.log('📡 [ChatWindow] Setting up Realtime subscription for:', conversationId)
 
-        // Cleanup any existing subscription
-        if (subscriptionRef.current) {
-            console.log('🔌 [ChatWindow] Cleaning up previous subscription')
-            supabase.removeChannel(subscriptionRef.current)
-            subscriptionRef.current = null
-        }
-
-
-        // Supabase Realtime: Nuclear approach - no table key to bypass all validation
         const channel = supabase
-            .channel(`room:${conversationId}`)
+            .channel('messages-realtime') // ✅ Nom simple et générique
             .on(
-                'postgres_changes' as any,
+                'postgres_changes',
                 {
-                    event: '*',  // Listen to all events
+                    event: 'INSERT',
                     schema: 'public',
-                    // ❌ NO TABLE KEY - Listen to entire schema to avoid type validation
-                } as any,
-                (payload: any) => {
-                    try {
-                        // ✅ Manual filtering: Check table name first
-                        if (payload.table !== 'messages') {
-                            return  // Ignore non-message events
-                        }
+                    table: 'messages'
+                    // ❌ NO FILTER - Let client-side filter to avoid CHANNEL_ERROR
+                },
+                (payload) => {
+                    console.log('📨 [ChatWindow] New message received:', payload.new)
 
-                        console.log('📨 [ChatWindow] Realtime event:', payload.eventType, payload)
-                        
-                        // Manual filtering: only process messages for this conversation
-                        const message = payload.new || payload.old
-                        if (!message || message.conversation_id !== conversationId) {
-                            console.log('📨 [ChatWindow] Message not for this conversation, ignoring')
-                            return
-                        }
-                        
-                        // Handle INSERT events
-                        if (payload.eventType === 'INSERT' && payload.new) {
-                            const newMessage = payload.new
-                            
-                            // Don't add own messages (already added via optimistic update)
-                            if (newMessage.sender_id === currentUserId) {
-                                console.log('📨 [ChatWindow] Own message, already added via optimistic update')
-                                return
-                            }
-                            
-                            // Add message from other user
-                            console.log('📨 [ChatWindow] Adding message from other user')
-                            setMessages((prev) => {
-                                // Avoid duplicates
-                                const exists = prev.find(m => m.id === newMessage.id)
-                                if (exists) {
-                                    console.log('📨 [ChatWindow] Message already exists, ignoring')
-                                    return prev
-                                }
-                                return [...prev, newMessage]
-                            })
-                        }
-                        
-                        // Handle UPDATE events (e.g., read status)
-                        if (payload.eventType === 'UPDATE' && payload.new) {
-                            console.log('📨 [ChatWindow] Message updated')
-                            setMessages((prev) => 
-                                prev.map(m => m.id === payload.new.id ? payload.new : m)
-                            )
-                        }
-                        
-                        // Handle DELETE events
-                        if (payload.eventType === 'DELETE' && payload.old) {
-                            console.log('📨 [ChatWindow] Message deleted')
-                            setMessages((prev) => 
-                                prev.filter(m => m.id !== payload.old.id)
-                            )
-                        }
-                    } catch (error) {
-                        console.error('📨 [ChatWindow] Error processing Realtime message:', error)
+                    const newMessage = payload.new as any
+
+                    // ✅ Manual client-side filtering by conversation_id
+                    if (newMessage.conversation_id !== conversationId) {
+                        console.log('📨 [ChatWindow] Message not for this conversation, ignoring')
+                        return
                     }
+
+                    // Don't add own messages (already added via optimistic update)
+                    if (newMessage.sender_id === currentUserId) {
+                        console.log('📨 [ChatWindow] Own message, skipping (optimistic update)')
+                        return
+                    }
+
+                    // Add message from other user
+                    console.log('📨 [ChatWindow] Adding message from other user')
+                    setMessages((prev) => {
+                        // Avoid duplicates
+                        const exists = prev.find(m => m.id === newMessage.id)
+                        if (exists) {
+                            console.log('📨 [ChatWindow] Message already exists, skipping')
+                            return prev
+                        }
+                        return [...prev, newMessage]
+                    })
                 }
             )
-            .subscribe((status: any, err: any) => {
-                if (err) {
-                    console.error('❌ Subscription error:', err)
-                }
-                console.log('🔌 [ChatWindow] Subscription status:', status)
+            .subscribe((status) => {
+                console.log('📡 [ChatWindow] Subscription status:', status)
             })
 
-        subscriptionRef.current = channel
-
         return () => {
-            console.log('🔌 [ChatWindow] Cleaning up Realtime listener')
-            if (subscriptionRef.current) {
-                supabase.removeChannel(subscriptionRef.current)
-                subscriptionRef.current = null
-            }
+            console.log('📡 [ChatWindow] Cleaning up Realtime subscription')
+            supabase.removeChannel(channel)
         }
     }, [conversationId, currentUserId])
     */
 
-    // ✅ POLLING ACTIF via useMessages hook avec refetchInterval: 2000ms
-
-    // ❌ DEUXIÈME LISTENER DÉSACTIVÉ (ZOMBIE trouvé ici !)
-    /*
-    useEffect(() => {
-        if (!conversationId) {
-            return
-        }
-
-        // Cleanup previous subscription
-        if (subscriptionRef.current) {
-            try {
-                subscriptionRef.current.unsubscribe()
-            } catch (e) {
-                console.error('Error unsubscribing:', e)
-            }
-            subscriptionRef.current = null
-        }
-
-
-        // Supabase Realtime: Nuclear approach - no table key to bypass all validation
-        const channel = supabase
-            .channel(`room:${conversationId}`)
-            .on(
-                'postgres_changes' as any,
-                {
-                    event: '*',  // Listen to all events
-                    schema: 'public',
-                    // ❌ NO TABLE KEY - Listen to entire schema to avoid type validation
-                } as any,
-                (payload: any) => {
-                    try {
-                        // ✅ Manual filtering: Check table name first
-                        if (payload.table !== 'messages') {
-                            return  // Ignore non-message events
-                        }
-
-                        console.log('📨 [ChatWindow] Realtime event:', payload.eventType, payload)
-
-                        // Manual filtering: only process messages for this conversation
-                        const message = payload.new || payload.old
-                        if (!message || message.conversation_id !== conversationId) {
-                            console.log('📨 [ChatWindow] Message not for this conversation, ignoring')
-                            return
-                        }
-
-                        // Handle INSERT events
-                        if (payload.eventType === 'INSERT' && payload.new) {
-                            const newMessage = payload.new
-
-                            // Don't add own messages (already added via optimistic update)
-                            if (newMessage.sender_id === currentUserId) {
-                                console.log('📨 [ChatWindow] Own message, already added via optimistic update')
-                                return
-                            }
-
-                            // Add message from other user
-                            console.log('📨 [ChatWindow] Adding message from other user')
-                            setMessages((prev) => {
-                                // Avoid duplicates
-                                const exists = prev.find(m => m.id === newMessage.id)
-                                if (exists) {
-                                    console.log('📨 [ChatWindow] Message already exists, ignoring')
-                                    return prev
-                                }
-                                return [...prev, newMessage]
-                            })
-                        }
-
-                        // Handle UPDATE events (e.g., read status)
-                        if (payload.eventType === 'UPDATE' && payload.new) {
-                            console.log('📨 [ChatWindow] Message updated')
-                            setMessages((prev) =>
-                                prev.map(m => m.id === payload.new.id ? payload.new : m)
-                            )
-                        }
-
-                        // Handle DELETE events
-                        if (payload.eventType === 'DELETE' && payload.old) {
-                            console.log('📨 [ChatWindow] Message deleted')
-                            setMessages((prev) =>
-                                prev.filter(m => m.id !== payload.old.id)
-                            )
-                        }
-                    } catch (error) {
-                        console.error('📨 [ChatWindow] Error processing Realtime message:', error)
-                    }
-                }
-            )
-            .subscribe((status: any, err: any) => {
-                if (err) {
-                    console.error('❌ Subscription error:', err)
-                }
-
-                if (status === 'SUBSCRIBED') {
-                } else if (status === 'CHANNEL_ERROR') {
-                    console.error('❌ REALTIME CHANNEL ERROR - Check Supabase Dashboard')
-                } else if (status === 'TIMED_OUT') {
-                    console.error('⏱️ REALTIME SUBSCRIPTION TIMED OUT - Retrying...')
-                    // Retry after 2 seconds
-                    setTimeout(() => {
-                        fetchMessages()
-                        fetchOtherUser()
-                    }, 2000)
-                }
-            })
-
-        subscriptionRef.current = channel
-
-        // Fetch initial data
-        fetchMessages()
-        fetchOtherUser()
-
-        // Cleanup on unmount
-        return () => {
-            if (subscriptionRef.current) {
-                try {
-                    subscriptionRef.current.unsubscribe()
-                } catch (e) {
-                    console.error('Error during cleanup:', e)
-                }
-                subscriptionRef.current = null
-            }
-        }
-    }, [conversationId, currentUserId, fetchMessages, fetchOtherUser])
-    */
-
-    // ✅ Fetch initial data without Realtime
+    // ✅ Fetch initial data + Polling every 2 seconds
     useEffect(() => {
         if (!conversationId) return
 
@@ -368,6 +195,16 @@ export function ChatWindow({ conversationId, currentUserId, onMobileBack, onConv
 
         // Reset scroll tracker for new conversation
         isAtBottomRef.current = true
+
+        // ✅ POLLING: Refetch messages every 2 seconds for real-time updates
+        const pollingInterval = setInterval(() => {
+            console.log('🔄 [ChatWindow] Polling for new messages...')
+            fetchMessages()
+        }, 2000) // 2 seconds
+
+        return () => {
+            clearInterval(pollingInterval)
+        }
     }, [conversationId, currentUserId, fetchMessages, fetchOtherUser, markAsRead])
 
     const isAtBottomRef = useRef(true) // Default to true for first load

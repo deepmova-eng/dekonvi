@@ -20,6 +20,8 @@ export default function Conversation({ conversationId, onBack }: ConversationPro
   const { setCurrentConversationId } = useNotificationsContext();
   const queryClient = useQueryClient();
 
+  console.log('🚀 [Conversation] Component mounted with conversationId:', conversationId);
+
   const [conversationData, setConversationData] = useState<{
     listingId?: string;
     listingTitle?: string;
@@ -58,8 +60,9 @@ export default function Conversation({ conversationId, onBack }: ConversationPro
 
     fetchMessages();
 
-    // Realtime subscription for new messages
-    console.log('🔔 [Direct Fetch] Setting up realtime subscription');
+
+    // ✅ UNIFIED Realtime subscription: adds to state + marks as read
+    console.log('🔔 [Realtime] Setting up unified subscription for:', conversationId);
     const channel = supabase
       .channel(`messages:${conversationId}`)
       .on(
@@ -70,18 +73,39 @@ export default function Conversation({ conversationId, onBack }: ConversationPro
           table: 'messages',
           filter: `conversation_id=eq.${conversationId}`
         },
-        (payload) => {
-          console.log('🔔 [Direct Fetch] New message received:', payload.new);
+        async (payload) => {
+          console.log('🔔 [Realtime] New message received:', payload.new);
+
+          // 1. ALWAYS add message to state (for both sender and receiver)
           setMessages(prev => [...prev, payload.new as any]);
+
+          // 2. Mark as read if from another user
+          const { data: { user } } = await supabase.auth.getUser();
+          if (user && (payload.new as any).sender_id !== user.id) {
+            console.log('🔔 [Realtime] Marking message as read:', (payload.new as any).id);
+
+            await supabase
+              .from('messages')
+              .update({ read: true })
+              .eq('id', (payload.new as any).id);
+
+            console.log('✅ [Realtime] Message marked as read');
+
+            // 3. Invalidate queries to update sidebar/notifications
+            queryClient.invalidateQueries({ queryKey: ['unread-messages-count'] });
+            queryClient.invalidateQueries({ queryKey: ['conversations'] });
+          }
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log('🔔 [Realtime] Subscription status:', status);
+      });
 
     return () => {
-      console.log('🔔 [Direct Fetch] Unsubscribing');
+      console.log('🔔 [Realtime] Cleaning up subscription');
       supabase.removeChannel(channel);
     };
-  }, [conversationId]);
+  }, [conversationId, queryClient]);
 
   // Fonction pour marquer les messages comme lus
   const markMessagesAsRead = async () => {
@@ -187,59 +211,7 @@ export default function Conversation({ conversationId, onBack }: ConversationPro
     fetchConversationDetails();
   }, [conversationId]);
 
-  // Listen for new messages in realtime and mark them as read
-  useEffect(() => {
-    if (!conversationId) return;
-
-    console.log('🔔 [Realtime] Subscribing to conversation:', conversationId);
-
-    const channel = supabase
-      .channel(`conversation:${conversationId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'messages',
-          filter: `conversation_id=eq.${conversationId}`
-        },
-        async (payload) => {
-          console.log('🔔 [Realtime] New message received:', payload);
-
-          const { data: { user } } = await supabase.auth.getUser();
-
-          // Si le message vient de quelqu'un d'autre
-          if (user && payload.new.sender_id !== user.id) {
-            console.log('🔔 [Realtime] Marking message as read:', payload.new.id);
-
-            // Marquer immédiatement comme lu
-            await supabase
-              .from('messages')
-              .update({ read: true })
-              .eq('id', payload.new.id);
-
-            console.log('✅ [Realtime] Message marked as read automatically');
-
-            // Invalidate queries to update UI IMMEDIATELY
-            queryClient.invalidateQueries({
-              queryKey: ['messages', conversationId]
-            });
-            queryClient.invalidateQueries({
-              queryKey: ['unread-messages-count']
-            });
-            queryClient.invalidateQueries({
-              queryKey: ['conversations']
-            });
-          }
-        }
-      )
-      .subscribe();
-
-    return () => {
-      console.log('🔔 [Realtime] Unsubscribing from conversation:', conversationId);
-      supabase.removeChannel(channel);
-    };
-  }, [conversationId]);
+  // ✅ Duplicate subscription removed - now unified above (line 61-104)
 
   // Show loading while messages or conversation data is loading
   if (loading || messagesLoading) {
