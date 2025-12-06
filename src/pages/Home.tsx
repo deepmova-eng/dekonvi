@@ -29,6 +29,19 @@ export default function Home({ onProductSelect, searchQuery = '' }: HomeProps) {
     const { user, loading: authLoading } = useSupabase();
     const queryClient = useQueryClient();
 
+    // State to hide flash during scroll restoration
+    // Initialize to true if we have a saved scroll position
+    const [isRestoringScroll, setIsRestoringScroll] = useState(() => {
+        return !!sessionStorage.getItem('home_scroll_pos');
+    });
+
+    // Disable browser's automatic scroll restoration
+    useEffect(() => {
+        if (window.history.scrollRestoration) {
+            window.history.scrollRestoration = 'manual';
+        }
+    }, []);
+
     // ✅ Realtime subscription COMPLET : INSERT, UPDATE, DELETE
     // - INSERT: User creates new listing
     // - UPDATE: Admin approves/rejects or user edits listing
@@ -217,26 +230,30 @@ export default function Home({ onProductSelect, searchQuery = '' }: HomeProps) {
         // If NO saved scroll position, it means we're arriving fresh (e.g., after creating listing)
         // In that case, invalidate queries to fetch latest data
         if (!savedPos) {
-            console.log('🔄 [HOME] No saved scroll, invalidating queries for fresh data...');
             queryClient.invalidateQueries({
                 queryKey: ['listings'],
                 exact: false
             });
+            return;
         }
 
         // Only restore if we have data rendered (important for infinite scroll)
-        if (listings.length > 0 && savedPos) {
+        if (listings.length > 0) {
             const scrollPos = parseInt(savedPos, 10);
 
             // Use setTimeout to override React Router's scroll behavior
-            // React Router scrolls to top asynchronously, we need to wait
             setTimeout(() => {
                 window.scrollTo({
                     top: scrollPos,
                     behavior: 'instant'
                 });
                 sessionStorage.removeItem('home_scroll_pos');
-            }, 100); // Wait 100ms for Router to finish
+
+                // Show content after scroll is complete
+                requestAnimationFrame(() => {
+                    setIsRestoringScroll(false);
+                });
+            }, 100);
         }
     }, [listings.length, queryClient]);
 
@@ -252,7 +269,13 @@ export default function Home({ onProductSelect, searchQuery = '' }: HomeProps) {
     }
 
     return (
-        <div className="pb-20 lg:pb-0">
+        <div
+            className="pb-20 lg:pb-0"
+            style={{
+                opacity: isRestoringScroll ? 0 : 1,
+                transition: 'opacity 0.15s ease-in-out'
+            }}
+        >
             {/* Header - Hidden on mobile, App.tsx provides mobile header */}
             <div className="bg-white border-b sticky top-[72px] z-50">
                 <div className="max-w-7xl mx-auto px-2 sm:px-4 py-4">
