@@ -1,16 +1,14 @@
-import React, { useState } from 'react';
-import { Package, MessageCircle, Heart, Settings, LogOut, Camera, ChevronLeft } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Package, Settings, Camera, ChevronLeft, Shield, Star, CheckCircle2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useSupabaseAuth } from '../hooks/useSupabaseAuth';
 import UserListings from '../components/profile/UserListings';
-import UserMessages from '../components/profile/UserMessages';
-import UserFavorites from '../components/profile/UserFavorites';
-import UserSettings from '../components/profile/UserSettings';
+import UserActivity from '../components/profile/UserActivity';
 import Login from './Login';
 import Register from './Register';
 
-type TabType = 'listings' | 'messages' | 'favorites' | 'settings';
+type TabType = 'listings' | 'activity';
 
 import type { Database } from '../types/supabase';
 
@@ -28,20 +26,32 @@ export default function Profile({
   onProductSelect
 }: ProfileProps) {
   const [activeTab, setActiveTab] = useState<TabType>('listings');
+  const [userProfile, setUserProfile] = useState<any>(null);
   const [showLogin, setShowLogin] = useState(false);
   const [showRegister, setShowRegister] = useState(false);
-  const { user, signOut } = useSupabaseAuth();
+  const { user } = useSupabaseAuth();
   const navigate = useNavigate();
 
   const [uploading, setUploading] = useState(false);
 
-  const handleLogout = async () => {
-    try {
-      await signOut();
-    } catch (error) {
-      console.error('Error signing out:', error);
-    }
-  };
+  // Fetch user profile data for ratings
+  useEffect(() => {
+    const fetchProfile = async () => {
+      if (!user) return;
+
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('rating, total_ratings, is_recommended')
+        .eq('id', user.id)
+        .single();
+
+      if (!error && data) {
+        setUserProfile(data);
+      }
+    };
+
+    fetchProfile();
+  }, [user]);
 
 
   const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -128,12 +138,10 @@ export default function Profile({
             onProductSelect={onProductSelect}
           />
         );
-      case 'messages':
-        return <UserMessages />;
-      case 'favorites':
-        return <UserFavorites onProductSelect={onProductSelect} />;
-      case 'settings':
-        return <UserSettings />;
+      case 'activity':
+        return <UserActivity />;
+      default:
+        return null;
     }
   };
 
@@ -176,10 +184,11 @@ export default function Profile({
     <div className="min-h-screen bg-gray-50">
       {/* Header Profile */}
       <div className="bg-white p-4 sm:p-6">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-          <div className="flex items-center space-x-2 sm:space-x-4 w-full sm:w-auto">
-            <div className="relative group">
-              <div className="h-20 w-20 bg-gray-200 rounded-full flex items-center justify-center overflow-hidden">
+        <div className="flex items-start justify-between gap-4 mb-6">
+          {/* Left: Avatar + Info */}
+          <div className="flex items-center space-x-3 sm:space-x-4 flex-1 min-w-0">
+            <div className="relative group flex-shrink-0">
+              <div className="h-16 w-16 sm:h-20 sm:w-20 bg-gray-200 rounded-full flex items-center justify-center overflow-hidden">
                 {user.user_metadata?.avatar_url ? (
                   <img
                     src={user.user_metadata.avatar_url}
@@ -187,12 +196,12 @@ export default function Profile({
                     className="h-full w-full object-cover"
                   />
                 ) : (
-                  <span className="text-3xl font-bold text-gray-500">
+                  <span className="text-2xl sm:text-3xl font-bold text-gray-500">
                     {user.user_metadata?.name?.charAt(0) || user.user_metadata?.full_name?.charAt(0) || user.email?.charAt(0)}
                   </span>
                 )}
-                <label className="absolute bottom-0 right-0 bg-primary-500 p-2 rounded-full text-white cursor-pointer hover:bg-primary-600 transition-colors shadow-md">
-                  <Camera size={16} />
+                <label className="absolute bottom-0 right-0 bg-primary-500 p-1.5 sm:p-2 rounded-full text-white cursor-pointer hover:bg-primary-600 transition-colors shadow-md">
+                  <Camera size={14} className="sm:w-4 sm:h-4" />
                   <input
                     type="file"
                     accept="image/*"
@@ -208,33 +217,64 @@ export default function Profile({
                 </div>
               )}
             </div>
+
+            {/* User Info */}
             <div className="flex-1 min-w-0">
-              <h1 className="text-xl sm:text-2xl font-bold truncate">{user.user_metadata?.name || user.user_metadata?.full_name || 'Utilisateur'}</h1>
-              <p className="text-sm sm:text-base text-gray-500 truncate">{user.email}</p>
-              <p className="text-xs sm:text-sm text-gray-400 hidden sm:block">
+              {/* Name + Badge */}
+              <div className="flex items-center gap-2 mb-1">
+                <h1 className="text-lg sm:text-2xl font-bold truncate">
+                  {user.user_metadata?.name || user.user_metadata?.full_name || 'Utilisateur'}
+                </h1>
+                {userProfile?.is_recommended && (
+                  <div className="flex-shrink-0" title="Compte vérifié">
+                    <CheckCircle2 className="w-5 h-5 text-blue-500" />
+                  </div>
+                )}
+              </div>
+
+              {/* Rating */}
+              {userProfile?.total_ratings > 0 && (
+                <div className="flex items-center gap-1.5 text-sm text-gray-600 mb-1">
+                  <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                  <span className="font-medium">
+                    {userProfile.rating.toFixed(1)}/5
+                  </span>
+                  <span className="text-gray-400">({userProfile.total_ratings})</span>
+                </div>
+              )}
+
+              {/* Member Since */}
+              <p className="text-xs sm:text-sm text-gray-500">
                 Membre depuis {new Date(user.created_at || '').toLocaleDateString('fr-FR', {
                   year: 'numeric',
-                  month: 'long',
-                  day: 'numeric'
+                  month: 'long'
                 })}
               </p>
-              {user.email === 'admin@dekonvi.com' && (
-                <button
-                  onClick={() => navigate('/admin')}
-                  className="mt-2 bg-red-500 text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg text-xs sm:text-sm font-medium hover:bg-red-600 transition-colors"
-                >
-                  Panel Admin
-                </button>
-              )}
             </div>
           </div>
-          <button
-            onClick={handleLogout}
-            className="flex items-center text-gray-600 hover:text-primary-500 self-end sm:self-auto"
-          >
-            <LogOut className="w-5 h-5" />
-            <span className="ml-2 hidden sm:inline">Déconnexion</span>
-          </button>
+
+          {/* Right: Icons Navigation */}
+          <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+            {/* Admin Shield Icon (Admins only) */}
+            {userProfile?.role === 'admin' && (
+              <button
+                onClick={() => navigate('/admin')}
+                className="p-2 hover:bg-gray-100 rounded-full transition-colors group"
+                title="Panel Admin"
+              >
+                <Shield className="w-5 h-5 text-gray-600 group-hover:text-red-500" />
+              </button>
+            )}
+
+            {/* Settings Icon */}
+            <button
+              onClick={() => navigate('/settings')}
+              className="p-2 hover:bg-gray-100 rounded-full transition-colors group"
+              title="Paramètres"
+            >
+              <Settings className="w-5 h-5 text-gray-600 group-hover:text-primary-500" />
+            </button>
+          </div>
         </div>
 
         {/* Navigation Tabs */}
@@ -247,37 +287,17 @@ export default function Profile({
               }`}
           >
             <Package className="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2" />
-            <span className="text-sm sm:text-base">Annonces</span>
+            <span className="text-sm sm:text-base">Mes Annonces</span>
           </button>
           <button
-            onClick={() => setActiveTab('messages')}
-            className={`flex items-center pb-4 px-2 border-b-2 whitespace-nowrap ${activeTab === 'messages'
+            onClick={() => setActiveTab('activity')}
+            className={`flex items-center pb-4 px-2 border-b-2 whitespace-nowrap ${activeTab === 'activity'
               ? 'border-primary-500 text-primary-500'
               : 'border-transparent text-gray-500 hover:text-primary-500'
               }`}
           >
-            <MessageCircle className="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2" />
-            <span className="text-sm sm:text-base">Messages</span>
-          </button>
-          <button
-            onClick={() => setActiveTab('favorites')}
-            className={`flex items-center pb-4 px-2 border-b-2 whitespace-nowrap ${activeTab === 'favorites'
-              ? 'border-primary-500 text-primary-500'
-              : 'border-transparent text-gray-500 hover:text-primary-500'
-              }`}
-          >
-            <Heart className="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2" />
-            <span className="text-sm sm:text-base">Favoris</span>
-          </button>
-          <button
-            onClick={() => setActiveTab('settings')}
-            className={`flex items-center pb-4 px-2 border-b-2 whitespace-nowrap ${activeTab === 'settings'
-              ? 'border-primary-500 text-primary-500'
-              : 'border-transparent text-gray-500 hover:text-primary-500'
-              }`}
-          >
-            <Settings className="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2" />
-            <span className="text-sm sm:text-base">Paramètres</span>
+            <Package className="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2" />
+            <span className="text-sm sm:text-base">Mon Activité</span>
           </button>
         </div>
       </div>
