@@ -200,11 +200,11 @@ export default function CategoryPage() {
 
                             {/* Grid */}
                             {!loading && listings.length > 0 && (
-                                <div className="listings-grid">
+                                <div className="grid grid-cols-2 gap-2 md:grid-cols-3 md:gap-4 lg:grid-cols-4 xl:grid-cols-5">
                                     {listings.map((listing) => (
                                         <Link
                                             key={listing.id}
-                                            to={`/ listing / ${listing.id} `}
+                                            to={`/listings/${listing.id}`}
                                             className="listing-card"
                                         >
                                             <div className="listing-image">
