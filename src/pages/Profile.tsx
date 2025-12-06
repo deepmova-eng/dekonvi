@@ -41,7 +41,7 @@ export default function Profile({
 
       const { data, error } = await supabase
         .from('profiles')
-        .select('rating, total_ratings, is_recommended')
+        .select('rating, total_ratings, is_recommended, role')
         .eq('id', user.id)
         .single();
 
