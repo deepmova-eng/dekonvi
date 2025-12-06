@@ -97,11 +97,17 @@ export default function ProductCard({ listing }: ProductCardProps) {
         return diffHours < 72;
     };
 
+    // ✅ SCROLL RESTORATION: Save scroll position before navigation
+    const handleClick = () => {
+        sessionStorage.setItem('home_scroll_pos', window.scrollY.toString());
+    };
+
     return (
         <Link
             to={`/listings/${listing.id}`}
             className="product-card"
             onMouseEnter={handleMouseEnter}
+            onClick={handleClick}
         >
             {/* Image container */}
             <div className="product-card__image-container">

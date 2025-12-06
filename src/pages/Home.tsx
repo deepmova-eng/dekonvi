@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useLayoutEffect } from 'react';
 import { Search, Camera, Grid3x3, List } from 'lucide-react';
 import { useSupabase } from '../contexts/SupabaseContext';
 import { supabase } from '../lib/supabase';
@@ -209,6 +209,26 @@ export default function Home({ onProductSelect, searchQuery = '' }: HomeProps) {
         setShowLogin(false);
         setShowRegister(false);
     };
+
+    // ✅ SCROLL RESTORATION: Restore scroll position on mount
+    useLayoutEffect(() => {
+        const savedPos = sessionStorage.getItem('home_scroll_pos');
+
+        // Only restore if we have data rendered (important for infinite scroll)
+        if (listings.length > 0 && savedPos) {
+            const scrollPos = parseInt(savedPos, 10);
+
+            // Use setTimeout to override React Router's scroll behavior
+            // React Router scrolls to top asynchronously, we need to wait
+            setTimeout(() => {
+                window.scrollTo({
+                    top: scrollPos,
+                    behavior: 'instant'
+                });
+                sessionStorage.removeItem('home_scroll_pos');
+            }, 100); // Wait 100ms for Router to finish
+        }
+    }, [listings.length]);
 
     if (showLogin) {
         return <Login onBack={handleBack} onRegisterClick={handleRegisterClick} />;
