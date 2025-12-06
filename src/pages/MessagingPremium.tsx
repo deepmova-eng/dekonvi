@@ -27,16 +27,8 @@ export default function MessagingPremium() {
         }
     }, [searchParams, conversations])
 
-    if (loading) {
-        return (
-            <div className="messaging-premium">
-                <div className="loading-messaging">
-                    <div className="spinner-large" />
-                    <p>Chargement des conversations...</p>
-                </div>
-            </div>
-        )
-    }
+    // ✅ Don't block the UI with a spinner - show skeleton instead
+    // The ConversationSidebar will handle the loading state with skeletons
 
     const handleConversationDeleted = () => {
         // Refresh the conversation list using React Query refetch
@@ -75,6 +67,7 @@ export default function MessagingPremium() {
                         currentUserId={user?.id || ''}
                         activeListing={conversations.find(c => c.id === activeConversationId)?.listing}
                         onDeleteConversation={handleConversationDeleted}
+                        loading={loading}
                     />
                 )}
             </div>
@@ -93,6 +86,7 @@ export default function MessagingPremium() {
                         currentUserId={user?.id || ''}
                         activeListing={conversations.find(c => c.id === activeConversationId)?.listing}
                         onDeleteConversation={handleConversationDeleted}
+                        loading={loading}
                     />
                 </div>
 

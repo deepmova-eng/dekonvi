@@ -4,6 +4,7 @@ import { SidebarMenu } from './SidebarMenu'
 import { ProductCard } from './ProductCard'
 import { ConversationItem } from './ConversationItem'
 import { ConfirmDialog } from '../shared/ConfirmDialog'
+import { ConversationSkeleton } from '../common/ConversationSkeleton'
 import './ConversationSidebar.css'
 
 interface Props {
@@ -13,9 +14,10 @@ interface Props {
     currentUserId: string
     activeListing?: any | null
     onDeleteConversation?: (conversationId: string) => void
+    loading?: boolean
 }
 
-export function ConversationSidebar({ conversations, activeId, onSelect, currentUserId, activeListing, onDeleteConversation }: Props) {
+export function ConversationSidebar({ conversations, activeId, onSelect, currentUserId, activeListing, onDeleteConversation, loading = false }: Props) {
     const [searchQuery, setSearchQuery] = useState('')
     const [showMenu, setShowMenu] = useState(false)
     const [showDeleteDialog, setShowDeleteDialog] = useState(false)
@@ -147,7 +149,13 @@ export function ConversationSidebar({ conversations, activeId, onSelect, current
 
             {/* Conversations list - Scrollable */}
             <div className="flex-1 overflow-y-auto overflow-x-hidden min-h-0 pb-20">
-                {filteredConversations.length === 0 ? (
+                {loading ? (
+                    <div className="divide-y divide-gray-100">
+                        {[1, 2, 3, 4, 5].map((i) => (
+                            <ConversationSkeleton key={i} />
+                        ))}
+                    </div>
+                ) : filteredConversations.length === 0 ? (
                     <div className="empty-conversations">
                         <p>Aucune conversation trouvée</p>
                     </div>

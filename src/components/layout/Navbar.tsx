@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
+import { useQueryClient } from '@tanstack/react-query'
 import { useSupabase } from '../../contexts/SupabaseContext'
 import {
     Home,
@@ -18,6 +19,7 @@ import {
 import { categories } from '../../config/categories'
 import NotificationBell from '../notifications/NotificationBell'
 import { useUnreadMessagesCount } from '../../hooks/useMessages'
+import { supabase } from '../../lib/supabase'
 import './Navbar.css'
 
 const TYPING_PHRASES = [
@@ -32,6 +34,7 @@ const TYPING_PHRASES = [
 export default function Navbar() {
     const { user, signOut } = useSupabase()
     const location = useLocation()
+    const queryClient = useQueryClient()
     const [isScrolled, setIsScrolled] = useState(false)
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
     const [activeDropdown, setActiveDropdown] = useState<string | null>(null)
@@ -112,6 +115,86 @@ export default function Navbar() {
         await signOut()
     }
 
+    // Prefetch conversations on Messages hover for instant loading
+    const handleMessagesPrefetch = () => {
+        if (!user?.id) return
+
+        queryClient.prefetchQuery({
+            queryKey: ['conversations', user.id],
+            queryFn: async () => {
+                // Fetch conversations
+                const { data: conversations, error: convError } = await supabase
+                    .from('conversations')
+                    .select('*')
+                    .or(`user1_id.eq.${user.id},user2_id.eq.${user.id}`)
+                    .order('updated_at', { ascending: false })
+
+                if (convError || !conversations || conversations.length === 0) {
+                    return []
+                }
+
+                // Filter deletions
+                const { data: deletions } = await supabase
+                    .from('conversation_deletions')
+                    .select('conversation_id, deleted_at')
+                    .eq('user_id', user.id)
+
+                const deletionMap = new Map(
+                    (deletions as any[])?.map((d: any) => [d.conversation_id, d.deleted_at]) || []
+                )
+
+                const visibleConversations = await Promise.all(
+                    (conversations as any[]).map(async (conv: any) => {
+                        const deletedAt = deletionMap.get(conv.id)
+                        if (!deletedAt) return conv
+
+                        const { data: newMessages } = await supabase
+                            .from('messages')
+                            .select('id')
+                            .eq('conversation_id', conv.id)
+                            .gt('created_at', deletedAt)
+                            .limit(1)
+
+                        return newMessages && newMessages.length > 0 ? conv : null
+                    })
+                )
+
+                const activeConversations = visibleConversations.filter(conv => conv !== null) as any[]
+
+                if (activeConversations.length === 0) return []
+
+                // Collect IDs
+                const userIds = new Set<string>()
+                const listingIds = new Set<string>()
+
+                activeConversations.forEach((conv: any) => {
+                    userIds.add(conv.user1_id)
+                    userIds.add(conv.user2_id)
+                    if (conv.listing_id) listingIds.add(conv.listing_id)
+                })
+
+                // Fetch profiles and listings
+                const { data: profiles } = await supabase
+                    .from('profiles')
+                    .select('id, name, avatar_url, email')
+                    .in('id', Array.from(userIds))
+
+                const { data: listings } = await supabase
+                    .from('listings')
+                    .select('id, title, images, price')
+                    .in('id', Array.from(listingIds))
+
+                // Enrich conversations
+                return activeConversations.map((conv: any) => ({
+                    ...conv,
+                    user1: (profiles as any[])?.find((p: any) => p.id === conv.user1_id),
+                    user2: (profiles as any[])?.find((p: any) => p.id === conv.user2_id),
+                    listing: (listings as any[])?.find((l: any) => l.id === conv.listing_id)
+                }))
+            }
+        })
+    }
+
     return (
         <nav className={`navbar-premium ${isScrolled ? 'scrolled' : ''}`}>
             {/* Scroll Progress Bar */}
@@ -190,6 +273,7 @@ export default function Navbar() {
                                 to="/messages"
                                 className={`nav-link ${isActive('/messages') ? 'active' : ''}`}
                                 style={{ position: 'relative' }}
+                                onMouseEnter={handleMessagesPrefetch}
                             >
                                 <MessageCircle size={18} />
                                 <span>Messages</span>
@@ -325,7 +409,7 @@ export default function Navbar() {
                                 <Heart size={20} />
                                 Favoris
                             </Link>
-                            <Link to="/messages" className="mobile-nav-link">
+                            <Link to="/messages" className="mobile-nav-link" onMouseEnter={handleMessagesPrefetch}>
                                 <MessageCircle size={20} />
                                 Messages
                             </Link>
