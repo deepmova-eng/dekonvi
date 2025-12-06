@@ -367,7 +367,7 @@ export default function SellerPublicProfile() {
                     </div>
 
                     {listings.length > 0 ? (
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
                             {listings.map((listing) => (
                                 <ProductCard key={listing.id} listing={listing} />
                             ))}
@@ -426,71 +426,76 @@ export default function SellerPublicProfile() {
                         </button>
                     </div>
 
-                    {/* Liste des avis - Limit to 3 unless 'Show All' clicked */}
+                    {/* Liste des avis - Vertical List (Amazon/Vinted style) */}
                     {reviews.length > 0 ? (
                         <>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="flex flex-col">
                                 {(showAllReviews ? reviews : reviews.slice(0, 3)).map((review) => (
                                     <div
                                         key={review.id}
-                                        className="bg-white rounded-2xl p-4 shadow-sm border border-gray-200 hover:shadow-lg transition-shadow"
+                                        className="py-6 border-b border-gray-200 last:border-b-0"
                                     >
-                                        {/* Header avis - Acheteur + Date */}
-                                        <div className="flex items-start justify-between mb-4">
-                                            <div className="flex items-center space-x-3">
-                                                {/* Avatar acheteur */}
-                                                <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center">
-                                                    <span className="text-gray-600 font-semibold text-lg">
-                                                        {review.profiles?.name?.[0]?.toUpperCase() || 'A'}
-                                                    </span>
+                                        <div className="flex items-start justify-between gap-4">
+                                            {/* Left side - Main content */}
+                                            <div className="flex-1 min-w-0">
+                                                {/* Header avis - Acheteur + Date + Étoiles */}
+                                                <div className="flex items-start gap-4 mb-3">
+                                                    {/* Avatar acheteur */}
+                                                    <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0">
+                                                        <span className="text-gray-600 font-semibold text-base">
+                                                            {review.profiles?.name?.[0]?.toUpperCase() || 'A'}
+                                                        </span>
+                                                    </div>
+
+                                                    <div className="flex-1 min-w-0">
+                                                        <div className="flex items-center gap-3 mb-1">
+                                                            <p className="font-semibold text-gray-900">
+                                                                {review.profiles?.name || 'Acheteur vérifié'}
+                                                            </p>
+                                                            {/* Étoiles inline */}
+                                                            <div className="flex items-center space-x-0.5">
+                                                                {[...Array(5)].map((_, i) => (
+                                                                    <Star
+                                                                        key={i}
+                                                                        className={`h-4 w-4 ${i < review.rating
+                                                                                ? 'text-yellow-400 fill-yellow-400'
+                                                                                : 'text-gray-300 fill-gray-300'
+                                                                            }`}
+                                                                    />
+                                                                ))}
+                                                            </div>
+                                                        </div>
+                                                        <p className="text-sm text-gray-500">
+                                                            {new Date(review.created_at).toLocaleDateString('fr-FR', {
+                                                                day: 'numeric',
+                                                                month: 'long',
+                                                                year: 'numeric'
+                                                            })}
+                                                        </p>
+                                                    </div>
                                                 </div>
-                                                <div>
-                                                    <p className="font-semibold text-gray-900">
-                                                        {review.profiles?.name || 'Acheteur vérifié'}
-                                                    </p>
-                                                    <p className="text-sm text-gray-500">
-                                                        {new Date(review.created_at).toLocaleDateString('fr-FR', {
-                                                            day: 'numeric',
-                                                            month: 'long',
-                                                            year: 'numeric'
-                                                        })}
-                                                    </p>
-                                                </div>
+
+                                                {/* Commentaire avec line-clamp */}
+                                                <ReviewComment comment={review.comment} />
                                             </div>
 
-                                            {/* Étoiles */}
-                                            <div className="flex items-center space-x-0.5">
-                                                {[...Array(5)].map((_, i) => (
-                                                    <Star
-                                                        key={i}
-                                                        className={`h-4 w-4 ${i < review.rating
-                                                            ? 'text-yellow-400 fill-yellow-400'
-                                                            : 'text-gray-300 fill-gray-300'
-                                                            }`}
+                                            {/* Right side - Photo preuve (thumbnail compact) */}
+                                            {review.proof_image_url && (
+                                                <div className="relative w-20 h-20 rounded-lg overflow-hidden group cursor-pointer flex-shrink-0">
+                                                    <img
+                                                        src={review.proof_image_url}
+                                                        alt="Photo du produit reçu"
+                                                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                                                        onClick={() => window.open(review.proof_image_url, '_blank')}
                                                     />
-                                                ))}
-                                            </div>
-                                        </div>
 
-                                        {/* Commentaire avec line-clamp */}
-                                        <ReviewComment comment={review.comment} />
-
-                                        {/* Photo preuve - Thumbnail avec overlay minimal */}
-                                        {review.proof_image_url && (
-                                            <div className="relative w-20 h-20 rounded-lg overflow-hidden group cursor-pointer flex-shrink-0">
-                                                <img
-                                                    src={review.proof_image_url}
-                                                    alt="Photo du produit reçu"
-                                                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                                                    onClick={() => window.open(review.proof_image_url, '_blank')}
-                                                />
-
-                                                {/* Badge "Preuve vérifiée" - Overlay with white border for contrast */}
-                                                <div className="absolute bottom-1 right-1 bg-green-500 rounded-full p-1 shadow-md border-2 border-white">
-                                                    <Check className="h-3 w-3 text-white" />
+                                                    {/* Badge "Preuve vérifiée" */}
+                                                    <div className="absolute bottom-1 right-1 bg-green-500 rounded-full p-1 shadow-md border-2 border-white">
+                                                        <Check className="h-3 w-3 text-white" />
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        )}
+                                            )}
+                                        </div>
                                     </div>
                                 ))}
                             </div>
