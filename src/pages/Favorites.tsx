@@ -33,7 +33,7 @@ export default function Favorites({ onProductSelect }: FavoritesProps) {
           <h1 className="text-2xl font-bold">Favoris</h1>
         </div>
         <div className="px-4 py-4">
-          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 gap-2 md:grid-cols-3 md:gap-4 lg:grid-cols-4 xl:grid-cols-5">
             {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
               <ProductCardSkeleton key={i} />
             ))}

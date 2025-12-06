@@ -41,17 +41,55 @@
     }
 }
 
-/* Responsive */
-@media (max-width: 768px) {
+/* ========================================
+   📱 MOBILE: Scroll Horizontal Compact
+   ======================================== */
+@media (max-width: 767px) {
     .categories-section-premium {
-        padding: 60px 0;
+        padding: 24px 0 32px 0;
+        background: white;
+    }
+
+    .section-header {
+        margin-bottom: 16px;
+        padding: 0 16px;
     }
 
     .section-title {
-        font-size: 28px;
+        font-size: 20px;
+        font-weight: 700;
+        margin: 0;
+        text-align: left;
     }
 
+    /* Cache le sous-titre sur mobile pour gagner de la place */
     .section-subtitle {
-        font-size: 16px;
+        display: none;
+    }
+
+    /* Conteneur de scroll horizontal */
+    .categories-grid-premium {
+        display: flex;
+        flex-direction: row;
+        gap: 12px;
+        overflow-x: auto;
+        overflow-y: hidden;
+        padding: 0 16px 8px 16px;
+        margin: 0;
+
+        /* Scroll fluide */
+        scroll-behavior: smooth;
+        -webkit-overflow-scrolling: touch;
+
+        /* Cache la scrollbar tout en gardant le scroll */
+        scrollbar-width: none;
+        /* Firefox */
+        -ms-overflow-style: none;
+        /* IE/Edge */
+    }
+
+    .categories-grid-premium::-webkit-scrollbar {
+        display: none;
+        /* Chrome/Safari */
     }
 }

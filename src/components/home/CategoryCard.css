@@ -241,3 +241,113 @@
         font-size: 13px;
     }
 }
+
+/* ========================================
+   📱 MOBILE COMPACT: Cercles style Airbnb
+   ======================================== */
+@media (max-width: 767px) {
+    .category-card-premium {
+        /* Transformation en format compact vertical */
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+        min-width: 80px;
+        /* ✅ Augmenté de 72px à 80px pour "Électronique" */
+        max-width: 80px;
+        padding: 0;
+        background: transparent;
+        border: none;
+        box-shadow: none;
+        flex-shrink: 0;
+        /* Empêche le rétrécissement dans le flex */
+    }
+
+    .category-card-premium:hover {
+        transform: none;
+        border-color: transparent;
+        box-shadow: none;
+    }
+
+    /* Pas de fond animé sur mobile */
+    .card-background {
+        display: none;
+    }
+
+    /* Contenu en colonne */
+    .card-content {
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        width: 100%;
+    }
+
+    /* Icône en cercle compact */
+    .card-icon-wrapper {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+    }
+
+    .card-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        /* Cercle complet */
+        background: linear-gradient(135deg, var(--category-color) 0%, var(--category-gradient) 100%);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .card-icon svg {
+        width: 28px;
+        height: 28px;
+    }
+
+    .category-card-premium:active .card-icon {
+        transform: scale(0.95);
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Texte centré en dessous */
+    .card-text {
+        width: 100%;
+        text-align: center;
+    }
+
+    .card-title {
+        font-size: 12px;
+        /* ✅ Augmenté de 11px à 12px */
+        font-weight: 600;
+        color: #374151;
+        margin: 0;
+        line-height: 1.3;
+        max-width: 80px;
+        /* ✅ Correspond à la nouvelle largeur */
+        text-align: center;
+        /* ✅ Centré */
+
+        /* ✅ Permet le retour à la ligne sur 2 lignes max */
+        white-space: normal;
+        /* Au lieu de nowrap */
+        overflow: hidden;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
+        /* ✅ Propriété standard pour compatibilité */
+        -webkit-box-orient: vertical;
+        text-overflow: ellipsis;
+    }
+
+    /* Cache description et meta sur mobile */
+    .card-description,
+    .card-meta,
+    .card-badge,
+    .card-shine,
+    .card-arrow {
+        display: none;
+    }
+
+    /* Désactive les animations complexes sur mobile */
+    .category-card-premium {
+        animation: none;
+    }
+}

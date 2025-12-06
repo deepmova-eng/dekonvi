@@ -311,7 +311,7 @@ export default function Home({ onProductSelect, searchQuery = '' }: HomeProps) {
 
                         {loading && regularListings.length === 0 ? (
                             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                                <div className="grid grid-cols-2 gap-2 md:grid-cols-3 md:gap-4 lg:grid-cols-4 xl:grid-cols-5">
                                     {[...Array(10)].map((_, i) => (
                                         <ProductCardSkeleton key={i} />
                                     ))}
@@ -320,7 +320,7 @@ export default function Home({ onProductSelect, searchQuery = '' }: HomeProps) {
                         ) : regularListings.length > 0 ? (
                             <>
                                 {viewMode === 'grid' ? (
-                                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                                    <div className="grid grid-cols-2 gap-2 md:grid-cols-3 md:gap-4 lg:grid-cols-4 xl:grid-cols-5">
                                         {regularListings.map((listing) => (
                                             <ProductCard
                                                 key={listing.id}
@@ -343,7 +343,7 @@ export default function Home({ onProductSelect, searchQuery = '' }: HomeProps) {
                                 {hasNextPage && (
                                     <div ref={sentinelRef} className="py-4">
                                         {isFetchingNextPage && (
-                                            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                                            <div className="grid grid-cols-2 gap-2 md:grid-cols-3 md:gap-4 lg:grid-cols-4 xl:grid-cols-5">
                                                 {[...Array(5)].map((_, i) => (
                                                     <ProductCardSkeleton key={`loading-${i}`} />
                                                 ))}

@@ -135,12 +135,11 @@ export default function CategoryListings() {
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500"></div>
           </div>
         ) : sortedListings.length > 0 ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+          <div className="grid grid-cols-2 gap-2 md:grid-cols-3 md:gap-4 lg:grid-cols-4 xl:grid-cols-5">
             {sortedListings.map((listing) => (
               <ProductCard
                 key={listing.id}
                 listing={listing}
-                onClick={() => navigate(`/product/${listing.id}`)}
               />
             ))}
           </div>
