@@ -85,7 +85,7 @@ export default function ProductCard({ listing }: ProductCardProps) {
         }
     };
 
-    // Check if listing is new (<48h)
+    // Check if listing is new (<72h = 3 days)
     const isNew = () => {
         // Handle both camelCase and snake_case
         const createdAtValue = (listing as any).created_at || listing.createdAt;
@@ -94,7 +94,7 @@ export default function ProductCard({ listing }: ProductCardProps) {
         const createdAt = new Date(createdAtValue);
         const now = new Date();
         const diffHours = (now.getTime() - createdAt.getTime()) / (1000 * 60 * 60);
-        return diffHours < 48;
+        return diffHours < 72;
     };
 
     return (
@@ -112,28 +112,32 @@ export default function ProductCard({ listing }: ProductCardProps) {
                     loading="lazy"
                 />
 
-                {/* Badges Container - Left and Right positioning */}
+                {/* 🎯 Zone de Badges (Gauche uniquement) - Empilement vertical */}
                 <div className="product-card__badges">
-                    {/* Left side - Premium */}
-                    <div>
-                        {((listing as any).is_premium || listing.isPremium) && (
-                            <span className="product-card__badge product-card__badge--premium">
-                                Premium
-                            </span>
-                        )}
-                    </div>
+                    {/* Badge Premium - Priorité 1 */}
+                    {((listing as any).is_premium || listing.isPremium) && (
+                        <span className="product-card__badge product-card__badge--premium">
+                            Premium
+                        </span>
+                    )}
 
-                    {/* Right side - Nouveau */}
-                    <div>
-                        {isNew() && (
-                            <span className="product-card__badge product-card__badge--new">
-                                Nouveau
-                            </span>
-                        )}
-                    </div>
+                    {/* Badge Nouveau - Priorité 2 */}
+                    {isNew() && (
+                        <span className="product-card__badge product-card__badge--new">
+                            Nouveau
+                        </span>
+                    )}
+
+                    {/* 💡 Badge Urgent - Priorité 0 (pour implémentation future)
+                    {((listing as any).is_urgent || listing.isUrgent) && (
+                        <span className="product-card__badge product-card__badge--urgent">
+                            Urgent
+                        </span>
+                    )}
+                    */}
                 </div>
 
-                {/* Bouton favori */}
+                {/* ❤️ Zone Sacrée (Droite) - Bouton favori EXCLUSIVEMENT */}
                 <button
                     onClick={handleFavoriteClick}
                     className={`product-card__favorite ${isFavorite ? 'active' : ''}`}
