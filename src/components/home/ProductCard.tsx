@@ -97,9 +97,11 @@ export default function ProductCard({ listing }: ProductCardProps) {
         return diffHours < 72;
     };
 
-    // ✅ SCROLL RESTORATION: Save scroll position before navigation
+    // Save scroll position before navigation
     const handleClick = () => {
-        sessionStorage.setItem('home_scroll_pos', window.scrollY.toString());
+        if (window.scrollY > 0) {
+            sessionStorage.setItem('home_pos', window.scrollY.toString());
+        }
     };
 
     return (

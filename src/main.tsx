@@ -16,6 +16,11 @@ import { FavoritesProvider } from './contexts/FavoritesContext';
 
 import { reportWebVitals } from './lib/vitals';
 
+// Disable browser's automatic scroll restoration - we control it manually
+if ('scrollRestoration' in history) {
+  history.scrollRestoration = 'manual';
+}
+
 // Initialiser Sentry
 if (import.meta.env.PROD) {
   Sentry.init({

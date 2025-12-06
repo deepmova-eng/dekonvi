@@ -152,7 +152,7 @@ export function useInfiniteListings(filters?: ListingFilters) {
       return loadedCount; // Next offset
     },
     initialPageParam: 0,
-    staleTime: 1000 * 60 * 3, // 3 minutes
+    staleTime: 1000 * 60 * 10, // 10 minutes - Keep cache for scroll restoration
   })
 }
 

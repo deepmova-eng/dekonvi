@@ -29,18 +29,10 @@ export default function Home({ onProductSelect, searchQuery = '' }: HomeProps) {
     const { user, loading: authLoading } = useSupabase();
     const queryClient = useQueryClient();
 
-    // State to hide flash during scroll restoration
-    // Initialize to true if we have a saved scroll position
-    const [isRestoringScroll, setIsRestoringScroll] = useState(() => {
-        return !!sessionStorage.getItem('home_scroll_pos');
+    // Par défaut, si on a une position à restaurer, on commence INVISIBLE (false)
+    const [isRestored, setIsRestored] = useState(() => {
+        return !sessionStorage.getItem('home_pos');
     });
-
-    // Disable browser's automatic scroll restoration
-    useEffect(() => {
-        if (window.history.scrollRestoration) {
-            window.history.scrollRestoration = 'manual';
-        }
-    }, []);
 
     // ✅ Realtime subscription COMPLET : INSERT, UPDATE, DELETE
     // - INSERT: User creates new listing
@@ -223,39 +215,72 @@ export default function Home({ onProductSelect, searchQuery = '' }: HomeProps) {
         setShowRegister(false);
     };
 
-    // ✅ SCROLL RESTORATION: Restore scroll position on mount
-    useLayoutEffect(() => {
-        const savedPos = sessionStorage.getItem('home_scroll_pos');
+    // ✅ SCROLL RESTORATION: Save position on unmount
+    useEffect(() => {
+        return () => {
+            if (window.scrollY > 0) {
+                sessionStorage.setItem('home_pos', window.scrollY.toString());
+            }
+        };
+    }, []);
 
-        // If NO saved scroll position, it means we're arriving fresh (e.g., after creating listing)
-        // In that case, invalidate queries to fetch latest data
-        if (!savedPos) {
-            queryClient.invalidateQueries({
-                queryKey: ['listings'],
-                exact: false
-            });
+    // ✅ SCROLL RESTORATION CORRIGÉ
+    useLayoutEffect(() => {
+        const savedPos = parseInt(sessionStorage.getItem('home_pos') || '0');
+
+        // Sécurité : Si pas de position ou pas de données, on ne fait rien
+        if (!savedPos || !data?.pages?.length) return;
+
+        // Fonction de scroll forcée
+        const tryScroll = () => {
+            const currentHeight = document.documentElement.scrollHeight;
+
+            // On ajoute une petite marge de sécurité (ex: 100px) car parfois le mobile est capricieux
+            if (currentHeight >= savedPos) {
+                // On force le scroll
+                window.scrollTo(0, savedPos);
+
+                // VÉRIFICATION : Est-ce qu'on est bien arrivé ?
+                // Parfois scrollTo échoue silencieusement si le thread est bloqué
+                if (Math.abs(window.scrollY - savedPos) < 50) {
+                    return true; // Succès confirmé
+                }
+            }
+            return false;
+        };
+
+        // 1. Essai immédiat
+        if (tryScroll()) {
+            // On supprime la clé seulement si succès immédiat CONFIRMÉ
+            sessionStorage.removeItem('home_pos');
+            setIsRestored(true); // AFFICHE LA PAGE MAINTENANT
             return;
         }
 
-        // Only restore if we have data rendered (important for infinite scroll)
-        if (listings.length > 0) {
-            const scrollPos = parseInt(savedPos, 10);
+        // 2. Mode "Acharné" (Polling)
+        const intervalId = setInterval(() => {
+            if (tryScroll()) {
+                clearInterval(intervalId);
+                // On nettoie la clé uniquement à la fin
+                sessionStorage.removeItem('home_pos');
+                setIsRestored(true); // AFFICHE LA PAGE MAINTENANT
+            }
+        }, 50);
 
-            // Use setTimeout to override React Router's scroll behavior
-            setTimeout(() => {
-                window.scrollTo({
-                    top: scrollPos,
-                    behavior: 'instant'
-                });
-                sessionStorage.removeItem('home_scroll_pos');
+        // 3. Sécurité (Timeout)
+        const timeoutId = setTimeout(() => {
+            clearInterval(intervalId);
+            setIsRestored(true); // Affiche quand même la page après 2s si échec
+            // On ne supprime PAS la clé ici au cas où ça marcherait plus tard par miracle
+        }, 2000); // On laisse 2 secondes max (c'est long mais sûr)
 
-                // Show content after scroll is complete
-                requestAnimationFrame(() => {
-                    setIsRestoringScroll(false);
-                });
-            }, 100);
-        }
-    }, [listings.length, queryClient]);
+        return () => {
+            clearInterval(intervalId);
+            clearTimeout(timeoutId);
+        };
+    }, [data]); // Dépendance aux données
+
+
 
     if (showLogin) {
         return <Login onBack={handleBack} onRegisterClick={handleRegisterClick} />;
@@ -269,13 +294,7 @@ export default function Home({ onProductSelect, searchQuery = '' }: HomeProps) {
     }
 
     return (
-        <div
-            className="pb-20 lg:pb-0"
-            style={{
-                opacity: isRestoringScroll ? 0 : 1,
-                transition: 'opacity 0.15s ease-in-out'
-            }}
-        >
+        <div className={`pb-20 lg:pb-0 transition-opacity duration-200 ${isRestored ? 'opacity-100' : 'opacity-0'}`}>
             {/* Header - Hidden on mobile, App.tsx provides mobile header */}
             <div className="bg-white border-b sticky top-[72px] z-50">
                 <div className="max-w-7xl mx-auto px-2 sm:px-4 py-4">
