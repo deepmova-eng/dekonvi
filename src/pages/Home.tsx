@@ -214,6 +214,16 @@ export default function Home({ onProductSelect, searchQuery = '' }: HomeProps) {
     useLayoutEffect(() => {
         const savedPos = sessionStorage.getItem('home_scroll_pos');
 
+        // If NO saved scroll position, it means we're arriving fresh (e.g., after creating listing)
+        // In that case, invalidate queries to fetch latest data
+        if (!savedPos) {
+            console.log('🔄 [HOME] No saved scroll, invalidating queries for fresh data...');
+            queryClient.invalidateQueries({
+                queryKey: ['listings'],
+                exact: false
+            });
+        }
+
         // Only restore if we have data rendered (important for infinite scroll)
         if (listings.length > 0 && savedPos) {
             const scrollPos = parseInt(savedPos, 10);
@@ -228,7 +238,7 @@ export default function Home({ onProductSelect, searchQuery = '' }: HomeProps) {
                 sessionStorage.removeItem('home_scroll_pos');
             }, 100); // Wait 100ms for Router to finish
         }
-    }, [listings.length]);
+    }, [listings.length, queryClient]);
 
     if (showLogin) {
         return <Login onBack={handleBack} onRegisterClick={handleRegisterClick} />;
