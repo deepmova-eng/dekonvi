@@ -115,6 +115,30 @@ export default function HeroSlider() {
         };
     }, [ads.length, isPaused, nextSlide]);
 
+    // Touch/Swipe support for mobile
+    const [touchStart, setTouchStart] = useState(0);
+    const [touchEnd, setTouchEnd] = useState(0);
+
+    const handleTouchStart = (e: React.TouchEvent) => {
+        setTouchStart(e.targetTouches[0].clientX);
+    };
+
+    const handleTouchMove = (e: React.TouchEvent) => {
+        setTouchEnd(e.targetTouches[0].clientX);
+    };
+
+    const handleTouchEnd = () => {
+        if (touchStart - touchEnd > 50) {
+            // Swipe left → next slide
+            nextSlide();
+        }
+
+        if (touchStart - touchEnd < -50) {
+            // Swipe right → prev slide
+            prevSlide();
+        }
+    };
+
     // Images are already optimized at upload time, no transformation needed
 
     if (ads.length === 0) return null;
@@ -125,6 +149,9 @@ export default function HeroSlider() {
                 className="hero-slider"
                 onMouseEnter={() => setIsPaused(true)}
                 onMouseLeave={() => setIsPaused(false)}
+                onTouchStart={handleTouchStart}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
             >
                 {/* Slides */}
                 {ads.map((ad, index) => (
