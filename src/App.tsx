@@ -23,6 +23,10 @@ import MonitoringDashboard from './pages/admin/Monitoring';
 import Categories from './pages/Categories';
 import CategoryListings from './pages/CategoryListings';
 import CategoryPage from './pages/CategoryPage';
+import UserSettings from './pages/UserSettings';
+import PersonalInfo from './pages/PersonalInfo';
+import Addresses from './pages/Addresses';
+import Security from './pages/Security';
 
 export default function App() {
   const { user } = useSupabase();
@@ -99,7 +103,8 @@ export default function App() {
       location.pathname.startsWith('/favorites') ||
       location.pathname.startsWith('/seller/') ||
       location.pathname === '/profile' ||
-      location.pathname.startsWith('/create')
+      location.pathname.startsWith('/create') ||
+      location.pathname.startsWith('/settings')
     ));
 
   return (
@@ -173,6 +178,38 @@ export default function App() {
                   }}
                   onProductSelect={(id) => navigate(`/listings/${id}`)}
                 />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/settings"
+            element={
+              <ProtectedRoute>
+                <UserSettings />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/settings/personal-info"
+            element={
+              <ProtectedRoute>
+                <PersonalInfo />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/settings/addresses"
+            element={
+              <ProtectedRoute>
+                <Addresses />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/settings/security"
+            element={
+              <ProtectedRoute>
+                <Security />
               </ProtectedRoute>
             }
           />

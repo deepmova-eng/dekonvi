@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Edit, Trash2, Sparkles } from 'lucide-react';
+import { Plus, Edit, Trash2, Sparkles, MoreVertical, Zap } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useSupabase } from '../../contexts/SupabaseContext';
 import type { Database } from '../../types/supabase';
@@ -25,6 +25,7 @@ export default function UserListings({
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [requestingBoostId, setRequestingBoostId] = useState<string | null>(null);
   const [pendingRequests, setPendingRequests] = useState<Set<string>>(new Set());
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
 
   const { user } = useSupabase();
 
@@ -319,44 +320,6 @@ export default function UserListings({
                     <span>En attente</span>
                   </div>
                 )}
-
-                {/* Action Buttons Overlay */}
-                <div className="absolute top-3 right-3 flex gap-2 z-10">
-                  {!listing.is_premium && (
-                    <button
-                      onClick={(e) => handleBoostClick(e, listing.id)}
-                      disabled={requestingBoostId === listing.id}
-                      className={`w-9 h-9 rounded-full flex items-center justify-center backdrop-blur-md shadow-sm transition-all ${requestingBoostId === listing.id
-                        ? 'bg-white/50 cursor-not-allowed'
-                        : 'bg-white/90 hover:bg-white hover:scale-110 text-amber-500'
-                        }`}
-                      title="Booster l'annonce"
-                    >
-                      <Sparkles size={16} />
-                    </button>
-                  )}
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onEditingListing(listing);
-                    }}
-                    className="w-9 h-9 bg-white/90 hover:bg-white rounded-full flex items-center justify-center backdrop-blur-md shadow-sm hover:scale-110 transition-all text-primary-500"
-                    title="Modifier"
-                  >
-                    <Edit size={16} />
-                  </button>
-                  <button
-                    onClick={(e) => handleDeleteClick(e, listing.id)}
-                    disabled={deletingId === listing.id}
-                    className={`w-9 h-9 rounded-full flex items-center justify-center backdrop-blur-md shadow-sm transition-all ${deletingId === listing.id
-                      ? 'bg-white/50 cursor-not-allowed'
-                      : 'bg-white/90 hover:bg-white hover:scale-110 text-red-500'
-                      }`}
-                    title="Supprimer"
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                </div>
               </div>
 
               <div className="product-content">
@@ -368,12 +331,116 @@ export default function UserListings({
                   <span className="product-price">
                     {listing.price.toLocaleString()} <span className="text-sm ml-1 font-normal text-neutral-500">FCFA</span>
                   </span>
+
+                  {/* Actions Menu Button */}
+                  <div className="relative">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setOpenMenuId(openMenuId === listing.id ? null : listing.id);
+                      }}
+                      className="p-1.5 hover:bg-gray-100 rounded-full transition-colors"
+                      title="Actions"
+                    >
+                      <MoreVertical size={18} className="text-gray-600" />
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         ))}
       </div>
+
+      {/* ===== ACTION SHEET (Fixed Overlay) ===== */}
+      {openMenuId && (() => {
+        const selectedListing = listings.find(l => l.id === openMenuId);
+        if (!selectedListing) return null;
+
+        return (
+          <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
+            {/* Overlay noir */}
+            <div
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
+              onClick={() => setOpenMenuId(null)}
+            />
+
+            {/* Menu blanc */}
+            <div className="relative bg-white w-full sm:w-96 sm:max-w-md rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden">
+              {/* Petite barre de drag (mobile) */}
+              <div className="w-12 h-1.5 bg-gray-300 rounded-full mx-auto my-3 sm:hidden" />
+
+              <div className="flex flex-col p-2">
+                {/* Option BOOSTER */}
+                {!selectedListing.is_premium && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setOpenMenuId(null);
+                      handleBoostClick(e, selectedListing.id);
+                    }}
+                    disabled={requestingBoostId === selectedListing.id}
+                    className="w-full text-left px-4 py-4 text-gray-800 hover:bg-amber-50 font-medium flex items-center gap-4 rounded-xl transition-colors disabled:opacity-50"
+                  >
+                    <div className="p-2 bg-amber-100 rounded-full text-amber-600">
+                      <Zap className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <span className="block text-base">Booster l'annonce</span>
+                      <span className="block text-xs text-gray-400 font-normal">Vendez plus vite</span>
+                    </div>
+                  </button>
+                )}
+
+                {/* Option MODIFIER */}
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setOpenMenuId(null);
+                    onEditingListing(selectedListing);
+                  }}
+                  className="w-full text-left px-4 py-4 text-gray-700 hover:bg-gray-50 font-medium flex items-center gap-4 rounded-xl transition-colors"
+                >
+                  <div className="p-2 bg-gray-100 rounded-full text-gray-600">
+                    <Edit className="w-5 h-5" />
+                  </div>
+                  <span className="text-base">Modifier</span>
+                </button>
+
+                {/* Ligne de séparation */}
+                <div className="h-px bg-gray-100 my-1 mx-4" />
+
+                {/* Option SUPPRIMER */}
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setOpenMenuId(null);
+                    handleDeleteClick(e, selectedListing.id);
+                  }}
+                  disabled={deletingId === selectedListing.id}
+                  className="w-full text-left px-4 py-4 text-red-600 hover:bg-red-50 font-medium flex items-center gap-4 rounded-xl transition-colors disabled:opacity-50"
+                >
+                  <div className="p-2 bg-red-100 rounded-full text-red-600">
+                    <Trash2 className="w-5 h-5" />
+                  </div>
+                  <span className="text-base">Supprimer</span>
+                </button>
+              </div>
+
+              {/* Bouton Annuler (Mobile) */}
+              <div className="p-4 border-t border-gray-100 sm:hidden">
+                <button
+                  onClick={() => setOpenMenuId(null)}
+                  className="w-full py-3 bg-gray-100 text-gray-700 font-bold rounded-xl hover:bg-gray-200 transition-colors"
+                >
+                  Annuler
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
       {/* Confirmation Modal */}
       {confirmAction && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
