@@ -66,26 +66,19 @@
     /* Shimmer effect */
 }
 
-.product-card__image {
-    /* Styles handled by OptimizedImage component */
-}
+/* Image styles handled by OptimizedImage component */
 
-.product-card:hover .product-card__image {
-    /* Hover handled by OptimizedImage */
-}
 
 /* ==================== BADGES SYSTEM ==================== */
 
-/* Badge Container - Full width for left/right positioning */
+/* 🎯 Zone de Badges (Gauche uniquement) - Empilement vertical */
 .product-card__badges {
     position: absolute;
-    top: var(--space-8);
-    left: 0;
-    right: 0;
+    top: 8px;
+    left: 8px;
     display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    padding: 0 var(--space-8);
+    flex-direction: column;
+    gap: 4px;
     z-index: 2;
     pointer-events: none;
 }
@@ -127,7 +120,7 @@
 .product-card__badge--new {
     background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
     color: white;
-    animation: slideInLeft 0.3s ease-out 0.1s both;
+    animation: slideInLeft 0.3s ease-out;
 }
 
 /* Badge Urgent */
