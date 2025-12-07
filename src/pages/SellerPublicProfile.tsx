@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase';
 import { useSellerProfile } from '../hooks/useProfile';
 import { useSellerListings } from '../hooks/useListings';
 import { useSellerReviews, useSubmitReview } from '../hooks/useReviews';
+import { useSellerResponseRate } from '../hooks/useSellerResponseRate';
 import {
     Star,
     MapPin,
@@ -81,6 +82,7 @@ export default function SellerPublicProfile() {
     const { data: seller, isLoading: sellerLoading } = useSellerProfile(id);
     const { data: listings = [], isLoading: listingsLoading } = useSellerListings(id);
     const { data: reviews = [], isLoading: reviewsLoading } = useSellerReviews(id);
+    const { data: responseRate, isLoading: responseRateLoading } = useSellerResponseRate(id);
 
     const loading = sellerLoading || listingsLoading || reviewsLoading;
 
@@ -218,7 +220,7 @@ export default function SellerPublicProfile() {
         ? reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length
         : 0;
 
-    const responseRate = 95; // TODO: Calculate from messaging data
+    // Response rate now calculated via useSellerResponseRate hook
     const memberSinceMonths = Math.floor(
         (new Date().getTime() - new Date(seller.created_at).getTime()) / (1000 * 60 * 60 * 24 * 30)
     );
@@ -332,7 +334,9 @@ export default function SellerPublicProfile() {
                                 <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
                                     <div className="flex items-center space-x-2 mb-1">
                                         <TrendingUp className="h-6 w-6 text-gray-600" />
-                                        <span className="text-xl font-bold text-gray-900">{responseRate}%</span>
+                                        <span className="text-xl font-bold text-gray-900">
+                                            {responseRate !== null && responseRate !== undefined ? `${responseRate}%` : 'N/A'}
+                                        </span>
                                     </div>
                                     <p className="text-xs text-gray-600">Réponse</p>
                                 </div>
@@ -341,7 +345,7 @@ export default function SellerPublicProfile() {
                                 <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
                                     <div className="flex items-center space-x-2 mb-1">
                                         <MapPin className="h-6 w-6 text-gray-600" />
-                                        <span className="text-base font-bold text-gray-900 truncate">{seller.location || 'Lomé'}</span>
+                                        <span className="text-base font-bold text-gray-900 truncate">{seller.location || 'Non renseignée'}</span>
                                     </div>
                                     <p className="text-xs text-gray-600">Ville</p>
                                 </div>
@@ -458,8 +462,8 @@ export default function SellerPublicProfile() {
                                                                     <Star
                                                                         key={i}
                                                                         className={`h-4 w-4 ${i < review.rating
-                                                                                ? 'text-yellow-400 fill-yellow-400'
-                                                                                : 'text-gray-300 fill-gray-300'
+                                                                            ? 'text-yellow-400 fill-yellow-400'
+                                                                            : 'text-gray-300 fill-gray-300'
                                                                             }`}
                                                                     />
                                                                 ))}
