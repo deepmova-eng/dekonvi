@@ -224,54 +224,48 @@ export default function Conversation({ conversationId, onBack }: ConversationPro
 
   return (
     <>
-      <div className="messages-header">
-        <div className="flex items-center justify-between">
-          <div className="contact-info">
-            {onBack && (
-              <button onClick={onBack} className="md:hidden mr-2 p-1 hover:bg-gray-100 rounded-full">
-                <ChevronLeft className="w-6 h-6 text-gray-600" />
-              </button>
+      {/* Header Hybride - Produit en vedette, User en contexte */}
+      <div className="mt-4 h-20 shrink-0 border-b flex items-center px-4 bg-white z-20 relative shadow-sm">
+        <div className="flex items-center gap-4 w-full">
+          {onBack && (
+            <button onClick={onBack} className="md:hidden p-1 -ml-2 hover:bg-gray-100 rounded-full transition-colors">
+              <ChevronLeft className="w-6 h-6 text-gray-600" />
+            </button>
+          )}
+
+          {/* Image Produit (Gauche) */}
+          <div
+            className="relative shrink-0 cursor-pointer group"
+            onClick={() => conversationData?.listingId && window.open(`/listings/${conversationData.listingId}`, '_blank')}
+          >
+            {conversationData?.listingImage ? (
+              <img
+                src={conversationData.listingImage}
+                alt={conversationData.listingTitle}
+                className="w-12 h-12 rounded-lg object-cover bg-gray-100 border border-gray-100 group-hover:opacity-90 transition-opacity"
+              />
+            ) : (
+              <div className="w-12 h-12 rounded-lg bg-gray-100 border border-gray-100 flex items-center justify-center text-gray-400">
+                <span className="text-xs">IMG</span>
+              </div>
             )}
-
-            <div className="avatar">
-              {conversationData?.otherParticipantAvatar ? (
-                <img
-                  src={conversationData.otherParticipantAvatar}
-                  alt={conversationData.otherParticipantName}
-                  className="w-full h-full object-cover rounded-full"
-                />
-              ) : (
-                conversationData?.otherParticipantName?.charAt(0) || 'U'
-              )}
-            </div>
-
-            <div>
-              <h3>{conversationData?.otherParticipantName}</h3>
-              <span className="status">
-                Répond en {conversationData?.otherParticipantResponseTime || 3}h
-              </span>
-            </div>
           </div>
 
-          {conversationData?.listingTitle && (
-            <div className="hidden sm:flex items-center gap-3 bg-white px-3 py-1.5 rounded-lg border border-gray-100 shadow-sm">
-              {conversationData.listingImage && (
-                <img
-                  src={conversationData.listingImage}
-                  alt=""
-                  className="w-8 h-8 rounded object-cover"
-                />
-              )}
-              <div className="text-right">
-                <p className="text-xs font-medium text-gray-900 truncate max-w-[150px]">
-                  {conversationData.listingTitle}
-                </p>
-                <p className="text-xs font-bold text-primary-600">
-                  {conversationData.listingPrice?.toLocaleString()} FCFA
-                </p>
-              </div>
+          {/* Info Centrale */}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-baseline justify-between gap-2">
+              <h3 className="font-bold text-gray-900 truncate text-base">
+                {conversationData?.listingTitle || 'Annonce sans titre'}
+              </h3>
+              <span className="font-bold text-primary-600 whitespace-nowrap text-base">
+                {conversationData?.listingPrice ? `${conversationData.listingPrice.toLocaleString()} FCFA` : ''}
+              </span>
             </div>
-          )}
+
+            <p className="text-sm text-gray-500 truncate">
+              Discussion avec <span className="font-medium text-gray-700">{conversationData?.otherParticipantName || 'Utilisateur'}</span>
+            </p>
+          </div>
         </div>
       </div>
 

@@ -419,6 +419,10 @@ export function ChatWindow({ conversationId, currentUserId, onMobileBack, onConv
                     onMobileBack={onMobileBack}
                     showMobileBack={true}
                     loading={loadingUser}
+                    listingImage={listing?.images?.[0]}
+                    listingTitle={listing?.title}
+                    listingPrice={listing?.price}
+                    listingId={listing?.id}
                 />
 
                 {/* Menu dropdown */}

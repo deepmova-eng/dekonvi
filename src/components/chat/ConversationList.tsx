@@ -133,13 +133,7 @@ export default function ConversationList({ onSelectConversation, selectedId }: C
           >
             <div className="flex items-start gap-3">
               <div className="conversation-avatar relative flex-shrink-0">
-                {listing?.images && listing.images.length > 0 ? (
-                  <img
-                    src={listing.images[0]}
-                    alt={listing.title}
-                    className="w-12 h-12 rounded-lg object-cover"
-                  />
-                ) : otherParticipant?.avatar_url ? (
+                {otherParticipant?.avatar_url ? (
                   <img
                     src={otherParticipant.avatar_url}
                     alt={otherParticipant.name}
@@ -156,7 +150,6 @@ export default function ConversationList({ onSelectConversation, selectedId }: C
                 <div className="flex justify-between items-start">
                   <h4 className={`text-sm ${hasUnread ? 'font-bold text-gray-900' : 'font-medium text-gray-900'}`}>
                     {otherParticipant?.name || 'Utilisateur'}
-                    {listing && <span className="text-xs text-gray-500 ml-2 font-normal">• {listing.title}</span>}
                   </h4>
                   <span className="text-xs text-gray-400 whitespace-nowrap ml-2">{timeStr}</span>
                 </div>

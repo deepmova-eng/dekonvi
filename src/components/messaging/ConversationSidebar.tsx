@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { Search, MoreVertical } from 'lucide-react'
 import { SidebarMenu } from './SidebarMenu'
-import { ProductCard } from './ProductCard'
 import { ConversationItem } from './ConversationItem'
 import { ConfirmDialog } from '../shared/ConfirmDialog'
 import { ConversationSkeleton } from '../common/ConversationSkeleton'
@@ -12,12 +11,11 @@ interface Props {
     activeId: string | null
     onSelect: (id: string) => void
     currentUserId: string
-    activeListing?: any | null
     onDeleteConversation?: (conversationId: string) => void
     loading?: boolean
 }
 
-export function ConversationSidebar({ conversations, activeId, onSelect, currentUserId, activeListing, onDeleteConversation, loading = false }: Props) {
+export function ConversationSidebar({ conversations, activeId, onSelect, currentUserId, onDeleteConversation, loading = false }: Props) {
     const [searchQuery, setSearchQuery] = useState('')
     const [showMenu, setShowMenu] = useState(false)
     const [showDeleteDialog, setShowDeleteDialog] = useState(false)
@@ -107,7 +105,7 @@ export function ConversationSidebar({ conversations, activeId, onSelect, current
         <div className="fixed inset-0 z-40 flex flex-col bg-white h-[100dvh] w-full overscroll-none md:static md:h-full md:w-auto md:z-auto">
 
             {/* Header - Fixed at top */}
-            <div className="flex-none pt-[env(safe-area-inset-top)]">
+            <div className="flex-none pt-[env(safe-area-inset-top)] md:pt-0 sticky top-0 z-50 bg-white border-b border-gray-200">
                 <div className="sidebar-header">
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 8px 0 24px' }}>
                         <h2>Messages</h2>
@@ -126,13 +124,6 @@ export function ConversationSidebar({ conversations, activeId, onSelect, current
                         )}
                     </div>
                 </div>
-
-                {/* Product Card - Context de la conversation active */}
-                {activeListing && (
-                    <div className="px-4 py-3">
-                        <ProductCard listing={activeListing} />
-                    </div>
-                )}
 
                 {/* Search */}
                 <div className="sidebar-search">

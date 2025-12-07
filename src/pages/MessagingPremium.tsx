@@ -41,6 +41,19 @@ export default function MessagingPremium() {
         setIsMobileViewingChat(false)
     }
 
+    // Lock body scroll on desktop to prevent global scrollbar
+    useEffect(() => {
+        const isDesktop = window.matchMedia('(min-width: 768px)').matches
+        if (isDesktop) {
+            document.body.style.overflow = 'hidden'
+            document.documentElement.style.overflow = 'hidden'
+        }
+        return () => {
+            document.body.style.overflow = ''
+            document.documentElement.style.overflow = ''
+        }
+    }, [])
+
     return (
         <>
             {/* MOBILE VIEW - Mutually exclusive: either sidebar OR chat */}
@@ -65,7 +78,6 @@ export default function MessagingPremium() {
                             setIsMobileViewingChat(true)
                         }}
                         currentUserId={user?.id || ''}
-                        activeListing={conversations.find(c => c.id === activeConversationId)?.listing}
                         onDeleteConversation={handleConversationDeleted}
                         loading={loading}
                     />
@@ -73,9 +85,9 @@ export default function MessagingPremium() {
             </div>
 
             {/* DESKTOP VIEW - Side by side layout */}
-            <div className="hidden md:flex h-screen w-full bg-gray-50">
+            <div className="hidden md:flex h-screen w-full bg-gray-50 overflow-hidden">
                 {/* Sidebar - Fixed width */}
-                <div className="w-[380px] flex-shrink-0 border-r bg-white">
+                <div className="w-[380px] flex-shrink-0 border-r bg-white h-full overflow-hidden pt-16">
                     <ConversationSidebar
                         conversations={conversations}
                         activeId={activeConversationId}
@@ -84,14 +96,13 @@ export default function MessagingPremium() {
                             setIsMobileViewingChat(true)
                         }}
                         currentUserId={user?.id || ''}
-                        activeListing={conversations.find(c => c.id === activeConversationId)?.listing}
                         onDeleteConversation={handleConversationDeleted}
                         loading={loading}
                     />
                 </div>
 
                 {/* Chat - Remaining space */}
-                <div className="flex-1 relative overflow-hidden">
+                <div className="flex-1 relative h-full overflow-hidden pt-16">
                     {activeConversationId ? (
                         <ChatWindow
                             conversationId={activeConversationId}
