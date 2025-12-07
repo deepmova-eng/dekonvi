@@ -1,26 +1,14 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useState } from 'react';
 import { Bell } from 'lucide-react';
 import { useNotifications } from '../../hooks/useNotifications';
-import NotificationList from './NotificationList';
+import NotificationDrawer from './NotificationDrawer';
 
 export default function NotificationBell() {
     const { unreadCount } = useNotifications();
     const [isOpen, setIsOpen] = useState(false);
-    const containerRef = useRef<HTMLDivElement>(null);
-
-    useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-            if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
-                setIsOpen(false);
-            }
-        };
-
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, []);
 
     return (
-        <div className="relative" ref={containerRef}>
+        <>
             <button
                 onClick={() => setIsOpen(!isOpen)}
                 className="notification-bell"
@@ -33,7 +21,10 @@ export default function NotificationBell() {
                 )}
             </button>
 
-            {isOpen && <NotificationList onClose={() => setIsOpen(false)} />}
-        </div>
+            <NotificationDrawer
+                isOpen={isOpen}
+                onClose={() => setIsOpen(false)}
+            />
+        </>
     );
 }
