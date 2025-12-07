@@ -345,7 +345,9 @@ export default function SellerPublicProfile() {
                                 <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
                                     <div className="flex items-center space-x-2 mb-1">
                                         <MapPin className="h-6 w-6 text-gray-600" />
-                                        <span className="text-base font-bold text-gray-900 truncate">{seller.location || 'Non renseignée'}</span>
+                                        <span className="text-base font-bold text-gray-900 whitespace-normal break-words leading-tight">
+                                            {seller.location || '--'}
+                                        </span>
                                     </div>
                                     <p className="text-xs text-gray-600">Ville</p>
                                 </div>
