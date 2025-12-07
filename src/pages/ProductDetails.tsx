@@ -25,6 +25,21 @@ import { useSellerProfile } from '../hooks/useProfile';
 import './ProductDetails.css';
 import { supabase } from '../lib/supabase';
 
+// Helper function to get condition label
+const getConditionLabel = (condition: string | null | undefined): string => {
+  if (!condition) return 'Non spécifié';
+
+  const conditionMap: Record<string, string> = {
+    'neuf': 'Neuf',
+    'comme-neuf': 'Comme neuf',
+    'bon-etat': 'Bon état',
+    'etat-correct': 'État correct',
+    'a-renover': 'À rénover'
+  };
+
+  return conditionMap[condition] || 'Occasion';
+};
+
 export default function ProductDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -402,7 +417,7 @@ export default function ProductDetails() {
                   </h1>
                   {listing.condition && (
                     <span className="product-condition-badge">
-                      {listing.condition === 'new' ? 'Neuf' : 'Occasion'}
+                      {getConditionLabel(listing.condition)}
                     </span>
                   )}
                 </div>
@@ -665,7 +680,7 @@ export default function ProductDetails() {
               <h3>Caractéristiques</h3>
               <dl className="specs-list">
                 <dt>État</dt>
-                <dd>{listing.condition === 'new' ? 'Neuf' : 'Occasion'}</dd>
+                <dd>{getConditionLabel(listing.condition)}</dd>
 
                 <dt>Catégorie</dt>
                 <dd>{listing.category}</dd>
