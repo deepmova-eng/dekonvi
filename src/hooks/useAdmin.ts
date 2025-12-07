@@ -95,18 +95,39 @@ export function useRejectListing() {
 
 /**
  * Hook pour fetch tous les users (admin)
+ * Uses get_users_admin() RPC to fetch auth.users data
+ * and joins with profiles for complete user information
  */
 export function useAllUsers() {
     return useQuery({
         queryKey: ['admin', 'users'],
         queryFn: async () => {
-            const { data, error } = await supabase
-                .from('profiles')
-                .select('*')
-                .order('created_at', { ascending: false });
+            // Step 1: Get auth.users data via RPC
+            const { data: authUsers, error: authError } = await supabase
+                .rpc('get_users_admin' as any);
 
-            if (error) throw error;
-            return data || [];
+            if (authError) throw authError;
+            if (!authUsers || authUsers.length === 0) return [];
+
+            // Step 2: Get profiles data
+            const { data: profiles, error: profilesError } = await supabase
+                .from('profiles')
+                .select('*');
+
+            if (profilesError) throw profilesError;
+
+            // Step 3: Merge auth.users + profiles data
+            const mergedUsers = authUsers.map((authUser: any) => {
+                const profile = profiles?.find(p => p.id === authUser.id);
+                return {
+                    ...profile,
+                    email_confirmed_at: authUser.email_confirmed_at,
+                    last_sign_in_at: authUser.last_sign_in_at,
+                    email: authUser.email
+                };
+            });
+
+            return mergedUsers;
         },
         staleTime: 1000 * 60, // 1 minute
     });

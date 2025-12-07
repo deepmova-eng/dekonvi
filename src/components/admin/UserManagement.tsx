@@ -68,13 +68,10 @@ export default function UserManagement({ filter = 'confirmed' }: UserManagementP
         throw new Error(result.error || 'Erreur lors de la mise à jour du statut');
       }
 
-      setUsers(users.map(u =>
-        u.id === user.id
-          ? { ...u, status: newStatus }
-          : u
-      ));
-
       toast.success(user.status === 'banned' ? 'Utilisateur débanni' : 'Utilisateur banni');
+
+      // Force refresh users list
+      window.location.reload();
     } catch (error) {
       console.error('Error updating user status:', error);
       toast.error('Erreur lors de la mise à jour du statut');
@@ -117,13 +114,10 @@ export default function UserManagement({ filter = 'confirmed' }: UserManagementP
         throw new Error(result.error || 'Erreur lors de la mise à jour du rôle');
       }
 
-      setUsers(users.map(u =>
-        u.id === user.id
-          ? { ...u, role: newRole }
-          : u
-      ));
-
       toast.success(user.role === 'admin' ? 'Administrateur rétrogradé' : 'Administrateur promu');
+
+      // Force refresh users list
+      window.location.reload();
     } catch (error) {
       console.error('Error updating user role:', error);
       toast.error('Erreur lors de la mise à jour du rôle');
@@ -158,18 +152,10 @@ export default function UserManagement({ filter = 'confirmed' }: UserManagementP
 
       toast.success('Utilisateur confirmé avec succès', { id: toastId });
 
-      // Optimistic update
-      setUsers(currentUsers => currentUsers.map(u =>
-        u.id === user.id
-          ? { ...u, email_confirmed_at: new Date().toISOString() }
-          : u
-      ));
-
-      // Delay fetch to ensure DB propagation
+      // Reload page to refresh user list from DB
       setTimeout(() => {
-        console.log('Refetching users after delay...');
-        fetchUsers();
-      }, 2000);
+        window.location.reload();
+      }, 1500);
     } catch (error: any) {
       console.error('Error confirming user:', error);
       toast.error(`Erreur: ${error.message || 'Échec de la confirmation'}`, { id: toastId });
@@ -198,8 +184,12 @@ export default function UserManagement({ filter = 'confirmed' }: UserManagementP
 
       if (error) throw error;
 
-      setUsers(users.filter(u => u.id !== user.id));
       toast.success('Utilisateur supprimé avec succès', { id: toastId });
+
+      // Reload page to refresh user list
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
     } catch (error: any) {
       console.error('Error deleting user:', error);
       toast.error(`Erreur: ${error.message || 'Échec de la suppression'}`, { id: toastId });
@@ -265,7 +255,131 @@ export default function UserManagement({ filter = 'confirmed' }: UserManagementP
         />
       </div>
 
-      <div className="divide-y">
+      {/* Mobile View - Decision Cards */}
+      <div className="md:hidden space-y-4 p-4">
+        {filteredUsers.map(user => (
+          <div key={user.id} className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 hover:shadow-md transition-shadow">
+            {/* Header - Avatar & Status Badge */}
+            <div className="flex items-start justify-between mb-3">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
+                  {user.avatar_url ? (
+                    <img
+                      src={user.avatar_url}
+                      alt={user.name}
+                      className="w-full h-full rounded-full object-cover"
+                    />
+                  ) : (
+                    <User className="w-5 h-5 text-gray-400" />
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold text-gray-900 text-base truncate">
+                    {user.name}
+                  </h3>
+                  <p className="text-xs text-gray-500 break-all mt-0.5">
+                    {user.email}
+                  </p>
+                </div>
+              </div>
+
+              {/* Status Badge */}
+              <div className="flex-shrink-0 ml-2">
+                {!user.email_confirmed_at && (
+                  <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-700">
+                    En attente
+                  </span>
+                )}
+                {user.email_confirmed_at && (
+                  <CheckCircle className="w-5 h-5 text-green-500" />
+                )}
+              </div>
+            </div>
+
+            {/* Additional Badges */}
+            <div className="flex items-center flex-wrap gap-2 mb-4">
+              {user.status === 'banned' && (
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700">
+                  Banni
+                </span>
+              )}
+              {user.role === 'admin' && (
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-700">
+                  Administrateur
+                </span>
+              )}
+            </div>
+
+            {/* Action Buttons - Grid 2 columns */}
+            <div className="grid grid-cols-2 gap-3">
+              {/* Delete/Refuse Button */}
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDeleteUser(user);
+                }}
+                className="flex items-center justify-center space-x-2 px-4 py-3 bg-white border-2 border-red-200 text-red-600 hover:bg-red-50 rounded-xl transition-all font-medium text-sm min-h-[44px]"
+              >
+                <Trash2 className="w-4 h-4" />
+                <span>Refuser</span>
+              </button>
+
+              {/* Validate Button (conditional) */}
+              {!user.email_confirmed_at ? (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleConfirmUser(user);
+                  }}
+                  style={{ backgroundColor: '#10B981' }}
+                  className="flex items-center justify-center space-x-2 px-4 py-3 text-white rounded-xl transition-all font-semibold text-sm shadow-lg shadow-green-500/30 hover:shadow-xl hover:shadow-green-500/40 min-h-[44px] border-none"
+                >
+                  <CheckCircle className="w-4 h-4" />
+                  <span>Valider</span>
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleBanUser(user);
+                  }}
+                  className={`flex items-center justify-center space-x-2 px-4 py-3 rounded-xl transition-all font-medium text-sm min-h-[44px] ${user.status === 'banned'
+                    ? 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    : 'bg-orange-100 text-orange-700 hover:bg-orange-200'
+                    }`}
+                >
+                  <Ban className="w-4 h-4" />
+                  <span>{user.status === 'banned' ? 'Débannir' : 'Bannir'}</span>
+                </button>
+              )}
+            </div>
+
+            {/* Admin Toggle (if confirmed) */}
+            {user.email_confirmed_at && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleMakeAdmin(user);
+                }}
+                className={`w-full mt-3 flex items-center justify-center space-x-2 px-4 py-2.5 rounded-lg transition-all font-medium text-sm ${user.role === 'admin'
+                  ? 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  : 'bg-primary-50 text-primary-700 hover:bg-primary-100'
+                  }`}
+              >
+                <Shield className="w-4 h-4" />
+                <span>{user.role === 'admin' ? 'Retirer Admin' : 'Promouvoir Admin'}</span>
+              </button>
+            )}
+          </div>
+        ))}
+      </div>
+
+      {/* Desktop View - Table Layout */}
+      <div className="hidden md:block divide-y">
         {filteredUsers.map(user => (
           <div key={user.id} className="p-6 flex items-center justify-between">
             <div className="flex items-center space-x-4">

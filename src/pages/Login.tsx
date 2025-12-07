@@ -81,6 +81,21 @@ export default function Login({ onBack, onRegisterClick }: LoginProps) {
         const data = await response.json();
         console.log('REST API login successful, got tokens');
 
+        // Check email confirmation status before storing session
+        if (!data.user?.email_confirmed_at) {
+          console.log('User email not confirmed, blocking access');
+          toast.error('Votre compte est en attente de validation par notre équipe.');
+
+          // Store temporary session to show pending page
+          localStorage.setItem('pending_user_email', email);
+
+          // Redirect to pending validation page
+          setTimeout(() => {
+            window.location.href = '/pending-validation';
+          }, 1000);
+          return;
+        }
+
         // Bypass setSession completely - store tokens manually in localStorage
         console.log('Storing session manually in localStorage...');
         const session = {
@@ -113,6 +128,28 @@ export default function Login({ onBack, onRegisterClick }: LoginProps) {
       }
 
       if (authResult.error) throw authResult.error;
+
+      // Check email confirmation status after successful Supabase client login
+      const { data: { user } } = await supabase.auth.getUser();
+
+      if (!user?.email_confirmed_at) {
+        console.log('User email not confirmed via client, blocking access');
+
+        // Sign out immediately
+        await supabase.auth.signOut();
+
+        setError('Votre compte est en attente de validation par notre équipe.');
+        toast.error('Votre compte est en attente de validation.');
+
+        // Store email for pending page
+        localStorage.setItem('pending_user_email', email);
+
+        // Redirect to pending validation page
+        setTimeout(() => {
+          window.location.href = '/pending-validation';
+        }, 1000);
+        return;
+      }
 
       launchConfetti();
       toast.success('Connexion réussie !');

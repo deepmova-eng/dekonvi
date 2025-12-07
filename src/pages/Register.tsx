@@ -47,58 +47,24 @@ export default function Register({ onBack, onLoginClick }: RegisterProps) {
         }
       });
 
-      const { error: signUpError, data } = await Promise.race([
+      const { error: signUpError } = await Promise.race([
         signUpPromise,
         timeoutPromise
       ]) as any;
 
       if (signUpError) throw signUpError;
 
-      // Check if we have a session
-      if (data?.session) {
-        // Auto-login successful
-        launchConfetti();
-        toast.success('Compte créé ! Redirection...');
-        setTimeout(() => {
-          onBack();
-        }, 1500);
-      } else if (data?.user && !data.session) {
-        // User created but no session (maybe email confirm is off but session not returned?)
-        // Attempt immediate login
-        console.log('User created but no session, attempting auto-login...');
-        const { error: signInError } = await supabase.auth.signInWithPassword({
-          email,
-          password
-        });
+      // Registration successful - user needs admin validation before accessing site
+      // Don't auto-login, redirect to home with message
+      launchConfetti();
+      toast.success('Compte créé ! En attente de validation par notre équipe.', {
+        duration: 6000,
+        icon: '⏳'
+      });
 
-        if (signInError) {
-          // If login fails, maybe email confirmation IS required?
-          console.warn('Auto-login failed:', signInError);
-
-          if (signInError.message.includes('Email not confirmed')) {
-            launchConfetti();
-            toast.success('Compte créé ! Veuillez vérifier votre email pour confirmer votre inscription.', {
-              duration: 6000,
-              icon: '📧'
-            });
-          } else {
-            toast.success('Compte créé ! Veuillez vous connecter.');
-          }
-        } else {
-          launchConfetti();
-          toast.success('Compte créé ! Redirection...');
-        }
-        setTimeout(() => {
-          onBack();
-        }, 2000);
-      } else {
-        // Fallback
-        launchConfetti();
-        toast.success('Compte créé avec succès !');
-        setTimeout(() => {
-          onBack();
-        }, 1500);
-      }
+      setTimeout(() => {
+        onBack();
+      }, 2000);
 
     } catch (error) {
       console.error('Registration error:', error);
@@ -278,8 +244,8 @@ export default function Register({ onBack, onLoginClick }: RegisterProps) {
           type="submit"
           disabled={loading}
           className={`w-full py-4 rounded-full font-semibold text-white text-lg transition-all shadow-lg ${loading
-              ? 'bg-gray-400 cursor-not-allowed'
-              : 'bg-primary-500 hover:bg-primary-600 hover:shadow-xl active:scale-[0.98]'
+            ? 'bg-gray-400 cursor-not-allowed'
+            : 'bg-primary-500 hover:bg-primary-600 hover:shadow-xl active:scale-[0.98]'
             }`}
           style={{
             background: loading ? undefined : 'linear-gradient(135deg, #2DD181 0%, #27ae60 100%)',
