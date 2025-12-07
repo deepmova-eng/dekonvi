@@ -135,6 +135,12 @@ export default function App() {
               secondary: '#FFFFFF',
             },
           },
+          loading: {
+            iconTheme: {
+              primary: '#3B82F6',
+              secondary: '#FFFFFF',
+            },
+          },
         }}
       />
 

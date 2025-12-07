@@ -1,6 +1,6 @@
 import React from 'react';
 import { Sparkles, Check, X } from 'lucide-react';
-import { usePremiumRequests, useApprovePremiumRequest } from '../../hooks/useAdmin';
+import { usePremiumRequests, useApprovePremiumRequest, useRejectPremiumRequest } from '../../hooks/useAdmin';
 import { supabase } from '../../lib/supabase';
 import type { Database } from '../../types/supabase';
 import toast from 'react-hot-toast';
@@ -14,6 +14,7 @@ export default function PremiumRequests() {
   // ✅ React Query hook - remplace useState + useEffect
   const { data: requests = [], isLoading: loading } = usePremiumRequests();
   const approveMutation = useApprovePremiumRequest();
+  const rejectMutation = useRejectPremiumRequest();
 
   const handleApprove = async (request: PremiumRequest) => {
     try {
@@ -69,8 +70,8 @@ export default function PremiumRequests() {
         throw new Error(result.error || 'Erreur lors du rejet');
       }
 
-      // Invalide le cache via React Query  
-      await approveMutation.mutateAsync(request.id);
+      // Invalide le cache via React Query - USE CORRECT MUTATION
+      await rejectMutation.mutateAsync(request.id);
       toast.success('Demande rejetée');
     } catch (error) {
       console.error('Error rejecting premium request:', error);

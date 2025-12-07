@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../lib/supabase';
 
@@ -240,6 +241,32 @@ export function useRejectReview() {
  * Hook pour fetch premium requests
  */
 export function usePremiumRequests() {
+    const queryClient = useQueryClient();
+
+    // Subscribe to Realtime changes
+    useEffect(() => {
+        const channel = supabase
+            .channel('admin_premium_requests')
+            .on('postgres_changes',
+                {
+                    event: '*',
+                    schema: 'public',
+                    table: 'premium_requests'
+                },
+                () => {
+                    // Invalidate cache when premium_requests changes
+                    queryClient.invalidateQueries({
+                        queryKey: ['admin', 'premium-requests']
+                    });
+                }
+            )
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(channel);
+        };
+    }, [queryClient]);
+
     return useQuery({
         queryKey: ['admin', 'premium-requests'],
         queryFn: async () => {
@@ -280,7 +307,9 @@ export function usePremiumRequests() {
 
             return enrichedRequests;
         },
-        staleTime: 1000 * 30,
+        staleTime: 1000 * 10, // 10 seconds - refresh more frequently
+        refetchOnWindowFocus: true, // Refetch when window gets focus
+        refetchInterval: 1000 * 15, // Auto-refetch every 15 seconds
     });
 }
 
@@ -307,7 +336,30 @@ export function useApprovePremiumRequest() {
     });
 }
 
-// ═══════════════════════════════════════════════════════════════════
+/**
+ * Hook pour rejeter une demande premium
+ */
+export function useRejectPremiumRequest() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async (requestId: string) => {
+            const { error } = await supabase
+                .from('premium_requests')
+                .update({ status: 'rejected' as const })
+                .eq('id', requestId);
+
+            if (error) throw error;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({
+                queryKey: ['admin', 'premium-requests']
+            });
+        },
+    });
+}
+
+//═══════════════════════════════════════════════════════════════════
 // REPORTED LISTINGS
 // ═══════════════════════════════════════════════════════════════════
 

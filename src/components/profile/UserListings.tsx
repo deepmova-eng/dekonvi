@@ -251,7 +251,22 @@ export default function UserListings({
       toast.success('Demande de boost envoyée avec succès');
     } catch (error) {
       console.error('Error requesting boost:', error);
-      toast.error('Erreur lors de la demande de boost');
+
+      // Check if error is duplicate boost attempt
+      const errorMessage = error instanceof Error ? error.message.toLowerCase() : '';
+      const isDuplicateError =
+        errorMessage.includes('duplicate') ||
+        errorMessage.includes('already exists') ||
+        errorMessage.includes('pending') ||
+        errorMessage.includes('unique');
+
+      if (isDuplicateError) {
+        toast('Cette annonce bénéficie déjà d\'un boost ou une demande est en cours.', {
+          icon: 'ℹ️',
+        });
+      } else {
+        toast.error('Erreur lors de la demande de boost');
+      }
     } finally {
       setRequestingBoostId(null);
     }
@@ -379,15 +394,41 @@ export default function UserListings({
                       setOpenMenuId(null);
                       handleBoostClick(e, selectedListing.id);
                     }}
-                    disabled={requestingBoostId === selectedListing.id}
-                    className="w-full text-left px-4 py-4 text-gray-800 hover:bg-amber-50 font-medium flex items-center gap-4 rounded-xl transition-colors disabled:opacity-50"
+                    disabled={
+                      requestingBoostId === selectedListing.id ||
+                      pendingRequests.has(selectedListing.id) ||
+                      selectedListing.is_premium
+                    }
+                    className={`w-full text-left px-4 py-4 font-medium flex items-center gap-4 rounded-xl transition-colors ${pendingRequests.has(selectedListing.id)
+                      ? 'bg-gray-50 text-gray-500 cursor-not-allowed'
+                      : selectedListing.is_premium
+                        ? 'bg-emerald-50 text-emerald-600 cursor-not-allowed'
+                        : 'text-gray-800 hover:bg-amber-50'
+                      } disabled:opacity-75`}
                   >
-                    <div className="p-2 bg-amber-100 rounded-full text-amber-600">
+                    <div className={`p-2 rounded-full ${pendingRequests.has(selectedListing.id)
+                      ? 'bg-gray-200 text-gray-500'
+                      : selectedListing.is_premium
+                        ? 'bg-emerald-100 text-emerald-600'
+                        : 'bg-amber-100 text-amber-600'
+                      }`}>
                       <Zap className="w-5 h-5" />
                     </div>
                     <div>
-                      <span className="block text-base">Booster l'annonce</span>
-                      <span className="block text-xs text-gray-400 font-normal">Vendez plus vite</span>
+                      <span className="block text-base">
+                        {pendingRequests.has(selectedListing.id)
+                          ? 'En attente'
+                          : selectedListing.is_premium
+                            ? 'Boost Actif'
+                            : 'Booster l\'annonce'}
+                      </span>
+                      <span className="block text-xs text-gray-400 font-normal">
+                        {pendingRequests.has(selectedListing.id)
+                          ? 'Demande en cours de traitement'
+                          : selectedListing.is_premium
+                            ? 'Annonce déjà boostée'
+                            : 'Vendez plus vite'}
+                      </span>
                     </div>
                   </button>
                 )}
