@@ -4,7 +4,6 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useSupabase } from '../../contexts/SupabaseContext'
 import {
     Home,
-    Search,
     Heart,
     MessageCircle,
     User,
@@ -21,26 +20,13 @@ import { useUnreadMessagesCount } from '../../hooks/useMessages'
 import { supabase } from '../../lib/supabase'
 import './Navbar.css'
 
-const TYPING_PHRASES = [
-    'Rechercher...',
-    'Trouver un iPhone...',
-    'Chercher une voiture...',
-    'Découvrir un appartement...',
-    'Acheter un vélo...',
-    'Trouver des vêtements...'
-]
-
 export default function Navbar() {
     const { user, signOut } = useSupabase()
     const location = useLocation()
     const queryClient = useQueryClient()
     const [isScrolled, setIsScrolled] = useState(false)
-    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
     const [activeDropdown, setActiveDropdown] = useState<string | null>(null)
     const [scrollProgress, setScrollProgress] = useState(0)
-    const [typingPlaceholder, setTypingPlaceholder] = useState('')
-    const [currentPhraseIndex, setCurrentPhraseIndex] = useState(0)
-    const [isTyping, setIsTyping] = useState(true)
 
     // Unread messages count
     const { data: unreadMessagesCount = 0 } = useUnreadMessagesCount(user?.id)
@@ -61,45 +47,6 @@ export default function Navbar() {
         window.addEventListener('scroll', handleScroll)
         return () => window.removeEventListener('scroll', handleScroll)
     }, [])
-
-    // Typing placeholder animation
-    useEffect(() => {
-        const currentPhrase = TYPING_PHRASES[currentPhraseIndex]
-        let currentIndex = 0
-        let timeoutId: NodeJS.Timeout
-
-        if (isTyping) {
-            // Typing effect
-            const typeNextChar = () => {
-                if (currentIndex <= currentPhrase.length) {
-                    setTypingPlaceholder(currentPhrase.substring(0, currentIndex))
-                    currentIndex++
-                    timeoutId = setTimeout(typeNextChar, 100)
-                } else {
-                    // Pause before deleting
-                    timeoutId = setTimeout(() => setIsTyping(false), 2000)
-                }
-            }
-            typeNextChar()
-        } else {
-            // Deleting effect
-            const deleteNextChar = () => {
-                if (currentIndex >= 0) {
-                    setTypingPlaceholder(currentPhrase.substring(0, currentIndex))
-                    currentIndex--
-                    timeoutId = setTimeout(deleteNextChar, 50)
-                } else {
-                    // Move to next phrase
-                    setCurrentPhraseIndex((prev) => (prev + 1) % TYPING_PHRASES.length)
-                    setIsTyping(true)
-                }
-            }
-            currentIndex = currentPhrase.length
-            deleteNextChar()
-        }
-
-        return () => clearTimeout(timeoutId)
-    }, [currentPhraseIndex, isTyping])
 
     // Close dropdowns on outside click
     useEffect(() => {
@@ -305,32 +252,24 @@ export default function Navbar() {
                     )}
                 </div>
 
-                {/* ACTIONS (droite) */}
-                <div className="navbar-actions">
-
-                    {/* Barre de recherche - Hidden on mobile, use Hero search instead */}
-                    <div className="search-box hidden md:flex">
-                        <Search size={18} className="search-icon" />
-                        <input
-                            type="text"
-                            placeholder={typingPlaceholder}
-                            className="search-input"
-                        />
-                        <kbd className="search-shortcut">⌘K</kbd>
-                    </div>
+                {/* ACTIONS (droite) - Ordre: Vendre → 🔔 → Avatar */}
+                <div className="flex items-center gap-6">
 
                     {user ? (
                         <>
-                            {/* Notifications */}
-                            <NotificationBell />
-
-                            {/* Bouton Publier */}
-                            <Link to="/create-premium" className="btn-publish hidden md:flex">
-                                <PlusCircle size={18} />
-                                <span>Publier</span>
+                            {/* Bouton CTA - Large & Prominent */}
+                            <Link
+                                to="/create-premium"
+                                className="btn-publish hidden md:flex px-6 py-2.5 font-bold text-base min-w-[180px] justify-center"
+                            >
+                                <PlusCircle size={20} />
+                                <span>Déposer une annonce</span>
                             </Link>
 
-                            {/* Menu utilisateur */}
+                            {/* Notifications - Milieu */}
+                            <NotificationBell />
+
+                            {/* Avatar Utilisateur - Dernier */}
                             <div className="user-menu hidden md:block">
                                 <button
                                     className="user-avatar-btn"
@@ -382,32 +321,6 @@ export default function Navbar() {
 
                 </div>
             </div>
-
-            {/* Mobile Menu */}
-            {isMobileMenuOpen && (
-                <div className="mobile-menu">
-                    <Link to="/" className="mobile-nav-link">
-                        <Home size={20} />
-                        Accueil
-                    </Link>
-                    <Link to="/categories" className="mobile-nav-link">
-                        <Grid size={20} />
-                        Catégories
-                    </Link>
-                    {user && (
-                        <>
-                            <Link to="/favorites" className="mobile-nav-link">
-                                <Heart size={20} />
-                                Favoris
-                            </Link>
-                            <Link to="/messages" className="mobile-nav-link" onMouseEnter={handleMessagesPrefetch}>
-                                <MessageCircle size={20} />
-                                Messages
-                            </Link>
-                        </>
-                    )}
-                </div>
-            )}
         </nav>
     )
 }
