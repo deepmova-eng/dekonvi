@@ -150,7 +150,38 @@ export default function UserManagement({ filter = 'confirmed' }: UserManagementP
         throw error;
       }
 
-      toast.success('Utilisateur confirmé avec succès', { id: toastId });
+      // Send email notification via Edge Function
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+
+        const emailResponse = await fetch(
+          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-validation-email`,
+          {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${session?.access_token}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              userId: user.id,
+              userName: user.name,
+              userEmail: user.email
+            }),
+          }
+        );
+
+        const emailResult = await emailResponse.json();
+
+        if (!emailResult.success) {
+          console.warn('Email sending failed:', emailResult.error);
+          toast.success('Utilisateur confirmé (email non envoyé)', { id: toastId });
+        } else {
+          toast.success('Utilisateur confirmé et email envoyé !', { id: toastId });
+        }
+      } catch (emailError) {
+        console.error('Email sending error:', emailError);
+        toast.success('Utilisateur confirmé (email non envoyé)', { id: toastId });
+      }
 
       // Reload page to refresh user list from DB
       setTimeout(() => {
