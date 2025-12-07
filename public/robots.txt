@@ -1,0 +1,25 @@
+# Dekonvi - Robots.txt
+# https://dekonvi.com
+
+User-agent: *
+Allow: /
+
+# Pages à ne pas indexer
+Disallow: /admin
+Disallow: /admin/*
+Disallow: /dashboard
+Disallow: /messages
+Disallow: /messages/*
+Disallow: /profile/settings
+Disallow: /security
+Disallow: /personal-info
+Disallow: /addresses
+
+# Assets
+Disallow: /assets/
+
+# Sitemap
+Sitemap: https://dekonvi.com/sitemap.xml
+
+# Crawl delay (pour éviter surcharge serveur)
+Crawl-delay: 1

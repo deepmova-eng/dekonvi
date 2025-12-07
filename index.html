@@ -2,14 +2,58 @@
 <html lang="fr">
 
 <head>
+  <!-- Meta basiques -->
   <meta charset="UTF-8" />
-  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
   <meta name="viewport"
     content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, interactive-widget=resizes-content" />
-  <meta name="theme-color" content="#ffffff" />
-  <title>Dekonvi - Marketplace Togo</title>
+  <title>Dekonvi - Petites Annonces Gratuites au Togo | Achat Vente</title>
   <meta name="description"
-    content="Achetez et vendez facilement au Togo avec Dekonvi, votre marketplace de confiance." />
+    content="Achetez et vendez gratuitement au Togo sur Dekonvi. Voitures, immobilier, emploi, téléphones, meubles et plus. La marketplace #1 du Togo avec des milliers d'annonces." />
+  <meta name="keywords"
+    content="petites annonces togo, marketplace togo, achat vente togo, voitures togo, immobilier togo, emploi togo, lomé, dekonvi" />
+  <meta name="author" content="Dekonvi" />
+  <meta name="theme-color" content="#2DD181" />
+
+  <!-- Geo targeting -->
+  <meta name="geo.region" content="TG" />
+  <meta name="geo.placename" content="Togo" />
+  <meta name="geo.position" content="6.1375;1.2123" />
+  <meta http-equiv="content-language" content="fr-TG" />
+
+  <!-- Open Graph (Facebook, WhatsApp) -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Dekonvi" />
+  <meta property="og:title" content="Dekonvi - Petites Annonces Gratuites au Togo" />
+  <meta property="og:description"
+    content="Achetez et vendez gratuitement au Togo. Voitures, immobilier, emploi et plus. La marketplace #1 du Togo." />
+  <meta property="og:image" content="https://dekonvi.com/og-image.jpg" />
+  <meta property="og:url" content="https://dekonvi.com" />
+  <meta property="og:locale" content="fr_TG" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:site" content="@dekonvi" />
+  <meta name="twitter:title" content="Dekonvi - Marketplace du Togo" />
+  <meta name="twitter:description" content="Petites annonces gratuites au Togo. La marketplace #1." />
+  <meta name="twitter:image" content="https://dekonvi.com/og-image.jpg" />
+
+  <!-- Mobile optimized -->
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Dekonvi" />
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+
+  <!-- Canonical -->
+  <link rel="canonical" href="https://dekonvi.com" />
+
+  <!-- Preconnect for performance -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
   <style>
     /* Fix status bar color on iOS */
     @supports (padding-top: env(safe-area-inset-top)) {
@@ -19,8 +63,18 @@
       }
     }
   </style>
+
   <!-- Plausible Analytics -->
   <script defer data-domain="dekonvi.com" src="https://plausible.io/js/script.js"></script>
+
+  <!-- Google Analytics (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-EX4L25ZVCV"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-EX4L25ZVCV');
+  </script>
 </head>
 
 <body>

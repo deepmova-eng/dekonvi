@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import { HelmetProvider } from 'react-helmet-async';
 import * as Sentry from "@sentry/react";
 import { SupabaseProvider } from './contexts/SupabaseContext';
 import { NotificationsProvider } from './contexts/NotificationsContext';
@@ -73,40 +74,42 @@ if (!root) throw new Error('Root element not found');
 
 createRoot(root).render(
   <StrictMode>
-    <Sentry.ErrorBoundary
-      fallback={({ error, resetError, eventId }) => (
-        <ErrorFallback error={error} resetError={resetError} eventId={eventId} />
-      )}
-      showDialog
-    >
-      <QueryClientProvider client={queryClient}>
-        <BrowserRouter>
-          <SupabaseProvider>
-            <NotificationsProvider>
-              <FavoritesProvider>
-                <App />
-                <Toaster
-                  position="top-right"
-                  toastOptions={{
-                    duration: 3000,
-                    style: {
-                      background: '#363636',
-                      color: '#fff',
-                    },
-                  }}
-                />
-              </FavoritesProvider>
-            </NotificationsProvider>
-          </SupabaseProvider>
-        </BrowserRouter>
-        {/* DevTools - uniquement en dev */}
-        {import.meta.env.DEV && (
-          <ReactQueryDevtools
-            initialIsOpen={false}
-            buttonPosition="bottom-right"
-          />
+    <HelmetProvider>
+      <Sentry.ErrorBoundary
+        fallback={({ error, resetError, eventId }) => (
+          <ErrorFallback error={error as Error} resetError={resetError} eventId={eventId} />
         )}
-      </QueryClientProvider>
-    </Sentry.ErrorBoundary>
+        showDialog
+      >
+        <QueryClientProvider client={queryClient}>
+          <BrowserRouter>
+            <SupabaseProvider>
+              <NotificationsProvider>
+                <FavoritesProvider>
+                  <App />
+                  <Toaster
+                    position="top-right"
+                    toastOptions={{
+                      duration: 3000,
+                      style: {
+                        background: '#363636',
+                        color: '#fff',
+                      },
+                    }}
+                  />
+                </FavoritesProvider>
+              </NotificationsProvider>
+            </SupabaseProvider>
+          </BrowserRouter>
+          {/* DevTools - uniquement en dev */}
+          {import.meta.env.DEV && (
+            <ReactQueryDevtools
+              initialIsOpen={false}
+              buttonPosition="bottom-right"
+            />
+          )}
+        </QueryClientProvider>
+      </Sentry.ErrorBoundary>
+    </HelmetProvider>
   </StrictMode>
 );

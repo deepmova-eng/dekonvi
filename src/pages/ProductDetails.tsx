@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import {
   ChevronLeft,
   ChevronRight,
@@ -270,363 +271,417 @@ export default function ProductDetails() {
 
   // Images are already optimized at upload time, no transformation needed
 
+  // Schema.org Product structured data
+  const productSchema = listing ? {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": listing.title,
+    "description": listing.description,
+    "image": listing.images,
+    "offers": {
+      "@type": "Offer",
+      "price": listing.price,
+      "priceCurrency": "XOF",
+      "availability": "https://schema.org/InStock",
+      "itemCondition": listing.condition === 'new' ? "https://schema.org/NewCondition" : "https://schema.org/UsedCondition",
+      "seller": {
+        "@type": "Person",
+        "name": sellerProfile?.name || "Vendeur Dekonvi"
+      }
+    }
+  } : null;
+
   return (
-    <div className="product-details-page">
-      <div className="container">
+    <>
+      {/* SEO Meta Tags */}
+      {listing && (
+        <Helmet>
+          <title>{listing.title} - {listing.price.toLocaleString()} FCFA | Dekonvi</title>
+          <meta name="description" content={listing.description?.substring(0, 160) || `${listing.title} à vendre sur Dekonvi. ${listing.price.toLocaleString()} FCFA.`} />
 
-        {/* Back button */}
-        <button onClick={() => navigate(-1)} className="back-button">
-          <ArrowLeft size={20} />
-          Retour
-        </button>
+          {/* Open Graph */}
+          <meta property="og:title" content={`${listing.title} - ${listing.price.toLocaleString()} FCFA`} />
+          <meta property="og:description" content={listing.description?.substring(0, 160)} />
+          <meta property="og:image" content={listing.images?.[0] || 'https://dekonvi.com/og-image.jpg'} />
+          <meta property="og:url" content={`https://dekonvi.com/listings/${id}`} />
+          <meta property="og:type" content="product" />
+          <meta property="product:price:amount" content={String(listing.price)} />
+          <meta property="product:price:currency" content="XOF" />
 
-        {/* Layout 2 colonnes */}
-        <div className="product-layout">
+          {/* Twitter */}
+          <meta name="twitter:title" content={`${listing.title} - ${listing.price.toLocaleString()} FCFA`} />
+          <meta name="twitter:description" content={listing.description?.substring(0, 160)} />
+          <meta name="twitter:image" content={listing.images?.[0] || 'https://dekonvi.com/og-image.jpg'} />
 
-          {/* GAUCHE : Galerie */}
-          <div className="product-gallery">
-            <div className="gallery-main">
-              <img
-                src={
-                  listing.images?.[selectedImageIndex]
-                    ? listing.images[selectedImageIndex]
-                    : '/placeholder.png'
-                }
-                alt={listing.title}
-                className="gallery-main-image"
-              />
+          {/* Canonical */}
+          <link rel="canonical" href={`https://dekonvi.com/listings/${id}`} />
+        </Helmet>
+      )}
 
-              {listing.images && listing.images.length > 1 && (
-                <>
-                  <button
-                    onClick={handlePrevImage}
-                    className="gallery-nav gallery-nav--prev"
-                    aria-label="Image précédente"
-                  >
-                    <ChevronLeft size={24} />
-                  </button>
+      {/* Schema.org Structured Data */}
+      {productSchema && (
+        <script type="application/ld+json">
+          {JSON.stringify(productSchema)}
+        </script>
+      )}
 
-                  <button
-                    onClick={handleNextImage}
-                    className="gallery-nav gallery-nav--next"
-                    aria-label="Image suivante"
-                  >
-                    <ChevronRight size={24} />
-                  </button>
-                </>
-              )}
-            </div>
+      <div className="product-details-page">
+        <div className="container">
 
-            {/* Thumbnails */}
-            {listing.images && listing.images.length > 1 && (
-              <div className="gallery-thumbnails">
-                {listing.images.map((image, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setSelectedImageIndex(index)}
-                    className={`gallery-thumbnail ${index === selectedImageIndex ? 'active' : ''
-                      }`}
-                  >
-                    <img
-                      src={image}
-                      alt={`Photo ${index + 1}`}
-                    />
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
+          {/* Back button */}
+          <button onClick={() => navigate(-1)} className="back-button">
+            <ArrowLeft size={20} />
+            Retour
+          </button>
 
-          {/* DROITE : Infos + Actions */}
-          <div className="product-sidebar">
-            <div className="sidebar-sticky">
+          {/* Layout 2 colonnes */}
+          <div className="product-layout">
 
-              {/* Prix */}
-              <div className="product-price-section">
-                <h1 className="product-price-large">
-                  {listing.price.toLocaleString()} FCFA
-                </h1>
-                {listing.condition && (
-                  <span className="product-condition-badge">
-                    {listing.condition === 'new' ? 'Neuf' : 'Occasion'}
-                  </span>
-                )}
-              </div>
+            {/* GAUCHE : Galerie */}
+            <div className="product-gallery">
+              <div className="gallery-main">
+                <img
+                  src={
+                    listing.images?.[selectedImageIndex]
+                      ? listing.images[selectedImageIndex]
+                      : '/placeholder.png'
+                  }
+                  alt={listing.title}
+                  className="gallery-main-image"
+                />
 
-              {/* Titre */}
-              <h2 className="product-title-main">{listing.title}</h2>
-
-              {/* Localisation + Date */}
-              <div className="product-meta-info">
-                <span className="meta-location">
-                  <MapPin size={16} />
-                  {listing.location || listing.city || 'Lomé'}
-                </span>
-                <span className="meta-timestamp">
-                  {formatDistanceToNow(new Date(listing.created_at), {
-                    addSuffix: true,
-                    locale: fr,
-                  })}
-                </span>
-              </div>
-
-              {/* Actions principales */}
-              <div className="product-actions mobile-action-bar">
-                <button
-                  className="btn btn--primary btn--large"
-                  onClick={handleSendMessage}
-                >
-                  <MessageCircle size={20} />
-                  Envoyer un message
-                </button>
-
-                {listing.contact_phone && !listing.hide_phone && (
-                  <button className="btn btn--secondary btn--large">
-                    <Phone size={20} />
-                    {listing.contact_phone}
-                  </button>
-                )}
-
-                <div className="product-actions-secondary">
-                  <button
-                    onClick={handleFavoriteClick}
-                    className={`btn btn--icon ${isFavorite ? 'active' : ''}`}
-                    aria-label={isFavorite ? 'Retirer des favoris' : 'Ajouter aux favoris'}
-                  >
-                    <Heart size={20} fill={isFavorite ? 'currentColor' : 'none'} />
-                  </button>
-                  <button className="btn btn--icon" aria-label="Partager">
-                    <Share2 size={20} />
-                  </button>
-                </div>
-              </div>
-
-              {/* Info livraison */}
-              {listing.delivery_available && (
-                <div className="info-box">
-                  <Truck size={20} />
-                  <span>Livraison possible</span>
-                </div>
-              )}
-
-              {/* Localisation détaillée */}
-              <div className="info-box">
-                <MapPin size={20} />
-                <div>
-                  <p className="info-box__title">{listing.city || 'Lomé'}</p>
-                  <p className="info-box__subtitle">{listing.location || 'Togo'}</p>
-                </div>
-              </div>
-
-            </div>
-          </div>
-
-        </div>
-
-        {/* ═══════════════════════════════════════ */}
-        {/* SECTION VENDEUR - ULTRA PREMIUM */}
-        {/* ═══════════════════════════════════════ */}
-        {sellerProfile && (
-          <div className="product-description-section" style={{ marginBottom: '24px' }}>
-            <h2>Vendeur</h2>
-
-            <Link
-              to={`/seller/${listing.seller_id}`}
-              className="group block"
-              style={{ textDecoration: 'none' }}
-              onMouseEnter={handleSellerHover}
-            >
-              <div
-                className="seller-premium-card"
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  padding: '20px',
-                  borderRadius: '12px',
-                  background: 'linear-gradient(to right, #F9FAFB, white)',
-                  border: '1px solid #E5E7EB',
-                  transition: 'all 0.3s ease',
-                  cursor: 'pointer',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = '#2DD181';
-                  e.currentTarget.style.boxShadow = '0 10px 25px rgba(45, 209, 129, 0.1)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = '#E5E7EB';
-                  e.currentTarget.style.boxShadow = 'none';
-                }}
-              >
-                {/* Avatar avec badge vérifié */}
-                <div style={{ position: 'relative', flexShrink: 0 }}>
-                  <div
-                    style={{
-                      width: '64px',
-                      height: '64px',
-                      borderRadius: '50%',
-                      background: 'linear-gradient(135deg, #D1FAE5, #ECFDF5)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      border: '2px solid white',
-                      overflow: 'hidden',
-                      transition: 'all 0.3s ease',
-                    }}
-                  >
-                    {sellerProfile.avatar_url ? (
-                      <img
-                        src={sellerProfile.avatar_url}
-                        alt={sellerProfile.name}
-                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                      />
-                    ) : (
-                      <span style={{
-                        color: '#059669',
-                        fontWeight: 700,
-                        fontSize: '24px',
-                      }}>
-                        {sellerProfile.name.charAt(0).toUpperCase()}
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Badge vérifié */}
-                  <div
-                    style={{
-                      position: 'absolute',
-                      bottom: '-4px',
-                      right: '-4px',
-                      width: '24px',
-                      height: '24px',
-                      background: '#2DD181',
-                      borderRadius: '50%',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      border: '2px solid white',
-                    }}
-                  >
-                    <svg style={{ width: '14px', height: '14px', color: 'white' }} fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                </div>
-
-                {/* Infos vendeur */}
-                <div style={{ flex: 1, minWidth: 0, marginLeft: '16px' }}>
-                  {/* Nom + flèche */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <h4 style={{
-                      fontWeight: 600,
-                      fontSize: '18px',
-                      color: '#111827',
-                      margin: 0,
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap',
-                      transition: 'color 0.3s ease',
-                    }}>
-                      {sellerProfile.name}
-                    </h4>
-                    <svg
-                      style={{ width: '20px', height: '20px', color: '#9CA3AF', flexShrink: 0, transition: 'all 0.3s ease' }}
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
+                {listing.images && listing.images.length > 1 && (
+                  <>
+                    <button
+                      onClick={handlePrevImage}
+                      className="gallery-nav gallery-nav--prev"
+                      aria-label="Image précédente"
                     >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                  </div>
+                      <ChevronLeft size={24} />
+                    </button>
 
-                  {/* Membre depuis */}
-                  <p style={{ fontSize: '14px', color: '#6B7280', margin: '4px 0 0 0' }}>
-                    Membre depuis {new Date(sellerProfile.created_at || Date.now()).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })}
-                  </p>
-
-                  {/* Étoiles et avis */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '10px' }}>
-                    {sellerProfile.total_ratings > 0 ? (
-                      <>
-                        {/* Étoiles */}
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
-                          {[...Array(5)].map((_, i) => (
-                            <Star
-                              key={i}
-                              className={i < Math.floor(sellerProfile.rating) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300 fill-gray-300'}
-                              size={16}
-                            />
-                          ))}
-                        </div>
-
-                        {/* Note */}
-                        <span style={{ fontSize: '14px', fontWeight: 600, color: '#111827' }}>
-                          {sellerProfile.rating.toFixed(1)}
-                        </span>
-
-                        {/* Nombre avis */}
-                        <span style={{ fontSize: '14px', color: '#6B7280' }}>
-                          ({sellerProfile.total_ratings} avis)
-                        </span>
-                      </>
-                    ) : (
-                      /* Pas d'avis */
-                      <span style={{ fontSize: '14px', color: '#6B7280', fontStyle: 'italic' }}>
-                        Aucun avis
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                {/* Badge "Voir profil" */}
-                <div style={{ flexShrink: 0 }}>
-                  <div
-                    className="voir-profil-badge"
-                    style={{
-                      padding: '8px 16px',
-                      background: '#ECFDF5',
-                      color: '#059669',
-                      fontSize: '14px',
-                      fontWeight: 500,
-                      borderRadius: '20px',
-                      opacity: 0,
-                      transition: 'opacity 0.3s ease',
-                      whiteSpace: 'nowrap',
-                    }}
-                  >
-                    Voir profil
-                  </div>
-                </div>
+                    <button
+                      onClick={handleNextImage}
+                      className="gallery-nav gallery-nav--next"
+                      aria-label="Image suivante"
+                    >
+                      <ChevronRight size={24} />
+                    </button>
+                  </>
+                )}
               </div>
-            </Link>
-          </div>
-        )}
 
-        {/* Description (pleine largeur) */}
-        <div className="product-description-section">
-          <h2>Description</h2>
-          <p className="description-text">{listing.description}</p>
-
-          {/* Caractéristiques */}
-          <div className="product-specifications">
-            <h3>Caractéristiques</h3>
-            <dl className="specs-list">
-              <dt>État</dt>
-              <dd>{listing.condition === 'new' ? 'Neuf' : 'Occasion'}</dd>
-
-              <dt>Catégorie</dt>
-              <dd>{listing.category}</dd>
-
-              {listing.delivery_available && (
-                <>
-                  <dt>Livraison</dt>
-                  <dd>Disponible</dd>
-                </>
+              {/* Thumbnails */}
+              {listing.images && listing.images.length > 1 && (
+                <div className="gallery-thumbnails">
+                  {listing.images.map((image, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setSelectedImageIndex(index)}
+                      className={`gallery-thumbnail ${index === selectedImageIndex ? 'active' : ''
+                        }`}
+                    >
+                      <img
+                        src={image}
+                        alt={`Photo ${index + 1}`}
+                      />
+                    </button>
+                  ))}
+                </div>
               )}
-            </dl>
-          </div>
-        </div>
+            </div>
 
+            {/* DROITE : Infos + Actions */}
+            <div className="product-sidebar">
+              <div className="sidebar-sticky">
+
+                {/* Prix */}
+                <div className="product-price-section">
+                  <h1 className="product-price-large">
+                    {listing.price.toLocaleString()} FCFA
+                  </h1>
+                  {listing.condition && (
+                    <span className="product-condition-badge">
+                      {listing.condition === 'new' ? 'Neuf' : 'Occasion'}
+                    </span>
+                  )}
+                </div>
+
+                {/* Titre */}
+                <h2 className="product-title-main">{listing.title}</h2>
+
+                {/* Localisation + Date */}
+                <div className="product-meta-info">
+                  <span className="meta-location">
+                    <MapPin size={16} />
+                    {listing.location || listing.city || 'Lomé'}
+                  </span>
+                  <span className="meta-timestamp">
+                    {formatDistanceToNow(new Date(listing.created_at), {
+                      addSuffix: true,
+                      locale: fr,
+                    })}
+                  </span>
+                </div>
+
+                {/* Actions principales */}
+                <div className="product-actions mobile-action-bar">
+                  <button
+                    className="btn btn--primary btn--large"
+                    onClick={handleSendMessage}
+                  >
+                    <MessageCircle size={20} />
+                    Envoyer un message
+                  </button>
+
+                  {listing.contact_phone && !listing.hide_phone && (
+                    <button className="btn btn--secondary btn--large">
+                      <Phone size={20} />
+                      {listing.contact_phone}
+                    </button>
+                  )}
+
+                  <div className="product-actions-secondary">
+                    <button
+                      onClick={handleFavoriteClick}
+                      className={`btn btn--icon ${isFavorite ? 'active' : ''}`}
+                      aria-label={isFavorite ? 'Retirer des favoris' : 'Ajouter aux favoris'}
+                    >
+                      <Heart size={20} fill={isFavorite ? 'currentColor' : 'none'} />
+                    </button>
+                    <button className="btn btn--icon" aria-label="Partager">
+                      <Share2 size={20} />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Info livraison */}
+                {listing.delivery_available && (
+                  <div className="info-box">
+                    <Truck size={20} />
+                    <span>Livraison possible</span>
+                  </div>
+                )}
+
+                {/* Localisation détaillée */}
+                <div className="info-box">
+                  <MapPin size={20} />
+                  <div>
+                    <p className="info-box__title">{listing.city || 'Lomé'}</p>
+                    <p className="info-box__subtitle">{listing.location || 'Togo'}</p>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+          </div>
+
+          {/* ═══════════════════════════════════════ */}
+          {/* SECTION VENDEUR - ULTRA PREMIUM */}
+          {/* ═══════════════════════════════════════ */}
+          {sellerProfile && (
+            <div className="product-description-section" style={{ marginBottom: '24px' }}>
+              <h2>Vendeur</h2>
+
+              <Link
+                to={`/seller/${listing.seller_id}`}
+                className="group block"
+                style={{ textDecoration: 'none' }}
+                onMouseEnter={handleSellerHover}
+              >
+                <div
+                  className="seller-premium-card"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    padding: '20px',
+                    borderRadius: '12px',
+                    background: 'linear-gradient(to right, #F9FAFB, white)',
+                    border: '1px solid #E5E7EB',
+                    transition: 'all 0.3s ease',
+                    cursor: 'pointer',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.borderColor = '#2DD181';
+                    e.currentTarget.style.boxShadow = '0 10px 25px rgba(45, 209, 129, 0.1)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.borderColor = '#E5E7EB';
+                    e.currentTarget.style.boxShadow = 'none';
+                  }}
+                >
+                  {/* Avatar avec badge vérifié */}
+                  <div style={{ position: 'relative', flexShrink: 0 }}>
+                    <div
+                      style={{
+                        width: '64px',
+                        height: '64px',
+                        borderRadius: '50%',
+                        background: 'linear-gradient(135deg, #D1FAE5, #ECFDF5)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        border: '2px solid white',
+                        overflow: 'hidden',
+                        transition: 'all 0.3s ease',
+                      }}
+                    >
+                      {sellerProfile.avatar_url ? (
+                        <img
+                          src={sellerProfile.avatar_url}
+                          alt={sellerProfile.name}
+                          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        />
+                      ) : (
+                        <span style={{
+                          color: '#059669',
+                          fontWeight: 700,
+                          fontSize: '24px',
+                        }}>
+                          {sellerProfile.name.charAt(0).toUpperCase()}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Badge vérifié */}
+                    <div
+                      style={{
+                        position: 'absolute',
+                        bottom: '-4px',
+                        right: '-4px',
+                        width: '24px',
+                        height: '24px',
+                        background: '#2DD181',
+                        borderRadius: '50%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        border: '2px solid white',
+                      }}
+                    >
+                      <svg style={{ width: '14px', height: '14px', color: 'white' }} fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                  </div>
+
+                  {/* Infos vendeur */}
+                  <div style={{ flex: 1, minWidth: 0, marginLeft: '16px' }}>
+                    {/* Nom + flèche */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <h4 style={{
+                        fontWeight: 600,
+                        fontSize: '18px',
+                        color: '#111827',
+                        margin: 0,
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                        transition: 'color 0.3s ease',
+                      }}>
+                        {sellerProfile.name}
+                      </h4>
+                      <svg
+                        style={{ width: '20px', height: '20px', color: '#9CA3AF', flexShrink: 0, transition: 'all 0.3s ease' }}
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </div>
+
+                    {/* Membre depuis */}
+                    <p style={{ fontSize: '14px', color: '#6B7280', margin: '4px 0 0 0' }}>
+                      Membre depuis {new Date(sellerProfile.created_at || Date.now()).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })}
+                    </p>
+
+                    {/* Étoiles et avis */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '10px' }}>
+                      {sellerProfile.total_ratings > 0 ? (
+                        <>
+                          {/* Étoiles */}
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
+                            {[...Array(5)].map((_, i) => (
+                              <Star
+                                key={i}
+                                className={i < Math.floor(sellerProfile.rating) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300 fill-gray-300'}
+                                size={16}
+                              />
+                            ))}
+                          </div>
+
+                          {/* Note */}
+                          <span style={{ fontSize: '14px', fontWeight: 600, color: '#111827' }}>
+                            {sellerProfile.rating.toFixed(1)}
+                          </span>
+
+                          {/* Nombre avis */}
+                          <span style={{ fontSize: '14px', color: '#6B7280' }}>
+                            ({sellerProfile.total_ratings} avis)
+                          </span>
+                        </>
+                      ) : (
+                        /* Pas d'avis */
+                        <span style={{ fontSize: '14px', color: '#6B7280', fontStyle: 'italic' }}>
+                          Aucun avis
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Badge "Voir profil" */}
+                  <div style={{ flexShrink: 0 }}>
+                    <div
+                      className="voir-profil-badge"
+                      style={{
+                        padding: '8px 16px',
+                        background: '#ECFDF5',
+                        color: '#059669',
+                        fontSize: '14px',
+                        fontWeight: 500,
+                        borderRadius: '20px',
+                        opacity: 0,
+                        transition: 'opacity 0.3s ease',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      Voir profil
+                    </div>
+                  </div>
+                </div>
+              </Link>
+            </div>
+          )}
+
+          {/* Description (pleine largeur) */}
+          <div className="product-description-section">
+            <h2>Description</h2>
+            <p className="description-text">{listing.description}</p>
+
+            {/* Caractéristiques */}
+            <div className="product-specifications">
+              <h3>Caractéristiques</h3>
+              <dl className="specs-list">
+                <dt>État</dt>
+                <dd>{listing.condition === 'new' ? 'Neuf' : 'Occasion'}</dd>
+
+                <dt>Catégorie</dt>
+                <dd>{listing.category}</dd>
+
+                {listing.delivery_available && (
+                  <>
+                    <dt>Livraison</dt>
+                    <dd>Disponible</dd>
+                  </>
+                )}
+              </dl>
+            </div>
+          </div>
+
+        </div>
       </div>
-    </div>
+    </>
   );
 }
