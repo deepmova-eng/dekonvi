@@ -12,12 +12,11 @@ import {
     Grid,
     LogOut,
     Settings,
-    ChevronDown,
-    Menu,
-    X
+    ChevronDown
 } from 'lucide-react'
 import { categories } from '../../config/categories'
 import NotificationBell from '../notifications/NotificationBell'
+import UserAvatar from '../common/UserAvatar'
 import { useUnreadMessagesCount } from '../../hooks/useMessages'
 import { supabase } from '../../lib/supabase'
 import './Navbar.css'
@@ -334,20 +333,19 @@ export default function Navbar() {
                             {/* Menu utilisateur */}
                             <div className="user-menu hidden md:block">
                                 <button
-                                    className="user-avatar"
+                                    className="user-avatar-btn"
                                     onClick={(e) => {
                                         e.stopPropagation()
                                         setActiveDropdown(activeDropdown === 'user' ? null : 'user')
                                     }}
                                 >
-                                    <img src={user.user_metadata?.avatar_url || '/default-avatar.png'} alt="" />
-                                    <div className="user-status online" />
+                                    <UserAvatar user={user} size="w-10 h-10" showStatus />
                                 </button>
 
                                 {activeDropdown === 'user' && (
                                     <div className="user-dropdown">
                                         <div className="dropdown-header">
-                                            <img src={user.user_metadata?.avatar_url || '/default-avatar.png'} alt="" />
+                                            <UserAvatar user={user} size="w-12 h-12" />
                                             <div>
                                                 <p className="user-name">{user.user_metadata?.name || 'Utilisateur'}</p>
                                                 <p className="user-email">{user.email}</p>
@@ -382,13 +380,6 @@ export default function Navbar() {
                         </Link>
                     )}
 
-                    {/* Menu mobile toggle - Hidden on mobile, only for desktop */}
-                    <button
-                        className="mobile-menu-toggle hidden md:block"
-                        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                    >
-                        {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-                    </button>
                 </div>
             </div>
 
