@@ -175,7 +175,14 @@ export default function Navbar() {
             <div className="navbar-container">
 
                 {/* LOGO */}
-                <Link to="/" className="navbar-logo">
+                <Link
+                    to="/"
+                    className="navbar-logo"
+                    onClick={(e) => {
+                        e.preventDefault();
+                        window.location.href = '/';
+                    }}
+                >
                     <div className="logo-icon">
                         <span className="logo-text">DEKONVI</span>
                     </div>
@@ -186,6 +193,10 @@ export default function Navbar() {
                     <Link
                         to="/"
                         className={`nav-link ${isActive('/') ? 'active' : ''}`}
+                        onClick={(e) => {
+                            e.preventDefault();
+                            window.location.href = '/';
+                        }}
                     >
                         <Home size={18} />
                         <span>Accueil</span>
