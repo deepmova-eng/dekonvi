@@ -78,6 +78,9 @@ export default function TicketConversation({ ticketId, onBack, isUserView = fals
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages]);
 
+    // Check if ticket is closed (read-only)
+    const isTicketClosed = ticket?.status === 'closed';
+
     const handleSendReply = async (e: React.FormEvent) => {
         e.preventDefault();
 
@@ -211,35 +214,51 @@ export default function TicketConversation({ ticketId, onBack, isUserView = fals
 
             {/* Reply Input - Sticky bottom */}
             <div className="bg-white border-t border-gray-200 p-4">
-                <form onSubmit={handleSendReply} className="flex gap-3">
-                    <textarea
-                        value={reply}
-                        onChange={(e) => setReply(e.target.value)}
-                        placeholder="Écrivez votre réponse..."
-                        rows={2}
-                        className="flex-1 px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-                        onKeyDown={(e) => {
-                            if (e.key === 'Enter' && !e.shiftKey) {
-                                e.preventDefault();
-                                handleSendReply(e);
-                            }
-                        }}
-                    />
-                    <button
-                        type="submit"
-                        disabled={!reply.trim() || isSending}
-                        className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
-                    >
-                        {isSending ? (
-                            <Loader2 className="h-5 w-5 animate-spin" />
-                        ) : (
-                            <Send className="h-5 w-5" />
-                        )}
-                    </button>
-                </form>
-                <p className="text-xs text-gray-500 mt-2">
-                    Appuyez sur Entrée pour envoyer, Shift+Entrée pour un saut de ligne
-                </p>
+                {isTicketClosed ? (
+                    /* Closed ticket message */
+                    <div className="bg-gray-50 border-2 border-gray-200 rounded-xl p-4 text-center">
+                        <p className="text-sm font-semibold text-gray-700 mb-1">
+                            🔒 Ce ticket est fermé
+                        </p>
+                        <p className="text-xs text-gray-500">
+                            Les tickets fermés sont archivés. Pour toute nouvelle question, veuillez ouvrir un nouveau ticket.
+                        </p>
+                    </div>
+                ) : (
+                    /* Active reply form */
+                    <>
+                        <form onSubmit={handleSendReply} className="flex gap-3">
+                            <textarea
+                                value={reply}
+                                onChange={(e) => setReply(e.target.value)}
+                                placeholder="Écrivez votre réponse..."
+                                rows={2}
+                                disabled={isTicketClosed}
+                                className="flex-1 px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none disabled:bg-gray-100 disabled:cursor-not-allowed"
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter' && !e.shiftKey) {
+                                        e.preventDefault();
+                                        handleSendReply(e);
+                                    }
+                                }}
+                            />
+                            <button
+                                type="submit"
+                                disabled={!reply.trim() || isSending || isTicketClosed}
+                                className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+                            >
+                                {isSending ? (
+                                    <Loader2 className="h-5 w-5 animate-spin" />
+                                ) : (
+                                    <Send className="h-5 w-5" />
+                                )}
+                            </button>
+                        </form>
+                        <p className="text-xs text-gray-500 mt-2">
+                            Appuyez sur Entrée pour envoyer, Shift+Entrée pour un saut de ligne
+                        </p>
+                    </>
+                )}
             </div>
         </div>
     );

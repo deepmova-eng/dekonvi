@@ -285,6 +285,13 @@ export function useSendMessage() {
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) throw new Error('Not authenticated');
 
+            // Check ticket status BEFORE sending message (for toast notification)
+            const { data: ticketBefore } = await supabase
+                .from('tickets')
+                .select('status')
+                .eq('id', ticketId)
+                .single();
+
             const { data, error } = await supabase
                 .from('ticket_messages')
                 .insert({
@@ -303,13 +310,31 @@ export function useSendMessage() {
                 .single();
 
             if (error) throw error;
-            return data as TicketMessage;
-        },
-        onSuccess: async (data) => {
-            // Invalidate messages query to force refetch
-            queryClient.invalidateQueries({ queryKey: ['ticket-messages', data.ticket_id] });
 
-            // Update ticket's updated_at timestamp
+            // Return both message data and previous status for onSuccess
+            return { messageData: data as TicketMessage, wasResolved: ticketBefore?.status === 'resolved' };
+        },
+        onSuccess: async ({ messageData, wasResolved }) => {
+            // Auto-reopen is handled by database trigger (see migration: 20241208_auto_reopen_resolved_tickets.sql)
+            // But we show a toast to inform the user
+
+            if (wasResolved) {
+                // Small delay to let trigger execute, then check if status changed
+                setTimeout(async () => {
+                    const { data: ticketAfter } = await supabase
+                        .from('tickets')
+                        .select('status')
+                        .eq('id', messageData.ticket_id)
+                        .single();
+
+                    if (ticketAfter?.status === 'in_progress') {
+                        toast.success('Le ticket a été réouvert - votre message a été envoyé');
+                    }
+                }, 500);
+            }
+
+            // Invalidate queries to show updated status from trigger
+            queryClient.invalidateQueries({ queryKey: ['ticket-messages', messageData.ticket_id] });
             queryClient.invalidateQueries({ queryKey: ['admin', 'tickets'] });
             queryClient.invalidateQueries({ queryKey: ['user', 'tickets'] });
 
@@ -374,6 +399,9 @@ export function useMarkTicketAsRead() {
  * User sees badge ONLY if last message was sent by ADMIN
  */
 export function hasUnreadMessages(ticket: Ticket, isAdmin: boolean): boolean {
+    // CRITICAL: Never show badge on closed tickets (nobody can reply anyway)
+    if (ticket.status === 'closed') return false;
+
     const lastReadAt = isAdmin ? ticket.admin_last_read_at : ticket.user_last_read_at;
 
     // If never read, it's unread
