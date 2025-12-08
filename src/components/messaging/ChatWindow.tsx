@@ -443,6 +443,30 @@ export function ChatWindow({ conversationId, currentUserId, onMobileBack, onConv
                 onScroll={handleScroll}
             >
                 <div className="flex flex-col p-4 space-y-2">
+                    {/* System Safety Message - Shows once at top */}
+                    <div style={{
+                        display: 'flex',
+                        justifyContent: 'center',
+                        marginBottom: '16px',
+                        marginTop: '8px'
+                    }}>
+                        <div style={{
+                            background: 'linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%)',
+                            border: '1px solid #FCD34D',
+                            borderRadius: '999px', // pill shape
+                            padding: '8px 20px',
+                            fontSize: '13px',
+                            color: '#92400E',
+                            fontWeight: 500,
+                            textAlign: 'center',
+                            maxWidth: '90%',
+                            lineHeight: '1.5',
+                            boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)'
+                        }}>
+                            ⚠️ Sécurité : Ne payez jamais à l'avance. Privilégiez les remises en main propre.
+                        </div>
+                    </div>
+
                     {messages.map((message, index) => {
                         const isOwn = message.sender_id === currentUserId
 

@@ -119,6 +119,42 @@ export function StepPricing({ data, updateData }: Props) {
                     placeholder="Ex: Agoè, Bè, etc."
                 />
             </div>
+
+            {/* Téléphone de contact */}
+            <div className="form-group">
+                <label htmlFor="contact_phone">
+                    Numéro de téléphone
+                </label>
+                <input
+                    id="contact_phone"
+                    type="tel"
+                    value={data.contact_phone || ''}
+                    onChange={(e) => updateData('contact_phone', e.target.value)}
+                    placeholder="Ex: 90 12 34 56"
+                />
+                <p className="field-hint" style={{ fontSize: '12px', color: '#9CA3AF', fontStyle: 'italic' }}>
+                    Soyez prudent lors de vos rendez-vous.
+                </p>
+            </div>
+
+            <div className="form-group">
+                <div className="option-card">
+                    <div className="option-content">
+                        <div className="option-text">
+                            <h4>Masquer mon numéro</h4>
+                            <p>Les acheteurs ne verront pas votre numéro directement</p>
+                        </div>
+                    </div>
+                    <label className="toggle-switch">
+                        <input
+                            type="checkbox"
+                            checked={data.hide_phone || false}
+                            onChange={(e) => updateData('hide_phone', e.target.checked)}
+                        />
+                        <span className="toggle-slider"></span>
+                    </label>
+                </div>
+            </div>
         </div>
     )
 }

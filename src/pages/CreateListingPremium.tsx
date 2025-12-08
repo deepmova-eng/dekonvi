@@ -52,6 +52,8 @@ export default function CreateListingPremium() {
         shipping_available: false,
         city: '',
         location: '',
+        contact_phone: '',
+        hide_phone: false,
         dynamic_fields: {},
     })
 
@@ -104,6 +106,8 @@ export default function CreateListingPremium() {
                 shipping_available: editingListing.delivery_available || false,
                 city: city?.trim() || '',
                 location: locationParts.join(',').trim() || '',
+                contact_phone: editingListing.contact_phone || '',
+                hide_phone: editingListing.hide_phone || false,
                 dynamic_fields: editingListing.dynamic_fields || {},
             })
 
@@ -300,7 +304,8 @@ export default function CreateListingPremium() {
                 delivery_available: formData.shipping_available,
                 location: locationString,
                 images: finalImageUrls,
-                hide_phone: false,
+                contact_phone: formData.contact_phone || '',
+                hide_phone: formData.hide_phone || false,
                 dynamic_fields: formData.dynamic_fields || {},
             }
 

@@ -14,7 +14,8 @@ import {
   ArrowLeft,
   User,
   Star,
-  Flag
+  Flag,
+  ShieldCheck
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -453,10 +454,22 @@ export default function ProductDetails() {
                   </button>
 
                   {listing.contact_phone && !listing.hide_phone && (
-                    <button className="btn btn--secondary btn--large">
-                      <Phone size={20} />
-                      {listing.contact_phone}
-                    </button>
+                    <div>
+                      <button className="btn btn--secondary btn--large">
+                        <Phone size={20} />
+                        {listing.contact_phone}
+                      </button>
+                      {/* Micro-nudge safety message */}
+                      <p style={{
+                        fontSize: '12px',
+                        color: '#9CA3AF',
+                        fontStyle: 'italic',
+                        marginTop: '8px',
+                        textAlign: 'center'
+                      }}>
+                        Soyez prudent lors de vos rendez-vous.
+                      </p>
+                    </div>
                   )}
 
                   <div className="product-actions-secondary">
@@ -680,6 +693,91 @@ export default function ProductDetails() {
               </Link>
             </div>
           )}
+
+          {/* ═══════════════════════════════════════ */}
+          {/* TRUST & SAFETY CARD - PREMIUM */}
+          {/* ═══════════════════════════════════════ */}
+          <div className="product-description-section" style={{ marginBottom: '24px' }}>
+            <div
+              style={{
+                background: 'linear-gradient(135deg, #F9FAFB 0%, #F3F4F6 100%)',
+                border: '1px solid #E5E7EB',
+                borderRadius: '16px',
+                padding: '20px',
+                boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)'
+              }}
+            >
+              {/* Header */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+                <div
+                  style={{
+                    background: 'linear-gradient(135deg, #3B82F6 0%, #2563EB 100%)',
+                    borderRadius: '12px',
+                    padding: '10px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                >
+                  <ShieldCheck size={24} color="white" />
+                </div>
+                <h3 style={{
+                  margin: 0,
+                  fontSize: '18px',
+                  fontWeight: 600,
+                  color: '#111827'
+                }}>
+                  Conseils de sécurité
+                </h3>
+              </div>
+
+              {/* Safety Tips */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <div style={{ display: 'flex', alignItems: 'start', gap: '12px' }}>
+                  <div
+                    style={{
+                      minWidth: '6px',
+                      height: '6px',
+                      borderRadius: '50%',
+                      background: '#10B981',
+                      marginTop: '7px'
+                    }}
+                  />
+                  <p style={{ margin: 0, fontSize: '15px', color: '#374151', lineHeight: '1.6' }}>
+                    <strong style={{ fontWeight: 600 }}>Ne payez jamais à l'avance</strong> (ni TMoney, ni Flooz)
+                  </p>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'start', gap: '12px' }}>
+                  <div
+                    style={{
+                      minWidth: '6px',
+                      height: '6px',
+                      borderRadius: '50%',
+                      background: '#10B981',
+                      marginTop: '7px'
+                    }}
+                  />
+                  <p style={{ margin: 0, fontSize: '15px', color: '#374151', lineHeight: '1.6' }}>
+                    <strong style={{ fontWeight: 600 }}>Rencontrez le vendeur</strong> dans un lieu public
+                  </p>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'start', gap: '12px' }}>
+                  <div
+                    style={{
+                      minWidth: '6px',
+                      height: '6px',
+                      borderRadius: '50%',
+                      background: '#10B981',
+                      marginTop: '7px'
+                    }}
+                  />
+                  <p style={{ margin: 0, fontSize: '15px', color: '#374151', lineHeight: '1.6' }}>
+                    <strong style={{ fontWeight: 600 }}>Vérifiez l'article</strong> avant de payer
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
 
           {/* Description (pleine largeur) */}
           <div className="product-description-section">
