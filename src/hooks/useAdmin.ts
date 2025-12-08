@@ -385,7 +385,7 @@ export function useRejectPremiumRequest() {
 // ═══════════════════════════════════════════════════════════════════
 
 /**
- * Hook pour fetch reported listings
+ * Hook pour fetch reported listings AND users
  */
 export function useReportedListings() {
     return useQuery({
@@ -399,8 +399,14 @@ export function useReportedListings() {
             title,
             images
           ),
-          profiles:reporter_id (
-            name
+          reporter:profiles!reporter_id (
+            name,
+            avatar_url
+          ),
+          reported_user:profiles!reported_user_id (
+            name,
+            avatar_url,
+            email
           )
         `)
                 .eq('status', 'pending')

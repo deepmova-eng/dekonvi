@@ -178,18 +178,22 @@ export interface Database {
       reports: {
         Row: {
           id: string
-          listing_id: string
+          listing_id: string | null
+          reported_user_id: string | null
           reporter_id: string
-          reason: string
+          target_type: 'listing' | 'user'
+          reason: 'scam' | 'spam' | 'inappropriate' | 'other'
           description: string
           status: 'pending' | 'resolved' | 'dismissed'
           created_at: string
         }
         Insert: {
           id?: string
-          listing_id: string
+          listing_id?: string | null
+          reported_user_id?: string | null
           reporter_id: string
-          reason: string
+          target_type: 'listing' | 'user'
+          reason: 'scam' | 'spam' | 'inappropriate' | 'other'
           description: string
           status?: 'pending' | 'resolved' | 'dismissed'
           created_at?: string

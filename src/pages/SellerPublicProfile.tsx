@@ -16,9 +16,11 @@ import {
     X,
     Upload,
     Info,
-    Check
+    Check,
+    Flag
 } from 'lucide-react';
 import ProductCard from '../components/home/ProductCard';
+import ReportModal from '../components/shared/ReportModal';
 
 interface SellerProfile {
     id: string;
@@ -95,6 +97,7 @@ export default function SellerPublicProfile() {
         proofImagePreview: ''
     });
     const [submittingReview, setSubmittingReview] = useState(false);
+    const [showReportModal, setShowReportModal] = useState(false);
 
 
     const handleProofImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -236,15 +239,24 @@ export default function SellerPublicProfile() {
     return (
         <div className="min-h-screen bg-gray-50 pb-20">
 
-            {/* Clean Header - Just Back Button */}
+            {/* Clean Header - Just Back Button + Report */}
             <div className="sticky top-0 z-40 bg-white border-b border-gray-200">
-                <div className="max-w-7xl mx-auto px-4 py-3">
+                <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
                     <button
                         onClick={() => navigate(-1)}
                         className="flex items-center space-x-2 text-gray-700 hover:text-gray-900 transition-colors"
                     >
                         <ChevronLeft className="h-6 w-6" />
                         <span className="font-medium">Retour</span>
+                    </button>
+
+                    <button
+                        onClick={() => setShowReportModal(true)}
+                        className="flex items-center space-x-2 px-4 py-2 text-gray-600 hover:text-red-600 transition-colors rounded-lg hover:bg-red-50"
+                        title="Signaler ce vendeur"
+                    >
+                        <Flag className="h-5 w-5" />
+                        <span className="text-sm font-medium hidden sm:inline">Signaler</span>
                     </button>
                 </div>
             </div>
@@ -706,6 +718,16 @@ export default function SellerPublicProfile() {
 
                     </div>
                 </div>
+            )}
+
+            {/* Report Modal */}
+            {showReportModal && (
+                <ReportModal
+                    targetType="user"
+                    targetId={id!}
+                    targetName={seller?.name || 'Ce vendeur'}
+                    onClose={() => setShowReportModal(false)}
+                />
             )}
         </div>
     );

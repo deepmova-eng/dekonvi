@@ -13,7 +13,8 @@ import {
   Phone,
   ArrowLeft,
   User,
-  Star
+  Star,
+  Flag
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -24,6 +25,7 @@ import { useSupabase } from '../contexts/SupabaseContext';
 import { useSellerProfile } from '../hooks/useProfile';
 import './ProductDetails.css';
 import { supabase } from '../lib/supabase';
+import ReportModal from '../components/shared/ReportModal';
 
 // Helper function to get condition label
 const getConditionLabel = (condition: string | null | undefined): string => {
@@ -49,6 +51,7 @@ export default function ProductDetails() {
   const { data: isFavorite = false } = useIsFavorite(id!);
   const { mutate: toggleFavorite } = useToggleFavorite();
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [showReportModal, setShowReportModal] = useState(false);
 
   // ✅ React Query hook - remplace useEffect seller fetch
   const { data: sellerProfile } = useSellerProfile(listing?.seller_id);
@@ -467,6 +470,14 @@ export default function ProductDetails() {
                     <button className="btn btn--icon" aria-label="Partager">
                       <Share2 size={20} />
                     </button>
+                    <button
+                      onClick={() => setShowReportModal(true)}
+                      className="btn btn--icon"
+                      aria-label="Signaler"
+                      title="Signaler cette annonce"
+                    >
+                      <Flag size={20} />
+                    </button>
                   </div>
                 </div>
 
@@ -697,6 +708,16 @@ export default function ProductDetails() {
 
         </div>
       </div>
+
+      {/* Report Modal */}
+      {showReportModal && (
+        <ReportModal
+          targetType="listing"
+          targetId={id!}
+          targetName={listing?.title || 'Cette annonce'}
+          onClose={() => setShowReportModal(false)}
+        />
+      )}
     </>
   );
 }
