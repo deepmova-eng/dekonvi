@@ -224,8 +224,9 @@ export interface Database {
           title: string
           description: string | null
           image_url: string
+          image_mobile_url: string | null
           link: string | null
-          order: number
+          order_position: number
           active: boolean
           created_at: string
         }
@@ -234,8 +235,9 @@ export interface Database {
           title: string
           description?: string | null
           image_url: string
+          image_mobile_url?: string | null
           link?: string | null
-          order?: number
+          order_position?: number
           active?: boolean
           created_at?: string
         }
@@ -243,8 +245,9 @@ export interface Database {
           title?: string
           description?: string | null
           image_url?: string
+          image_mobile_url?: string | null
           link?: string | null
-          order?: number
+          order_position?: number
           active?: boolean
         }
       }

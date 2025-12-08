@@ -160,10 +160,28 @@ export default function HeroSlider() {
                         className={`slide ${index === currentIndex ? 'active' : ''}`}
                         data-slide={index}
                     >
-                        <img
-                            src={ad.image_url}
-                            alt={ad.title}
-                        />
+                        <picture>
+                            {/* Mobile Image (if available) - Portrait/Square 800x1000 or 800x800 */}
+                            {ad.image_mobile_url && (
+                                <source
+                                    media="(max-width: 767px)"
+                                    srcSet={ad.image_mobile_url}
+                                />
+                            )}
+
+                            {/* Desktop Image - Landscape 1920x630 */}
+                            <source
+                                media="(min-width: 768px)"
+                                srcSet={ad.image_url}
+                            />
+
+                            {/* Fallback: Desktop image for older browsers */}
+                            <img
+                                src={ad.image_url}
+                                alt={ad.title}
+                                loading={index === 0 ? "eager" : "lazy"}
+                            />
+                        </picture>
                         <div className="slide-overlay"></div>
                         <div className="slide-content">
                             <h2>{ad.title}</h2>
