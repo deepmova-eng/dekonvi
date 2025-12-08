@@ -443,55 +443,53 @@ export default function ProductDetails() {
                   </span>
                 </div>
 
-                {/* Actions principales */}
-                <div className="product-actions mobile-action-bar">
+
+
+                {/* Actions principales - MOBILE ACTION BAR */}
+                <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 p-3 flex items-center gap-3 z-50 lg:relative lg:border-0 lg:bg-transparent lg:p-0">
+
+                  {/* Message Button */}
                   <button
-                    className="btn btn--primary btn--large"
+                    className="btn btn--primary flex-1 h-12"
                     onClick={handleSendMessage}
                   >
                     <MessageCircle size={20} />
-                    Envoyer un message
+                    <span className="hidden sm:inline">Envoyer un message</span>
+                    <span className="inline sm:hidden">Message</span>
                   </button>
 
+                  {/* Phone Button - Only if phone exists */}
                   {listing.contact_phone && !listing.hide_phone && (
-                    <div>
-                      <button className="btn btn--secondary btn--large">
-                        <Phone size={20} />
-                        {listing.contact_phone}
-                      </button>
-                      {/* Micro-nudge safety message */}
-                      <p style={{
-                        fontSize: '12px',
-                        color: '#9CA3AF',
-                        fontStyle: 'italic',
-                        marginTop: '8px',
-                        textAlign: 'center'
-                      }}>
-                        Soyez prudent lors de vos rendez-vous.
-                      </p>
-                    </div>
+                    <button
+                      className="btn btn--secondary flex-1 h-12"
+                    >
+                      <Phone size={20} />
+                      <span className="hidden sm:inline">{listing.contact_phone}</span>
+                      <span className="inline sm:hidden">Appeler</span>
+                    </button>
                   )}
 
-                  <div className="product-actions-secondary">
-                    <button
-                      onClick={handleFavoriteClick}
-                      className={`btn btn--icon ${isFavorite ? 'active' : ''}`}
-                      aria-label={isFavorite ? 'Retirer des favoris' : 'Ajouter aux favoris'}
-                    >
-                      <Heart size={20} fill={isFavorite ? 'currentColor' : 'none'} />
-                    </button>
-                    <button className="btn btn--icon" aria-label="Partager">
-                      <Share2 size={20} />
-                    </button>
-                    <button
-                      onClick={() => setShowReportModal(true)}
-                      className="btn btn--icon"
-                      aria-label="Signaler"
-                      title="Signaler cette annonce"
-                    >
-                      <Flag size={20} />
-                    </button>
-                  </div>
+                  {/* Favorite Button */}
+                  <button
+                    onClick={handleFavoriteClick}
+                    className={`btn btn--icon w-12 h-12 flex-none ${isFavorite ? 'active' : ''}`}
+                    aria-label={isFavorite ? 'Retirer des favoris' : 'Ajouter aux favoris'}
+                  >
+                    <Heart size={20} fill={isFavorite ? 'currentColor' : 'none'} />
+                  </button>
+
+                  {/* Share and Report - Hidden on mobile, visible on desktop */}
+                  <button className="btn btn--icon w-12 h-12 flex-none hidden lg:flex" aria-label="Partager">
+                    <Share2 size={20} />
+                  </button>
+                  <button
+                    onClick={() => setShowReportModal(true)}
+                    className="btn btn--icon w-12 h-12 flex-none hidden lg:flex"
+                    aria-label="Signaler"
+                    title="Signaler cette annonce"
+                  >
+                    <Flag size={20} />
+                  </button>
                 </div>
 
                 {/* Info livraison */}
