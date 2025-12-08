@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft, PlusCircle, MessageCircle } from 'lucide-react';
-import { useUserTickets, hasUnreadMessages } from '../hooks/useSupport';
+import { ChevronLeft, PlusCircle, MessageCircle, Archive } from 'lucide-react';
+import { useUserTickets, hasUnreadMessages, useArchiveTicket } from '../hooks/useSupport';
 import ContactSupportModal from '../components/shared/ContactSupportModal';
+import { ConfirmDialog } from '../components/shared/ConfirmDialog';
 import TicketConversation from '../components/admin/TicketConversation';
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -11,8 +12,11 @@ export default function MyTickets() {
     const navigate = useNavigate();
     const [showContactModal, setShowContactModal] = useState(false);
     const [selectedTicketId, setSelectedTicketId] = useState<string | null>(null);
+    const [showConfirmArchive, setShowConfirmArchive] = useState(false);
+    const [ticketToArchive, setTicketToArchive] = useState<string | null>(null);
 
     const { data: tickets = [], isLoading } = useUserTickets();
+    const { mutate: archiveTicket } = useArchiveTicket();
 
     // Subject icons & labels
     const subjectIcons: Record<string, string> = {
@@ -164,12 +168,31 @@ export default function MyTickets() {
 
                                 {/* Footer */}
                                 <div className="flex items-center justify-between pt-3 border-t border-gray-100">
-                                    <p className="text-sm text-gray-500">
-                                        {formatDistanceToNow(new Date(ticket.updated_at), {
-                                            addSuffix: true,
-                                            locale: fr
-                                        })}
-                                    </p>
+                                    <div className="flex items-center gap-3">
+                                        <p className="text-sm text-gray-500">
+                                            {formatDistanceToNow(new Date(ticket.updated_at), {
+                                                addSuffix: true,
+                                                locale: fr
+                                            })}
+                                        </p>
+
+                                        {/* Archive button - Only visible for CLOSED tickets */}
+                                        {ticket.status === 'closed' && (
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setTicketToArchive(ticket.id);
+                                                    setShowConfirmArchive(true);
+                                                }}
+                                                className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-red-600 transition-colors"
+                                                title="Archiver ce ticket fermé"
+                                            >
+                                                <Archive className="h-4 w-4" />
+                                                <span className="hidden sm:inline">Archiver</span>
+                                            </button>
+                                        )}
+                                    </div>
+
                                     <button className="text-sm font-semibold text-blue-600 hover:text-blue-700">
                                         Voir la conversation →
                                     </button>
@@ -184,6 +207,25 @@ export default function MyTickets() {
             {showContactModal && (
                 <ContactSupportModal onClose={() => setShowContactModal(false)} />
             )}
+
+            {/* Archive Confirmation Dialog */}
+            <ConfirmDialog
+                isOpen={showConfirmArchive}
+                onClose={() => {
+                    setShowConfirmArchive(false);
+                    setTicketToArchive(null);
+                }}
+                onConfirm={() => {
+                    if (ticketToArchive) {
+                        archiveTicket({ ticketId: ticketToArchive, isAdmin: false });
+                    }
+                }}
+                title="Archiver ce ticket ?"
+                message="Ce ticket fermé sera caché de votre liste mais restera accessible à l'équipe support pour consultation."
+                confirmText="Archiver"
+                cancelText="Annuler"
+                danger={false}
+            />
         </div>
     );
 }

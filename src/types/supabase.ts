@@ -270,6 +270,10 @@ export interface Database {
           admin_last_read_at: string | null
           user_last_read_at: string | null
           last_message_sender_role: string | null
+          archived_by_user: boolean
+          archived_by_admin: boolean
+          deleted_at: string | null
+          archived_at: string | null
         }
         Insert: {
           id?: string
@@ -281,6 +285,11 @@ export interface Database {
           updated_at?: string
           admin_last_read_at?: string | null
           user_last_read_at?: string | null
+          last_message_sender_role?: string | null
+          archived_by_user?: boolean
+          archived_by_admin?: boolean
+          deleted_at?: string | null
+          archived_at?: string | null
         }
         Update: {
           status?: 'open' | 'in_progress' | 'resolved' | 'closed'
@@ -288,6 +297,11 @@ export interface Database {
           updated_at?: string
           admin_last_read_at?: string | null
           user_last_read_at?: string | null
+          last_message_sender_role?: string | null
+          archived_by_user?: boolean
+          archived_by_admin?: boolean
+          deleted_at?: string | null
+          archived_at?: string | null
         }
       }
       ticket_messages: {

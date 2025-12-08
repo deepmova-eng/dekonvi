@@ -21,6 +21,10 @@ export interface Ticket {
     admin_last_read_at: string | null;
     user_last_read_at: string | null;
     last_message_sender_role: string | null;
+    archived_by_user: boolean;
+    archived_by_admin: boolean;
+    deleted_at: string | null;
+    archived_at: string | null;
     user?: {
         name: string;
         avatar_url: string | null;
@@ -172,6 +176,8 @@ export function useUserTickets() {
                 .from('tickets')
                 .select('*')
                 .eq('user_id', user.id)
+                .eq('archived_by_user', false)  // Filter out archived tickets
+                .is('deleted_at', null)          // Filter out deleted tickets
                 .order('created_at', { ascending: false });
 
             if (error) throw error;
@@ -419,4 +425,81 @@ export function hasUnreadMessages(ticket: Ticket, isAdmin: boolean): boolean {
         // User sees badge ONLY if admin sent last message
         return ticket.last_message_sender_role === 'admin';
     }
+}
+
+/**
+ * Archive ticket (hide from user's view)
+ * Users can archive their own tickets, admins can archive any ticket
+ */
+export function useArchiveTicket() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async ({ ticketId, isAdmin }: { ticketId: string; isAdmin: boolean }) => {
+            const field = isAdmin ? 'archived_by_admin' : 'archived_by_user';
+
+            const { error } = await supabase
+                .from('tickets')
+                .update({
+                    [field]: true,
+                    archived_at: new Date().toISOString()
+                })
+                .eq('id', ticketId);
+
+            if (error) throw error;
+        },
+        onSuccess: () => {
+            // Force IMMEDIATE refetch (not just invalidate)
+            queryClient.refetchQueries({ queryKey: ['user', 'tickets'] });
+            queryClient.refetchQueries({ queryKey: ['admin', 'tickets'] });
+            toast.success('Ticket archivé');
+        }
+    });
+}
+
+/**
+ * Unarchive ticket (admin only)
+ */
+export function useUnarchiveTicket() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async (ticketId: string) => {
+            const { error } = await supabase
+                .from('tickets')
+                .update({
+                    archived_by_admin: false,
+                    archived_at: null
+                })
+                .eq('id', ticketId);
+
+            if (error) throw error;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['admin', 'tickets'] });
+            toast.success('Ticket désarchivé');
+        }
+    });
+}
+
+/**
+ * Soft delete ticket (admin only - for spam/test tickets)
+ */
+export function useSoftDeleteTicket() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async (ticketId: string) => {
+            const { error } = await supabase
+                .from('tickets')
+                .update({ deleted_at: new Date().toISOString() })
+                .eq('id', ticketId);
+
+            if (error) throw error;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['admin', 'tickets'] });
+            toast.success('Ticket supprimé (soft delete)');
+        }
+    });
 }

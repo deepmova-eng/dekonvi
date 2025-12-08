@@ -1,16 +1,15 @@
-import { useEffect } from 'react'
-import { X } from 'lucide-react'
-import './ConfirmDialog.css'
+import { useEffect } from 'react';
+import { X, Archive, AlertTriangle } from 'lucide-react';
 
 interface ConfirmDialogProps {
-    isOpen: boolean
-    onClose: () => void
-    onConfirm: () => void
-    title: string
-    message: string
-    confirmText?: string
-    cancelText?: string
-    danger?: boolean
+    isOpen: boolean;
+    onClose: () => void;
+    onConfirm: () => void;
+    title: string;
+    message: string;
+    confirmText?: string;
+    cancelText?: string;
+    danger?: boolean;
 }
 
 export function ConfirmDialog({
@@ -27,65 +26,90 @@ export function ConfirmDialog({
     useEffect(() => {
         const handleEscape = (e: KeyboardEvent) => {
             if (e.key === 'Escape' && isOpen) {
-                onClose()
+                onClose();
             }
-        }
+        };
 
         if (isOpen) {
-            document.addEventListener('keydown', handleEscape)
+            document.addEventListener('keydown', handleEscape);
             // Prevent body scroll when modal is open
-            document.body.style.overflow = 'hidden'
+            document.body.style.overflow = 'hidden';
         }
 
         return () => {
-            document.removeEventListener('keydown', handleEscape)
-            document.body.style.overflow = 'unset'
-        }
-    }, [isOpen, onClose])
+            document.removeEventListener('keydown', handleEscape);
+            document.body.style.overflow = 'unset';
+        };
+    }, [isOpen, onClose]);
 
-    if (!isOpen) return null
+    if (!isOpen) return null;
 
     const handleConfirm = () => {
-        onConfirm()
-        onClose()
-    }
+        onConfirm();
+        onClose();
+    };
 
     return (
-        <div className="confirm-dialog-overlay" onClick={onClose}>
-            <div className="confirm-dialog" onClick={(e) => e.stopPropagation()}>
-                {/* Header */}
-                <div className="confirm-dialog-header">
-                    <h3>{title}</h3>
+        <div
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[9999] p-4 animate-in fade-in duration-200"
+            onClick={onClose}
+        >
+            {/* Modal */}
+            <div
+                className="bg-white rounded-2xl shadow-2xl max-w-md w-full transform transition-all animate-in fade-in zoom-in-95 duration-200"
+                onClick={(e) => e.stopPropagation()}
+            >
+                {/* Header with close button */}
+                <div className="relative p-6 pb-4">
                     <button
-                        className="confirm-dialog-close"
                         onClick={onClose}
+                        className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-full transition-colors"
                         aria-label="Fermer"
                     >
-                        <X size={20} />
+                        <X className="w-5 h-5 text-gray-500" />
                     </button>
-                </div>
 
-                {/* Content */}
-                <div className="confirm-dialog-content">
-                    <p>{message}</p>
+                    {/* Icon */}
+                    <div className="flex justify-center mb-4">
+                        <div className={`${danger ? 'bg-red-100' : 'bg-orange-100'} p-4 rounded-full`}>
+                            {danger ? (
+                                <AlertTriangle className="w-12 h-12 text-red-600" />
+                            ) : (
+                                <Archive className="w-12 h-12 text-orange-600" />
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Title */}
+                    <h3 className="text-xl font-bold text-gray-900 text-center mb-2">
+                        {title}
+                    </h3>
+
+                    {/* Message */}
+                    <p className="text-gray-600 text-center leading-relaxed">
+                        {message}
+                    </p>
                 </div>
 
                 {/* Actions */}
-                <div className="confirm-dialog-actions">
+                <div className="flex gap-3 p-6 pt-2 border-t border-gray-100">
                     <button
-                        className="confirm-dialog-btn confirm-dialog-btn-cancel"
                         onClick={onClose}
+                        className="flex-1 px-6 py-3 bg-gray-100 text-gray-700 font-semibold rounded-lg hover:bg-gray-200 transition-all transform active:scale-95"
                     >
                         {cancelText}
                     </button>
                     <button
-                        className={`confirm-dialog-btn ${danger ? 'confirm-dialog-btn-danger' : 'confirm-dialog-btn-confirm'}`}
                         onClick={handleConfirm}
+                        className={`flex-1 px-6 py-3 text-white font-semibold rounded-lg transition-all shadow-lg transform active:scale-95 ${danger
+                                ? 'bg-red-600 hover:bg-red-700'
+                                : 'bg-orange-600 hover:bg-orange-700'
+                            }`}
                     >
                         {confirmText}
                     </button>
                 </div>
             </div>
         </div>
-    )
+    );
 }
