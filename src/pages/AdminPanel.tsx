@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ChevronLeft, Grid, Star, Users, AlertTriangle, Settings, Sparkles, UserPlus } from 'lucide-react';
+import { ChevronLeft, Grid, Star, Users, AlertTriangle, Settings, Sparkles, UserPlus, MessageCircle } from 'lucide-react';
 import PendingListings from '../components/admin/PendingListings';
 import PremiumRequests from '../components/admin/PremiumRequests';
 import UserManagement from '../components/admin/UserManagement';
@@ -7,10 +7,11 @@ import ReportedListings from '../components/admin/ReportedListings';
 import AdminSettings from '../components/admin/AdminSettings';
 import AdvertisementManager from '../components/admin/AdvertisementManager';
 import ReviewModeration from '../components/admin/ReviewModeration';
+import TicketsList from '../components/admin/TicketsList';
 import { useSupabase } from '../contexts/SupabaseContext';
 import { useNavigate, Link } from 'react-router-dom';
 
-type TabType = 'pending' | 'premium' | 'users' | 'pending_users' | 'reports' | 'settings' | 'ads' | 'reviews';
+type TabType = 'pending' | 'premium' | 'users' | 'pending_users' | 'reports' | 'support' | 'settings' | 'ads' | 'reviews';
 
 export default function AdminPanel() {
   const [activeTab, setActiveTab] = useState<TabType>('pending');
@@ -38,6 +39,8 @@ export default function AdminPanel() {
         return <UserManagement filter="pending" />;
       case 'reports':
         return <ReportedListings />;
+      case 'support':
+        return <TicketsList />;
       case 'settings':
         return <AdminSettings />;
       case 'ads':
@@ -138,6 +141,16 @@ export default function AdminPanel() {
             >
               <AlertTriangle className="w-5 h-5 mr-2" />
               Signalements
+            </button>
+            <button
+              onClick={() => setActiveTab('support')}
+              className={`flex items-center py-4 border-b-2 ${activeTab === 'support'
+                ? 'border-primary-500 text-primary-500'
+                : 'border-transparent text-gray-500 hover:text-gray-700'
+                }`}
+            >
+              <MessageCircle className="w-5 h-5 mr-2" />
+              Support
             </button>
             <button
               onClick={() => setActiveTab('settings')}

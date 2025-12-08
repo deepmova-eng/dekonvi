@@ -25,6 +25,7 @@ import Categories from './pages/Categories';
 import CategoryListings from './pages/CategoryListings';
 import CategoryPage from './pages/CategoryPage';
 import UserSettings from './pages/UserSettings';
+import MyTickets from './pages/MyTickets';
 import PersonalInfo from './pages/PersonalInfo';
 import Addresses from './pages/Addresses';
 import Security from './pages/Security';
@@ -158,6 +159,7 @@ export default function App() {
           <Route path="/login" element={<Login onBack={() => navigate(-1)} onRegisterClick={() => navigate('/register')} />} />
           <Route path="/register" element={<Register onBack={() => navigate(-1)} onLoginClick={() => navigate('/login')} />} />
           <Route path="/pending-validation" element={<PendingValidation />} />
+          <Route path="/my-tickets" element={<MyTickets />} />
           <Route path="/categories" element={<Categories />} />
           <Route path="/categories/:slug" element={<CategoryListings />} />
           <Route path="/category/:categoryId" element={<CategoryPage />} />

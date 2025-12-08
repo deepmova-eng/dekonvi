@@ -258,6 +258,55 @@ export interface Database {
           active?: boolean
         }
       }
+      tickets: {
+        Row: {
+          id: string
+          user_id: string
+          subject: 'validation_issue' | 'technical_bug' | 'billing' | 'other'
+          status: 'open' | 'in_progress' | 'resolved' | 'closed'
+          priority: 'low' | 'medium' | 'high'
+          created_at: string
+          updated_at: string
+          admin_last_read_at: string | null
+          user_last_read_at: string | null
+          last_message_sender_role: string | null
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          subject: 'validation_issue' | 'technical_bug' | 'billing' | 'other'
+          status?: 'open' | 'in_progress' | 'resolved' | 'closed'
+          priority?: 'low' | 'medium' | 'high'
+          created_at?: string
+          updated_at?: string
+          admin_last_read_at?: string | null
+          user_last_read_at?: string | null
+        }
+        Update: {
+          status?: 'open' | 'in_progress' | 'resolved' | 'closed'
+          priority?: 'low' | 'medium' | 'high'
+          updated_at?: string
+          admin_last_read_at?: string | null
+          user_last_read_at?: string | null
+        }
+      }
+      ticket_messages: {
+        Row: {
+          id: string
+          ticket_id: string
+          sender_id: string
+          message: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          ticket_id: string
+          sender_id: string
+          message: string
+          created_at?: string
+        }
+        Update: {}
+      }
       reviews: {
         Row: {
           id: string

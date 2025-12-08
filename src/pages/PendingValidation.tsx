@@ -1,9 +1,30 @@
-import { Clock, CheckCircle, Mail, LogOut } from 'lucide-react';
+import { useState } from 'react';
+import { Clock, CheckCircle, Mail, LogOut, MessageCircle } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import ContactSupportModal from '../components/shared/ContactSupportModal';
+import { useUserTickets } from '../hooks/useSupport';
+import { formatDistanceToNow } from 'date-fns';
+import { fr } from 'date-fns/locale';
+
+const statusLabels = {
+    open: 'Ouvert',
+    in_progress: 'En cours',
+    resolved: 'Résolu',
+    closed: 'Fermé'
+};
+
+const statusColors = {
+    open: 'bg-green-100 text-green-700',
+    in_progress: 'bg-yellow-100 text-yellow-700',
+    resolved: 'bg-purple-100 text-purple-700',
+    closed: 'bg-gray-100 text-gray-700'
+};
 
 export default function PendingValidation() {
+    const [showContactModal, setShowContactModal] = useState(false);
+    const { data: userTickets = [] } = useUserTickets();
     const navigate = useNavigate();
 
     const handleLogout = async () => {
@@ -83,13 +104,46 @@ export default function PendingValidation() {
                         <span>Se déconnecter</span>
                     </button>
 
-                    {/* Support Link */}
-                    <p className="text-center text-xs text-gray-500 mt-6">
-                        Besoin d'aide ?{' '}
-                        <a href="mailto:support@dekonvi.com" className="text-primary-500 hover:text-primary-600 font-medium">
-                            Contactez le support
-                        </a>
-                    </p>
+                    {/* Contact Support Button */}
+                    <button
+                        onClick={() => setShowContactModal(true)}
+                        className="w-full py-3 px-4 bg-blue-50 hover:bg-blue-100 text-blue-700 font-medium rounded-xl transition-colors flex items-center justify-center space-x-2 border-2 border-blue-200"
+                    >
+                        <MessageCircle className="w-5 h-5" />
+                        <span>Contactez le support</span>
+                    </button>
+
+                    {/* User's Tickets List */}
+                    {userTickets.length > 0 && (
+                        <div className="mt-6">
+                            <h3 className="text-sm font-semibold text-gray-900 mb-3">
+                                Mes demandes ({userTickets.length})
+                            </h3>
+                            <div className="space-y-2">
+                                {userTickets.slice(0, 3).map(ticket => (
+                                    <div
+                                        key={ticket.id}
+                                        className="p-3 bg-gray-50 rounded-lg border border-gray-200"
+                                    >
+                                        <div className="flex items-center justify-between gap-2 mb-1">
+                                            <span className={`inline-flex px-2 py-0.5 rounded text-xs font-bold ${statusColors[ticket.status]}`}>
+                                                {statusLabels[ticket.status]}
+                                            </span>
+                                            <span className="text-xs text-gray-500">
+                                                {formatDistanceToNow(new Date(ticket.created_at), { addSuffix: true, locale: fr })}
+                                            </span>
+                                        </div>
+                                        <p className="text-xs text-gray-600">
+                                            Ticket #{ticket.id.slice(0, 6).toUpperCase()}
+                                        </p>
+                                    </div>
+                                ))}
+                            </div>
+                            <p className="text-xs text-gray-500 mt-2 text-center">
+                                Vous serez notifié par email dès qu'un admin répondra
+                            </p>
+                        </div>
+                    )}
                 </div>
 
                 {/* Back to Home */}
@@ -101,6 +155,11 @@ export default function PendingValidation() {
                         ← Retour à l'accueil
                     </button>
                 </div>
+
+                {/* Contact Support Modal */}
+                {showContactModal && (
+                    <ContactSupportModal onClose={() => setShowContactModal(false)} />
+                )}
             </div>
         </div>
     );

@@ -11,7 +11,8 @@ import {
     Grid,
     LogOut,
     Settings,
-    ChevronDown
+    ChevronDown,
+    LifeBuoy
 } from 'lucide-react'
 import { categories } from '../../config/categories'
 import NotificationBell from '../notifications/NotificationBell'
@@ -301,6 +302,11 @@ export default function Navbar() {
                                         <Link to="/admin" className="dropdown-item">
                                             <Settings size={16} />
                                             Administration
+                                        </Link>
+
+                                        <Link to="/my-tickets" className="dropdown-item">
+                                            <LifeBuoy size={16} />
+                                            Aide & Support
                                         </Link>
 
                                         <div className="dropdown-divider" />

@@ -1,6 +1,8 @@
-import { ChevronLeft, User, MapPin, Lock, ChevronRight, LogOut } from 'lucide-react';
+import { useState } from 'react';
+import { ChevronLeft, User, MapPin, Lock, ChevronRight, LogOut, LifeBuoy } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useSupabaseAuth } from '../hooks/useSupabaseAuth';
+import ContactSupportModal from '../components/shared/ContactSupportModal';
 
 interface SettingsItemProps {
     icon: React.ReactNode;
@@ -26,6 +28,7 @@ function SettingsItem({ icon, title, onClick }: SettingsItemProps) {
 export default function UserSettings() {
     const navigate = useNavigate();
     const { signOut } = useSupabaseAuth();
+    const [showContactModal, setShowContactModal] = useState(false);
 
     const handleLogout = async () => {
         try {
@@ -73,6 +76,22 @@ export default function UserSettings() {
                     />
                 </div>
 
+                {/* Help & Support Button */}
+                <div className="bg-white rounded-lg overflow-hidden shadow-sm mt-6">
+                    <button
+                        onClick={() => setShowContactModal(true)}
+                        className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
+                    >
+                        <div className="flex items-center gap-3">
+                            <div className="text-blue-600">
+                                <LifeBuoy className="w-5 h-5" />
+                            </div>
+                            <span className="text-base font-medium text-gray-900">Aide & Support</span>
+                        </div>
+                        <ChevronRight className="w-5 h-5 text-gray-400" />
+                    </button>
+                </div>
+
                 {/* Logout Button */}
                 <button
                     onClick={handleLogout}
@@ -82,6 +101,11 @@ export default function UserSettings() {
                     <span>Déconnexion</span>
                 </button>
             </div>
+
+            {/* Contact Support Modal */}
+            {showContactModal && (
+                <ContactSupportModal onClose={() => setShowContactModal(false)} />
+            )}
         </div>
     );
 }
