@@ -28,6 +28,7 @@ export default function Navbar() {
     const [isScrolled, setIsScrolled] = useState(false)
     const [activeDropdown, setActiveDropdown] = useState<string | null>(null)
     const [scrollProgress, setScrollProgress] = useState(0)
+    const [isAdmin, setIsAdmin] = useState(false)
 
     // Unread messages count
     const { data: unreadMessagesCount = 0 } = useUnreadMessagesCount(user?.id)
@@ -48,6 +49,26 @@ export default function Navbar() {
         window.addEventListener('scroll', handleScroll)
         return () => window.removeEventListener('scroll', handleScroll)
     }, [])
+
+    // Fetch user role to check if admin
+    useEffect(() => {
+        if (!user?.id) {
+            setIsAdmin(false)
+            return
+        }
+
+        const fetchUserRole = async () => {
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('role')
+                .eq('id', user.id)
+                .single()
+
+            setIsAdmin(profile?.role === 'admin')
+        }
+
+        fetchUserRole()
+    }, [user?.id])
 
     // Close dropdowns on outside click
     useEffect(() => {
@@ -299,10 +320,13 @@ export default function Navbar() {
                                             Mon profil
                                         </Link>
 
-                                        <Link to="/admin" className="dropdown-item">
-                                            <Settings size={16} />
-                                            Administration
-                                        </Link>
+                                        {/* Admin menu - Only visible to admins */}
+                                        {isAdmin && (
+                                            <Link to="/admin" className="dropdown-item">
+                                                <Settings size={16} />
+                                                Administration
+                                            </Link>
+                                        )}
 
                                         <Link to="/my-tickets" className="dropdown-item">
                                             <LifeBuoy size={16} />
