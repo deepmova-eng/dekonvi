@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Shield, Ban, User, CheckCircle, XCircle, Trash2 } from 'lucide-react';
 import { useAllUsers } from '../../hooks/useAdmin';
+import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../../lib/supabase';
 import type { Database } from '../../types/supabase';
 import toast from 'react-hot-toast';
@@ -19,8 +20,9 @@ interface UserManagementProps {
 }
 
 export default function UserManagement({ filter = 'confirmed' }: UserManagementProps) {
-  // ✅ React Query hook - remplace useState + useEffect
+  // ✅ React Query hooks
   const { data: users = [], isLoading: loading } = useAllUsers();
+  const queryClient = useQueryClient();
 
   const [search, setSearch] = useState('');
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
@@ -70,8 +72,13 @@ export default function UserManagement({ filter = 'confirmed' }: UserManagementP
 
       toast.success(user.status === 'banned' ? 'Utilisateur débanni' : 'Utilisateur banni');
 
-      // Force refresh users list
-      window.location.reload();
+      // ✅ INSTANT UPDATE - Mettre à jour le cache manuellement pour feedback immédiat
+      queryClient.setQueryData(['admin', 'users'], (oldData: ExtendedUser[] | undefined) => {
+        if (!oldData) return oldData;
+        return oldData.map(u =>
+          u.id === user.id ? { ...u, status: newStatus } : u
+        );
+      });
     } catch (error) {
       console.error('Error updating user status:', error);
       toast.error('Erreur lors de la mise à jour du statut');
@@ -116,8 +123,13 @@ export default function UserManagement({ filter = 'confirmed' }: UserManagementP
 
       toast.success(user.role === 'admin' ? 'Administrateur rétrogradé' : 'Administrateur promu');
 
-      // Force refresh users list
-      window.location.reload();
+      // ✅ INSTANT UPDATE - Mettre à jour le cache manuellement
+      queryClient.setQueryData(['admin', 'users'], (oldData: ExtendedUser[] | undefined) => {
+        if (!oldData) return oldData;
+        return oldData.map(u =>
+          u.id === user.id ? { ...u, role: newRole } : u
+        );
+      });
     } catch (error) {
       console.error('Error updating user role:', error);
       toast.error('Erreur lors de la mise à jour du rôle');
@@ -183,10 +195,10 @@ export default function UserManagement({ filter = 'confirmed' }: UserManagementP
         toast.success('Utilisateur confirmé (email non envoyé)', { id: toastId });
       }
 
-      // Reload page to refresh user list from DB
-      setTimeout(() => {
-        window.location.reload();
-      }, 1500);
+      // ✅ OPTIMISTIC UPDATE - Invalider le cache React Query
+      queryClient.invalidateQueries({
+        queryKey: ['admin', 'users']
+      });
     } catch (error: any) {
       console.error('Error confirming user:', error);
       toast.error(`Erreur: ${error.message || 'Échec de la confirmation'}`, { id: toastId });
@@ -217,10 +229,10 @@ export default function UserManagement({ filter = 'confirmed' }: UserManagementP
 
       toast.success('Utilisateur supprimé avec succès', { id: toastId });
 
-      // Reload page to refresh user list
-      setTimeout(() => {
-        window.location.reload();
-      }, 1000);
+      // ✅ OPTIMISTIC UPDATE - Invalider le cache React Query
+      queryClient.invalidateQueries({
+        queryKey: ['admin', 'users']
+      });
     } catch (error: any) {
       console.error('Error deleting user:', error);
       toast.error(`Erreur: ${error.message || 'Échec de la suppression'}`, { id: toastId });
@@ -341,70 +353,40 @@ export default function UserManagement({ filter = 'confirmed' }: UserManagementP
               )}
             </div>
 
-            {/* Action Buttons - Grid 2 columns */}
+            {/* Action Buttons - Premium 2-Column Layout */}
             <div className="grid grid-cols-2 gap-3">
-              {/* Delete/Refuse Button */}
+              {/* Ban/Unban Button - Outline Style */}
               <button
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
-                  handleDeleteUser(user);
+                  handleBanUser(user);
                 }}
-                className="flex items-center justify-center space-x-2 px-4 py-3 bg-white border-2 border-red-200 text-red-600 hover:bg-red-50 rounded-xl transition-all font-medium text-sm min-h-[44px]"
+                className={`flex items-center justify-center space-x-2 px-4 py-3 rounded-xl transition-all font-medium text-sm min-h-[44px] border-2 ${user.status === 'banned'
+                  ? 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
+                  : 'border-orange-300 bg-white text-orange-600 hover:bg-orange-50'
+                  }`}
               >
-                <Trash2 className="w-4 h-4" />
-                <span>Refuser</span>
+                <Ban className="w-4 h-4" />
+                <span>{user.status === 'banned' ? 'Débannir' : 'Bannir'}</span>
               </button>
 
-              {/* Validate Button (conditional) */}
-              {!user.email_confirmed_at ? (
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleConfirmUser(user);
-                  }}
-                  style={{ backgroundColor: '#10B981' }}
-                  className="flex items-center justify-center space-x-2 px-4 py-3 text-white rounded-xl transition-all font-semibold text-sm shadow-lg shadow-green-500/30 hover:shadow-xl hover:shadow-green-500/40 min-h-[44px] border-none"
-                >
-                  <CheckCircle className="w-4 h-4" />
-                  <span>Valider</span>
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleBanUser(user);
-                  }}
-                  className={`flex items-center justify-center space-x-2 px-4 py-3 rounded-xl transition-all font-medium text-sm min-h-[44px] ${user.status === 'banned'
-                    ? 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                    : 'bg-orange-100 text-orange-700 hover:bg-orange-200'
-                    }`}
-                >
-                  <Ban className="w-4 h-4" />
-                  <span>{user.status === 'banned' ? 'Débannir' : 'Bannir'}</span>
-                </button>
-              )}
-            </div>
-
-            {/* Admin Toggle (if confirmed) */}
-            {user.email_confirmed_at && (
+              {/* Promote/Demote Admin Button - Gradient Style */}
               <button
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
                   handleMakeAdmin(user);
                 }}
-                className={`w-full mt-3 flex items-center justify-center space-x-2 px-4 py-2.5 rounded-lg transition-all font-medium text-sm ${user.role === 'admin'
-                  ? 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  : 'bg-primary-50 text-primary-700 hover:bg-primary-100'
+                className={`flex items-center justify-center space-x-2 px-4 py-3 rounded-xl transition-all font-semibold text-sm min-h-[44px] ${user.role === 'admin'
+                  ? 'bg-gray-500 text-white hover:bg-gray-600'
+                  : 'bg-gradient-to-r from-green-500 to-blue-500 text-white hover:from-green-600 hover:to-blue-600 shadow-lg shadow-blue-500/30'
                   }`}
               >
                 <Shield className="w-4 h-4" />
-                <span>{user.role === 'admin' ? 'Retirer Admin' : 'Promouvoir Admin'}</span>
+                <span>{user.role === 'admin' ? 'Rétrograder' : 'Promouvoir'}</span>
               </button>
-            )}
+            </div>
           </div>
         ))}
       </div>

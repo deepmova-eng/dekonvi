@@ -71,6 +71,7 @@ export interface Database {
           phone: string | null
           location: string | null
           role: 'user' | 'admin'
+          status: 'active' | 'banned'
           rating: number
           total_ratings: number
           is_recommended: boolean
@@ -85,6 +86,7 @@ export interface Database {
           phone?: string | null
           location?: string | null
           role?: 'user' | 'admin'
+          status?: 'active' | 'banned'
           rating?: number
           total_ratings?: number
           is_recommended?: boolean
@@ -97,6 +99,7 @@ export interface Database {
           phone?: string | null
           location?: string | null
           role?: 'user' | 'admin'
+          status?: 'active' | 'banned'
           rating?: number
           total_ratings?: number
           is_recommended?: boolean
