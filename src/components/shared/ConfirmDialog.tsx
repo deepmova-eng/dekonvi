@@ -71,11 +71,11 @@ export function ConfirmDialog({
 
                     {/* Icon */}
                     <div className="flex justify-center mb-4">
-                        <div className={`${danger ? 'bg-red-100' : 'bg-orange-100'} p-4 rounded-full`}>
+                        <div className={`${danger ? 'bg-red-100' : 'bg-gray-100'} p-4 rounded-full`}>
                             {danger ? (
                                 <AlertTriangle className="w-12 h-12 text-red-600" />
                             ) : (
-                                <Archive className="w-12 h-12 text-orange-600" />
+                                <Archive className="w-12 h-12 text-gray-900" />
                             )}
                         </div>
                     </div>
@@ -102,8 +102,8 @@ export function ConfirmDialog({
                     <button
                         onClick={handleConfirm}
                         className={`flex-1 px-6 py-3 text-white font-semibold rounded-lg transition-all shadow-lg transform active:scale-95 ${danger
-                                ? 'bg-red-600 hover:bg-red-700'
-                                : 'bg-orange-600 hover:bg-orange-700'
+                            ? 'bg-red-600 hover:bg-red-700'
+                            : 'bg-gray-900 hover:bg-black'
                             }`}
                     >
                         {confirmText}

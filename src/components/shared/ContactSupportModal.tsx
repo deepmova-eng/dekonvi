@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { X, Send, AlertCircle } from 'lucide-react';
-import { useCreateTicket, TicketSubject } from '../../hooks/useSupport';
+import { X, Send, AlertCircle, Info } from 'lucide-react';
+import { useCreateTicket, useUserTickets, TicketSubject } from '../../hooks/useSupport';
 
 interface ContactSupportModalProps {
     onClose: () => void;
@@ -20,6 +20,15 @@ export default function ContactSupportModal({ onClose }: ContactSupportModalProp
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const { mutate: createTicket } = useCreateTicket();
+    const { data: userTickets = [] } = useUserTickets();
+
+    // Check if user has an existing open or in_progress ticket
+    const hasActiveTicket = userTickets.some(
+        (ticket) => ticket.status === 'open' || ticket.status === 'in_progress'
+    );
+    const activeTicket = userTickets.find(
+        (ticket) => ticket.status === 'open' || ticket.status === 'in_progress'
+    );
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -78,8 +87,8 @@ export default function ContactSupportModal({ onClose }: ContactSupportModalProp
                                     type="button"
                                     onClick={() => setSubject(option.value)}
                                     className={`flex items-center gap-3 p-4 rounded-xl border-2 transition-all ${subject === option.value
-                                            ? 'border-blue-500 bg-blue-50'
-                                            : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50'
+                                        ? 'border-blue-500 bg-blue-50'
+                                        : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50'
                                         }`}
                                 >
                                     <span className="text-2xl">{option.icon}</span>
@@ -108,16 +117,42 @@ export default function ContactSupportModal({ onClose }: ContactSupportModalProp
                     </div>
 
                     {/* Info banner */}
+                    {/* Benevolent Anti-Spam Message */}
                     <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-start gap-3">
-                        <AlertCircle className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                        <Info className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
                         <div className="text-sm text-blue-900">
-                            <p className="font-semibold mb-1">Notre équipe vous aidera</p>
+                            <p className="font-semibold mb-1">💡 Pour un traitement plus rapide</p>
                             <p>
-                                Vous recevrez une réponse par email dès que notre équipe aura traité votre demande.
-                                Vous pourrez aussi suivre l'évolution de votre ticket sur cette page.
+                                Merci de ne pas multiplier les demandes. Une seule suffit !
+                                Notre équipe traite les tickets par ordre d'arrivée sous 24h.
                             </p>
                         </div>
                     </div>
+
+                    {/* Active Ticket Warning (if exists) */}
+                    {hasActiveTicket && activeTicket && (
+                        <div className="bg-orange-50 border-2 border-orange-300 rounded-lg p-4 flex items-start gap-3">
+                            <AlertCircle className="h-5 w-5 text-orange-600 flex-shrink-0 mt-0.5" />
+                            <div className="flex-1">
+                                <p className="text-sm font-semibold text-orange-900 mb-1">
+                                    Vous avez déjà une demande en cours de traitement
+                                </p>
+                                <p className="text-sm text-orange-800 mb-2">
+                                    Ticket #{activeTicket.id.slice(0, 6).toUpperCase()} ({activeTicket.status === 'open' ? 'Ouvert' : 'En cours'})
+                                </p>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        onClose();
+                                        window.location.href = '/my-tickets';
+                                    }}
+                                    className="text-sm font-semibold text-orange-700 hover:text-orange-900 underline"
+                                >
+                                    → Voir mon ticket existant
+                                </button>
+                            </div>
+                        </div>
+                    )}
 
                 </form>
 
@@ -132,8 +167,9 @@ export default function ContactSupportModal({ onClose }: ContactSupportModalProp
                     </button>
                     <button
                         onClick={handleSubmit}
-                        disabled={!subject || !message.trim() || isSubmitting}
+                        disabled={!subject || !message.trim() || isSubmitting || hasActiveTicket}
                         className="flex items-center gap-2 px-6 md:px-8 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        title={hasActiveTicket ? "Vous avez déjà un ticket en cours" : ""}
                     >
                         {isSubmitting ? (
                             <>
