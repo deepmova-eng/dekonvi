@@ -9,7 +9,7 @@ import AdvertisementManager from '../components/admin/AdvertisementManager';
 import ReviewModeration from '../components/admin/ReviewModeration';
 import TicketsList from '../components/admin/TicketsList';
 import { useSupabase } from '../contexts/SupabaseContext';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, Navigate } from 'react-router-dom';
 import { useAdminStats } from '../hooks/useAdmin';
 
 type TabType = 'pending' | 'premium' | 'users' | 'pending_users' | 'reports' | 'support' | 'settings' | 'ads' | 'reviews';
@@ -17,8 +17,21 @@ type TabType = 'pending' | 'premium' | 'users' | 'pending_users' | 'reports' | '
 export default function AdminPanel() {
   const [activeTab, setActiveTab] = useState<TabType>('pending');
   const navigate = useNavigate();
-  const { signOut } = useSupabase();
+  const { signOut, profile, loading } = useSupabase();
   const { data: stats } = useAdminStats();
+
+  // 🛡️ SECURITY: Admin Guard - Redirect non-admin users
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-gray-600">Vérification des permissions...</div>
+      </div>
+    );
+  }
+
+  if (!profile || profile.role !== 'admin') {
+    return <Navigate to="/" replace />;
+  }
 
   const handleBack = () => {
     navigate('/');
