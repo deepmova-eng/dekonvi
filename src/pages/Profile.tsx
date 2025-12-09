@@ -3,6 +3,7 @@ import { Package, Settings, Camera, ChevronLeft, Shield, Star, CheckCircle2 } fr
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useSupabaseAuth } from '../hooks/useSupabaseAuth';
+import { useAdminStats } from '../hooks/useAdmin';
 import UserListings from '../components/profile/UserListings';
 import UserActivity from '../components/profile/UserActivity';
 import Login from './Login';
@@ -31,6 +32,9 @@ export default function Profile({
   const [showRegister, setShowRegister] = useState(false);
   const { user } = useSupabaseAuth();
   const navigate = useNavigate();
+
+  // Admin stats for badge
+  const { data: adminStats } = useAdminStats();
 
   const [uploading, setUploading] = useState(false);
 
@@ -259,10 +263,13 @@ export default function Profile({
             {userProfile?.role === 'admin' && (
               <button
                 onClick={() => navigate('/admin')}
-                className="p-2 hover:bg-gray-100 rounded-full transition-colors group"
+                className="p-2 hover:bg-gray-100 rounded-full transition-colors group relative"
                 title="Panel Admin"
               >
                 <Shield className="w-5 h-5 text-gray-600 group-hover:text-red-500" />
+                {adminStats?.totalPending > 0 && (
+                  <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full animate-pulse" />
+                )}
               </button>
             )}
 

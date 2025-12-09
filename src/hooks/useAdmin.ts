@@ -518,9 +518,88 @@ export function useDeleteAdvertisement() {
 // ═══════════════════════════════════════════════════════════════════
 
 /**
- * Hook pour les stats admin (dashboard)
+ * Hook pour les stats admin (dashboard) avec Realtime updates
  */
 export function useAdminStats() {
+    const queryClient = useQueryClient();
+
+    // Subscribe to Realtime changes
+    useEffect(() => {
+        const channels = [
+            // Channel pour profiles (nouveaux users)
+            supabase
+                .channel('admin_profiles_changes')
+                .on('postgres_changes',
+                    {
+                        event: '*',
+                        schema: 'public',
+                        table: 'profiles'
+                    },
+                    () => {
+                        queryClient.invalidateQueries({
+                            queryKey: ['admin', 'stats']
+                        });
+                    }
+                )
+                .subscribe(),
+
+            // Channel pour reports
+            supabase
+                .channel('admin_reports_changes')
+                .on('postgres_changes',
+                    {
+                        event: '*',
+                        schema: 'public',
+                        table: 'reports'
+                    },
+                    () => {
+                        queryClient.invalidateQueries({
+                            queryKey: ['admin', 'stats']
+                        });
+                    }
+                )
+                .subscribe(),
+
+            // Channel pour tickets
+            supabase
+                .channel('admin_tickets_changes')
+                .on('postgres_changes',
+                    {
+                        event: '*',
+                        schema: 'public',
+                        table: 'tickets'
+                    },
+                    () => {
+                        queryClient.invalidateQueries({
+                            queryKey: ['admin', 'stats']
+                        });
+                    }
+                )
+                .subscribe(),
+
+            // Channel pour listings
+            supabase
+                .channel('admin_listings_changes')
+                .on('postgres_changes',
+                    {
+                        event: '*',
+                        schema: 'public',
+                        table: 'listings'
+                    },
+                    () => {
+                        queryClient.invalidateQueries({
+                            queryKey: ['admin', 'stats']
+                        });
+                    }
+                )
+                .subscribe(),
+        ];
+
+        return () => {
+            channels.forEach(channel => supabase.removeChannel(channel));
+        };
+    }, [queryClient]);
+
     return useQuery({
         queryKey: ['admin', 'stats'],
         queryFn: async () => {
@@ -532,6 +611,8 @@ export function useAdminStats() {
                 pendingReviews,
                 premiumRequests,
                 reportedListings,
+                openTickets,
+                authUsers,
             ] = await Promise.all([
                 supabase.from('listings').select('id', { count: 'exact', head: true }),
                 supabase.from('listings').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
@@ -539,18 +620,40 @@ export function useAdminStats() {
                 supabase.from('reviews').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
                 supabase.from('premium_requests').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
                 supabase.from('reports').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
+                supabase.from('tickets').select('id', { count: 'exact', head: true }).eq('status', 'open'),
+                supabase.rpc('get_users_admin' as any),
             ]);
 
-            return {
+            // Calculate pending users (email not confirmed)
+            const pendingUsers = authUsers?.data?.filter((u: any) => !u.email_confirmed_at).length || 0;
+
+            const counts = {
                 totalListings: totalListings.count || 0,
                 pendingListings: pendingListings.count || 0,
                 totalUsers: totalUsers.count || 0,
                 pendingReviews: pendingReviews.count || 0,
                 premiumRequests: premiumRequests.count || 0,
                 reportedListings: reportedListings.count || 0,
+                openTickets: openTickets.count || 0,
+                pendingUsers,
+            };
+
+            // Calculate total pending for global badge
+            const totalPending =
+                counts.pendingListings +
+                counts.pendingReviews +
+                counts.premiumRequests +
+                counts.reportedListings +
+                counts.openTickets +
+                counts.pendingUsers;
+
+            return {
+                ...counts,
+                totalPending,
             };
         },
-        staleTime: 1000 * 60, // 1 minute
+        staleTime: 1000 * 30, // 30 secondes (needs fresh data)
         refetchInterval: 1000 * 60, // Auto-refetch chaque minute
+        refetchOnWindowFocus: true, // Refetch when window gets focus
     });
 }

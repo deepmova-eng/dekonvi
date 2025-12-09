@@ -18,6 +18,7 @@ import { categories } from '../../config/categories'
 import NotificationBell from '../notifications/NotificationBell'
 import UserAvatar from '../common/UserAvatar'
 import { useUnreadMessagesCount } from '../../hooks/useMessages'
+import { useAdminStats } from '../../hooks/useAdmin'
 import { supabase } from '../../lib/supabase'
 import './Navbar.css'
 
@@ -32,6 +33,9 @@ export default function Navbar() {
 
     // Unread messages count
     const { data: unreadMessagesCount = 0 } = useUnreadMessagesCount(user?.id)
+
+    // Admin stats for global badge
+    const { data: adminStats } = useAdminStats()
 
     // Detect scroll + progress bar
     useEffect(() => {
@@ -333,9 +337,24 @@ export default function Navbar() {
 
                                         {/* Admin menu - Only visible to admins */}
                                         {isAdmin && (
-                                            <Link to="/admin" className="dropdown-item">
+                                            <Link to="/admin" className="dropdown-item" style={{ position: 'relative' }}>
                                                 <Settings size={16} />
                                                 Administration
+                                                {adminStats?.totalPending > 0 && (
+                                                    <span
+                                                        style={{
+                                                            position: 'absolute',
+                                                            top: '50%',
+                                                            right: '12px',
+                                                            transform: 'translateY(-50%)',
+                                                            width: '8px',
+                                                            height: '8px',
+                                                            backgroundColor: '#ef4444',
+                                                            borderRadius: '50%',
+                                                            animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite'
+                                                        }}
+                                                    />
+                                                )}
                                             </Link>
                                         )}
 
