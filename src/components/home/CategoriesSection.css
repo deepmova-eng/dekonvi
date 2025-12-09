@@ -42,21 +42,24 @@
 }
 
 /* ========================================
-   📱 MOBILE: Scroll Horizontal Compact
+   📱 MOBILE: Ultra-Compact (Leboncoin Style)
    ======================================== */
 @media (max-width: 767px) {
     .categories-section-premium {
-        padding: 24px 0 32px 0;
+        padding: 6px 0 10px 0;
+        /* ✅ ULTRA-COMPACT - Réduit encore de 12px/16px */
         background: white;
     }
 
     .section-header {
-        margin-bottom: 16px;
+        margin-bottom: 4px;
+        /* ✅ MAXIMUM COMPACT - Réduit de 8px */
         padding: 0 16px;
     }
 
     .section-title {
-        font-size: 20px;
+        font-size: 18px;
+        /* ✅ Réduit de 20px */
         font-weight: 700;
         margin: 0;
         text-align: left;
@@ -74,7 +77,8 @@
         gap: 12px;
         overflow-x: auto;
         overflow-y: hidden;
-        padding: 0 16px 8px 16px;
+        padding: 0 16px 4px 16px;
+        /* ✅ Réduit de 8px */
         margin: 0;
 
         /* Scroll fluide */
