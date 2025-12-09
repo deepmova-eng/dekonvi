@@ -460,13 +460,15 @@ export default function ProductDetails() {
 
                   {/* Phone Button - Only if phone exists */}
                   {listing.contact_phone && !listing.hide_phone && (
-                    <button
+                    <a
+                      href={`tel:${listing.contact_phone.replace(/\s/g, '')}`}
                       className="btn btn--secondary flex-1 h-12"
+                      style={{ textDecoration: 'none' }}
                     >
                       <Phone size={20} />
                       <span className="hidden sm:inline">{listing.contact_phone}</span>
                       <span className="inline sm:hidden">Appeler</span>
-                    </button>
+                    </a>
                   )}
 
                   {/* Favorite Button */}
