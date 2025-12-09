@@ -10,6 +10,7 @@ import ReviewModeration from '../components/admin/ReviewModeration';
 import TicketsList from '../components/admin/TicketsList';
 import { useSupabase } from '../contexts/SupabaseContext';
 import { useNavigate, Link } from 'react-router-dom';
+import { useAdminStats } from '../hooks/useAdmin';
 
 type TabType = 'pending' | 'premium' | 'users' | 'pending_users' | 'reports' | 'support' | 'settings' | 'ads' | 'reviews';
 
@@ -17,6 +18,7 @@ export default function AdminPanel() {
   const [activeTab, setActiveTab] = useState<TabType>('pending');
   const navigate = useNavigate();
   const { signOut } = useSupabase();
+  const { data: stats } = useAdminStats();
 
   const handleBack = () => {
     navigate('/');
@@ -101,6 +103,11 @@ export default function AdminPanel() {
             >
               <Grid className="w-5 h-5 mr-2" />
               En attente
+              {stats?.pendingListings > 0 && (
+                <span className="ml-2 bg-red-500 text-white text-xs rounded-full px-2 py-0.5 animate-pulse">
+                  {stats.pendingListings}
+                </span>
+              )}
             </button>
             <button
               onClick={() => setActiveTab('premium')}
@@ -111,6 +118,11 @@ export default function AdminPanel() {
             >
               <Star className="w-5 h-5 mr-2" />
               Premium
+              {stats?.premiumRequests > 0 && (
+                <span className="ml-2 bg-red-500 text-white text-xs rounded-full px-2 py-0.5 animate-pulse">
+                  {stats.premiumRequests}
+                </span>
+              )}
             </button>
             <button
               onClick={() => setActiveTab('pending_users')}
@@ -121,6 +133,11 @@ export default function AdminPanel() {
             >
               <UserPlus className="w-5 h-5 mr-2" />
               Demandes
+              {stats?.pendingUsers > 0 && (
+                <span className="ml-2 bg-red-500 text-white text-xs rounded-full px-2 py-0.5 animate-pulse">
+                  {stats.pendingUsers}
+                </span>
+              )}
             </button>
             <button
               onClick={() => setActiveTab('users')}
@@ -141,6 +158,11 @@ export default function AdminPanel() {
             >
               <AlertTriangle className="w-5 h-5 mr-2" />
               Signalements
+              {stats?.reportedListings > 0 && (
+                <span className="ml-2 bg-red-500 text-white text-xs rounded-full px-2 py-0.5 animate-pulse">
+                  {stats.reportedListings}
+                </span>
+              )}
             </button>
             <button
               onClick={() => setActiveTab('support')}
@@ -151,6 +173,11 @@ export default function AdminPanel() {
             >
               <MessageCircle className="w-5 h-5 mr-2" />
               Support
+              {stats?.openTickets > 0 && (
+                <span className="ml-2 bg-red-500 text-white text-xs rounded-full px-2 py-0.5 animate-pulse">
+                  {stats.openTickets}
+                </span>
+              )}
             </button>
             <button
               onClick={() => setActiveTab('settings')}
