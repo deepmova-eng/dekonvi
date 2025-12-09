@@ -353,40 +353,72 @@ export default function UserManagement({ filter = 'confirmed' }: UserManagementP
               )}
             </div>
 
-            {/* Action Buttons - Premium 2-Column Layout */}
-            <div className="grid grid-cols-2 gap-3">
-              {/* Ban/Unban Button - Outline Style */}
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleBanUser(user);
-                }}
-                className={`flex items-center justify-center space-x-2 px-4 py-3 rounded-xl transition-all font-medium text-sm min-h-[44px] border-2 ${user.status === 'banned'
-                  ? 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
-                  : 'border-orange-300 bg-white text-orange-600 hover:bg-orange-50'
-                  }`}
-              >
-                <Ban className="w-4 h-4" />
-                <span>{user.status === 'banned' ? 'Débannir' : 'Bannir'}</span>
-              </button>
+            {/* Action Buttons - Conditional based on confirmation status */}
+            {!user.email_confirmed_at ? (
+              // PENDING USERS: Show Confirm + Delete buttons
+              <div className="grid grid-cols-2 gap-3">
+                {/* Confirm Button - Success Style */}
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleConfirmUser(user);
+                  }}
+                  className="flex items-center justify-center space-x-2 px-4 py-3 rounded-xl transition-all font-semibold text-sm min-h-[44px] bg-gradient-to-r from-blue-500 to-green-500 text-white hover:from-blue-600 hover:to-green-600 shadow-lg shadow-blue-500/30"
+                >
+                  <CheckCircle className="w-4 h-4" />
+                  <span>Valider</span>
+                </button>
 
-              {/* Promote/Demote Admin Button - Gradient Style */}
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleMakeAdmin(user);
-                }}
-                className={`flex items-center justify-center space-x-2 px-4 py-3 rounded-xl transition-all font-semibold text-sm min-h-[44px] ${user.role === 'admin'
-                  ? 'bg-gray-500 text-white hover:bg-gray-600'
-                  : 'bg-gradient-to-r from-green-500 to-blue-500 text-white hover:from-green-600 hover:to-blue-600 shadow-lg shadow-blue-500/30'
-                  }`}
-              >
-                <Shield className="w-4 h-4" />
-                <span>{user.role === 'admin' ? 'Rétrograder' : 'Promouvoir'}</span>
-              </button>
-            </div>
+                {/* Delete Button - Danger Style */}
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDeleteUser(user);
+                  }}
+                  className="flex items-center justify-center space-x-2 px-4 py-3 rounded-xl transition-all font-medium text-sm min-h-[44px] border-2 border-red-300 bg-white text-red-600 hover:bg-red-50"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  <span>Supprimer</span>
+                </button>
+              </div>
+            ) : (
+              // CONFIRMED USERS: Show Ban + Promote buttons
+              <div className="grid grid-cols-2 gap-3">
+                {/* Ban/Unban Button - Outline Style */}
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleBanUser(user);
+                  }}
+                  className={`flex items-center justify-center space-x-2 px-4 py-3 rounded-xl transition-all font-medium text-sm min-h-[44px] border-2 ${user.status === 'banned'
+                    ? 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
+                    : 'border-orange-300 bg-white text-orange-600 hover:bg-orange-50'
+                    }`}
+                >
+                  <Ban className="w-4 h-4" />
+                  <span>{user.status === 'banned' ? 'Débannir' : 'Bannir'}</span>
+                </button>
+
+                {/* Promote/Demote Admin Button - Gradient Style */}
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleMakeAdmin(user);
+                  }}
+                  className={`flex items-center justify-center space-x-2 px-4 py-3 rounded-xl transition-all font-semibold text-sm min-h-[44px] ${user.role === 'admin'
+                    ? 'bg-gray-500 text-white hover:bg-gray-600'
+                    : 'bg-gradient-to-r from-green-500 to-blue-500 text-white hover:from-green-600 hover:to-blue-600 shadow-lg shadow-blue-500/30'
+                    }`}
+                >
+                  <Shield className="w-4 h-4" />
+                  <span>{user.role === 'admin' ? 'Rétrograder' : 'Promouvoir'}</span>
+                </button>
+              </div>
+            )}
           </div>
         ))}
       </div>
