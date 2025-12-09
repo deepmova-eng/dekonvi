@@ -11,6 +11,8 @@ import ProtectedRoute from './components/ProtectedRoute';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import ForgotPassword from './pages/ForgotPassword';
+import UpdatePassword from './pages/UpdatePassword';
 import PendingValidation from './pages/PendingValidation';
 import MessagingPremium from './pages/MessagingPremium';
 import CreateListing from './pages/CreateListing';
@@ -158,6 +160,8 @@ export default function App() {
           <Route path="/" element={<Home onProductSelect={(id) => navigate(`/listings/${id}`)} />} />
           <Route path="/login" element={<Login onBack={() => navigate(-1)} onRegisterClick={() => navigate('/register')} />} />
           <Route path="/register" element={<Register onBack={() => navigate(-1)} onLoginClick={() => navigate('/login')} />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/update-password" element={<UpdatePassword />} />
           <Route path="/pending-validation" element={<PendingValidation />} />
           <Route path="/my-tickets" element={<MyTickets />} />
           <Route path="/categories" element={<Categories />} />

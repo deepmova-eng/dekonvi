@@ -232,6 +232,15 @@ export default function Login({ onBack, onRegisterClick }: LoginProps) {
               {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
             </button>
           </div>
+          {/* Forgot Password Link */}
+          <div className="text-right mt-2">
+            <a
+              href="/forgot-password"
+              className="text-sm font-medium text-green-600 hover:text-green-500 hover:underline cursor-pointer"
+            >
+              Mot de passe oublié ?
+            </a>
+          </div>
         </div>
 
         <button
