@@ -52,7 +52,10 @@
 .hero-slider {
     position: relative;
     width: 100%;
-    height: 400px;
+    aspect-ratio: 21 / 7;
+    /* ✅ Panorama desktop */
+    max-height: 400px;
+    /* Safety cap */
     border-radius: 24px;
     overflow: hidden;
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
@@ -95,27 +98,32 @@
     z-index: 2;
 }
 
-/* CONTENU DU SLIDE */
+/* CONTENU DU SLIDE - Réduit pour panorama */
 .slide-content {
     position: absolute;
-    bottom: 60px;
-    left: 48px;
+    bottom: 40px;
+    /* Réduit de 60px */
+    left: 32px;
+    /* Réduit de 48px */
     z-index: 3;
     color: white;
     max-width: 600px;
 }
 
 .slide-content h2 {
-    font-size: 56px;
+    font-size: 40px;
+    /* Réduit de 56px pour s'adapter */
     font-weight: 700;
-    margin: 0 0 12px 0;
+    margin: 0 0 8px 0;
+    /* Réduit spacing */
     text-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
     line-height: 1.1;
     text-transform: lowercase;
 }
 
 .slide-content p {
-    font-size: 24px;
+    font-size: 20px;
+    /* Réduit de 24px */
     margin: 0;
     font-weight: 500;
     text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
@@ -179,10 +187,11 @@
     height: 24px;
 }
 
-/* DOTS - En bas au centre, sur l'image */
+/* DOTS - En bas au centre, style Leboncoin fin */
 .slider-dots {
     position: absolute;
-    bottom: 24px;
+    bottom: 20px;
+    /* Réduit de 24px */
     left: 50%;
     transform: translateX(-50%);
     display: flex;
@@ -216,10 +225,13 @@
     border-color: rgba(255, 255, 255, 0.9);
 }
 
-/* RESPONSIVE - Mobile : Swipe uniquement */
+/* RESPONSIVE - Mobile : Format ultra-compact panorama */
 @media (max-width: 768px) {
     .hero-slider {
-        height: 300px;
+        aspect-ratio: 21 / 9;
+        /* ✅ Format panorama compact - TRÈS IMPORTANT */
+        max-height: 180px;
+        /* ✅ Réduit drastiquement de 300px */
         border-radius: 16px;
         margin: 24px 0;
         touch-action: pan-y;
@@ -227,17 +239,21 @@
     }
 
     .slide-content {
-        bottom: 80px;
-        left: 24px;
-        right: 24px;
+        bottom: 16px;
+        /* ✅ Très compact */
+        left: 16px;
+        right: 16px;
     }
 
     .slide-content h2 {
-        font-size: 36px;
+        font-size: 20px;
+        /* ✅ Réduit drastiquement de 36px */
+        margin: 0 0 4px 0;
     }
 
     .slide-content p {
-        font-size: 18px;
+        font-size: 12px;
+        /* ✅ Réduit de 18px */
     }
 
     /* ✅ MASQUE les flèches sur mobile (swipe only) */
@@ -245,20 +261,25 @@
         display: none;
     }
 
-    /* Dots restent visibles, plus petits */
+    /* Dots encore plus fins - Style Leboncoin */
     .slider-dots {
-        bottom: 16px;
-        gap: 6px;
+        bottom: 12px;
+        /* Réduit de 16px */
+        gap: 5px;
+        /* Réduit de 6px */
     }
 
     .dot {
-        width: 6px;
-        height: 6px;
-        border-width: 1.5px;
+        width: 5px;
+        /* ✅ Ultra fin - style Leboncoin */
+        height: 5px;
+        border-width: 1px;
+        /* ✅ Bordure très fine */
     }
 
     .dot.active {
-        width: 24px;
+        width: 18px;
+        /* ✅ Réduit de 24px */
     }
 }
 
