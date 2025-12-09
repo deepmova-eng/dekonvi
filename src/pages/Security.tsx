@@ -84,7 +84,7 @@ export default function Security() {
         passwordData.newPassword === passwordData.confirmPassword;
 
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-white">
             {/* Header */}
             <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
                 <div className="max-w-2xl mx-auto flex items-center justify-between p-4">
@@ -161,8 +161,8 @@ export default function Security() {
                             onClick={handleSavePassword}
                             disabled={!canSavePassword || loading}
                             className={`w-full py-3 px-4 rounded-lg font-medium flex items-center justify-center gap-2 transition-all ${canSavePassword && !loading
-                                    ? 'bg-primary-500 text-white hover:bg-primary-600'
-                                    : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                ? 'bg-primary-500 text-white hover:bg-primary-600'
+                                : 'bg-gray-200 text-gray-400 cursor-not-allowed'
                                 }`}
                         >
                             <Save className="w-5 h-5" />

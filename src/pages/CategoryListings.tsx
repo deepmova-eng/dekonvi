@@ -42,7 +42,7 @@ export default function CategoryListings() {
   // Show subcategories if none selected
   if (!selectedSubcategory) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-white">
         {/* Header */}
         <div className="sticky top-[72px] bg-white z-50 border-b">
           <div className="flex items-center justify-between p-4">
@@ -78,7 +78,7 @@ export default function CategoryListings() {
   const selectedSub = category.subcategories.find(s => s.id === selectedSubcategory);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-white">
       {/* Header */}
       <div className="sticky top-[72px] bg-white z-50">
         <div className="flex items-center justify-between p-4 border-b">

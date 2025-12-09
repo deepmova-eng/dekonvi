@@ -219,7 +219,7 @@ body {
   align-items: center;
   justify-content: center;
   padding: 24px;
-  background: #F9FAFB;
+  background: white;
 }
 
 /* Grid - 4 colonnes au lieu de 3 */
@@ -262,7 +262,7 @@ body {
   width: 100%;
   aspect-ratio: 1 / 1;
   overflow: hidden;
-  background: #F9FAFB;
+  background: white;
 }
 
 .product-image.square {
@@ -369,7 +369,7 @@ body {
 /* Layout principal Page Produit */
 .product-details-page {
   padding: 24px 0;
-  background: #F9FAFB;
+  background: white;
 }
 
 .product-layout {
@@ -538,7 +538,7 @@ body {
 }
 
 .btn-secondary:hover {
-  background: #F9FAFB;
+  background: white;
   border-color: #2DD181;
 }
 
@@ -596,9 +596,10 @@ body {
   align-items: flex-start;
   gap: 12px;
   padding: 12px;
-  background: #F9FAFB;
+  background: white;
   border-radius: 8px;
   margin-bottom: 12px;
+  border: 1px solid #E5E7EB;
 }
 
 .location-city {

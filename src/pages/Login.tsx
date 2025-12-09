@@ -260,7 +260,7 @@ export default function Login({ onBack, onRegisterClick }: LoginProps) {
 
       <button
         onClick={onRegisterClick}
-        className="mt-8 w-full py-4 bg-gray-50 rounded-xl flex items-center justify-between px-4 hover:bg-gray-100 transition-colors"
+        className="mt-8 w-full py-4 bg-white rounded-xl flex items-center justify-between px-4 hover:bg-gray-50/30 transition-colors border border-gray-200"
       >
         <span className="text-gray-900 font-medium">Créer un compte</span>
         <ArrowRight className="text-primary-500" />

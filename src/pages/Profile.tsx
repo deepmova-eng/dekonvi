@@ -187,7 +187,7 @@ export default function Profile({
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-white">
       {/* Header Profile */}
       <div className="bg-white p-4 sm:p-6">
         <div className="flex items-start justify-between gap-4 mb-6">

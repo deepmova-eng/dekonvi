@@ -85,7 +85,7 @@ export default function MessagingPremium() {
             </div>
 
             {/* DESKTOP VIEW - Side by side layout */}
-            <div className="hidden md:flex h-screen w-full bg-gray-50 overflow-hidden">
+            <div className="hidden md:flex h-screen w-full bg-white overflow-hidden">
                 {/* Sidebar - Fixed width */}
                 <div className="w-[380px] flex-shrink-0 border-r bg-white h-full overflow-hidden pt-16">
                     <ConversationSidebar

@@ -237,7 +237,7 @@ export default function SellerPublicProfile() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 pb-20">
+        <div className="min-h-screen bg-white pb-20">
 
             {/* Clean Header - Just Back Button + Report */}
             <div className="sticky top-0 z-40 bg-white border-b border-gray-200">
@@ -323,7 +323,7 @@ export default function SellerPublicProfile() {
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
 
                                 {/* Stat 1 - Annonces */}
-                                <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
+                                <div className="bg-white rounded-xl p-4 border border-gray-100">
                                     <div className="flex items-center space-x-2 mb-1">
                                         <Package className="h-6 w-6 text-gray-600" />
                                         <span className="text-xl font-bold text-gray-900">{listings.length}</span>
@@ -332,7 +332,7 @@ export default function SellerPublicProfile() {
                                 </div>
 
                                 {/* Stat 2 - Membre depuis */}
-                                <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
+                                <div className="bg-white rounded-xl p-4 border border-gray-100">
                                     <div className="flex items-center space-x-2 mb-1">
                                         <Calendar className="h-6 w-6 text-gray-600" />
                                         <span className="text-xl font-bold text-gray-900">
@@ -343,7 +343,7 @@ export default function SellerPublicProfile() {
                                 </div>
 
                                 {/* Stat 3 - Taux réponse */}
-                                <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
+                                <div className="bg-white rounded-xl p-4 border border-gray-100">
                                     <div className="flex items-center space-x-2 mb-1">
                                         <TrendingUp className="h-6 w-6 text-gray-600" />
                                         <span className="text-xl font-bold text-gray-900">
@@ -354,7 +354,7 @@ export default function SellerPublicProfile() {
                                 </div>
 
                                 {/* Stat 4 - Localisation */}
-                                <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
+                                <div className="bg-white rounded-xl p-4 border border-gray-100">
                                     <div className="flex items-center space-x-2 mb-1">
                                         <MapPin className="h-6 w-6 text-gray-600" />
                                         <span className="text-base font-bold text-gray-900 whitespace-normal break-words leading-tight">

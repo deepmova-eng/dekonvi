@@ -89,7 +89,7 @@ export default function PendingValidation() {
                     </div>
 
                     {/* Info Box */}
-                    <div className="bg-gray-50 rounded-xl p-4 mb-6">
+                    <div className="bg-white rounded-xl p-4 mb-6 border border-gray-100">
                         <p className="text-xs text-gray-600 text-center">
                             💡 <span className="font-medium">Astuce :</span> Vérifiez votre dossier spam et ajoutez-nous à vos contacts pour ne rien manquer
                         </p>
@@ -123,7 +123,7 @@ export default function PendingValidation() {
                                 {userTickets.slice(0, 3).map(ticket => (
                                     <div
                                         key={ticket.id}
-                                        className="p-3 bg-gray-50 rounded-lg border border-gray-200"
+                                        className="p-3 bg-white rounded-lg border border-gray-100"
                                     >
                                         <div className="flex items-center justify-between gap-2 mb-1">
                                             <span className={`inline-flex px-2 py-0.5 rounded text-xs font-bold ${statusColors[ticket.status]}`}>

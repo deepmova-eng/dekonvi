@@ -50,7 +50,7 @@ export default function Categories() {
   // Afficher les sous-catégories si une catégorie est sélectionnée
   if (selectedCategoryId && selectedCategory) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-white">
         {/* Header */}
         <div className="sticky top-[72px] bg-white z-50">
           <div className="flex items-center p-4 border-b">
@@ -64,7 +64,7 @@ export default function Categories() {
 
         {/* Subcategories List */}
         <div className="bg-white divide-y">
-          <div className="p-4 bg-gray-50">
+          <div className="p-4 bg-white">
             <p className="text-sm text-gray-600">Choisissez une sous-catégorie</p>
           </div>
           {selectedCategory.subcategories.map((sub) => {
@@ -89,7 +89,7 @@ export default function Categories() {
 
   // Afficher la liste des catégories
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-white">
       {/* Header */}
       <div className="sticky top-[72px] bg-white z-50">
         <div className="flex items-center justify-between p-4 border-b">
