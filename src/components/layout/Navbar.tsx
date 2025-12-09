@@ -34,9 +34,6 @@ export default function Navbar() {
     // Unread messages count
     const { data: unreadMessagesCount = 0 } = useUnreadMessagesCount(user?.id)
 
-    // Admin stats for global badge
-    const { data: adminStats } = useAdminStats()
-
     // Detect scroll + progress bar
     useEffect(() => {
         const handleScroll = () => {
@@ -73,6 +70,11 @@ export default function Navbar() {
 
         fetchUserRole()
     }, [user?.id])
+
+    // ✅ Admin stats ONLY for confirmed admins - prevents 400 errors
+    const { data: adminStats } = useAdminStats({
+        enabled: isAdmin
+    })
 
     // Close dropdowns on outside click
     useEffect(() => {

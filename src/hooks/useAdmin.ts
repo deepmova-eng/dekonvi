@@ -519,12 +519,16 @@ export function useDeleteAdvertisement() {
 
 /**
  * Hook pour les stats admin (dashboard) avec Realtime updates
+ * @param options - Optional params including 'enabled' flag
  */
-export function useAdminStats() {
+export function useAdminStats(options?: { enabled?: boolean }) {
     const queryClient = useQueryClient();
+    const enabled = options?.enabled ?? true; // Default to true for backwards compatibility
 
-    // Subscribe to Realtime changes
+    // Subscribe to Realtime changes ONLY if enabled
     useEffect(() => {
+        if (!enabled) return; // ✅ Don't subscribe if not enabled
+
         const channels = [
             // Channel pour profiles (nouveaux users)
             supabase
@@ -598,10 +602,11 @@ export function useAdminStats() {
         return () => {
             channels.forEach(channel => supabase.removeChannel(channel));
         };
-    }, [queryClient]);
+    }, [queryClient, enabled]); // ✅ Add enabled to dependencies
 
     return useQuery({
         queryKey: ['admin', 'stats'],
+        enabled, // ✅ Only fetch when enabled
         queryFn: async () => {
             // Fetch multiple stats en parallèle
             const [

@@ -33,9 +33,6 @@ export default function Profile({
   const { user } = useSupabaseAuth();
   const navigate = useNavigate();
 
-  // Admin stats for badge
-  const { data: adminStats } = useAdminStats();
-
   const [uploading, setUploading] = useState(false);
 
   // Fetch user profile data for ratings
@@ -56,6 +53,11 @@ export default function Profile({
 
     fetchProfile();
   }, [user]);
+
+  // ✅ Admin stats ONLY for admins - prevents 400 errors for non-admins
+  const { data: adminStats } = useAdminStats({
+    enabled: userProfile?.role === 'admin'
+  });
 
 
   const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {

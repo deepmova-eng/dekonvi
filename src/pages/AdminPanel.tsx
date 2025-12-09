@@ -18,7 +18,6 @@ export default function AdminPanel() {
   const [activeTab, setActiveTab] = useState<TabType>('pending');
   const navigate = useNavigate();
   const { signOut, profile, loading } = useSupabase();
-  const { data: stats } = useAdminStats();
 
   // 🛡️ SECURITY: Admin Guard - Redirect non-admin users
   if (loading) {
@@ -32,6 +31,9 @@ export default function AdminPanel() {
   if (!profile || profile.role !== 'admin') {
     return <Navigate to="/" replace />;
   }
+
+  // ✅ Admin stats ONLY called for confirmed admins (after guard)
+  const { data: stats } = useAdminStats();
 
   const handleBack = () => {
     navigate('/');
