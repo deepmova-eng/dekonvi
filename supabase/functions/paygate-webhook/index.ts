@@ -1,0 +1,146 @@
+import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+
+const corsHeaders = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+}
+
+interface PayGateWebhookPayload {
+    tx_reference: string
+    status: 'success' | 'failed' | 'pending'
+    amount: number
+    phone: string
+    network?: string
+}
+
+serve(async (req) => {
+    // Handle CORS preflight
+    if (req.method === 'OPTIONS') {
+        return new Response('ok', { headers: corsHeaders })
+    }
+
+    try {
+        // Parse webhook payload
+        const payload: PayGateWebhookPayload = await req.json()
+
+        console.log('PayGate Webhook received:', payload)
+
+        // TODO: Verify webhook signature (PayGate security)
+        // const signature = req.headers.get('X-PayGate-Signature')
+        // if (!verifySignature(payload, signature)) {
+        //   throw new Error('Invalid webhook signature')
+        // }
+
+        // Create Supabase admin client (service role)
+        const supabaseAdmin = createClient(
+            Deno.env.get('SUPABASE_URL') ?? '',
+            Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+            {
+                auth: {
+                    autoRefreshToken: false,
+                    persistSession: false,
+                },
+            }
+        )
+
+        // Find transaction by PayGate ref
+        const { data: transaction, error: transactionError } = await supabaseAdmin
+            .from('transactions')
+            .select('*, boost_packages(*)')
+            .eq('paygate_ref', payload.tx_reference)
+            .single()
+
+        if (transactionError || !transaction) {
+            console.error('Transaction not found:', payload.tx_reference)
+            throw new Error('Transaction introuvable')
+        }
+
+        // Check if transaction is not already processed
+        if (transaction.status !== 'pending') {
+            console.log('Transaction already processed:', transaction.id, transaction.status)
+            return new Response(
+                JSON.stringify({ message: 'Transaction already processed' }),
+                { headers: corsHeaders, status: 200 }
+            )
+        }
+
+        // Check if transaction has expired
+        if (new Date(transaction.expires_at) < new Date()) {
+            console.log('Transaction expired:', transaction.id)
+            await supabaseAdmin
+                .from('transactions')
+                .update({ status: 'expired' })
+                .eq('id', transaction.id)
+
+            throw new Error('Transaction expirée')
+        }
+
+        // Update transaction status
+        const newStatus = payload.status === 'success' ? 'success' : 'failed'
+
+        const { error: updateError } = await supabaseAdmin
+            .from('transactions')
+            .update({
+                status: newStatus,
+                error_message: payload.status === 'failed' ? 'Paiement refusé ou annulé' : null,
+            })
+            .eq('id', transaction.id)
+
+        if (updateError) {
+            console.error('Error updating transaction:', updateError)
+            throw new Error('Erreur lors de la mise à jour de la transaction')
+        }
+
+        // If payment success, boost the listing
+        if (payload.status === 'success') {
+            const boostDurationDays = transaction.boost_packages?.duration_days || 1
+            const premiumUntil = new Date(Date.now() + boostDurationDays * 24 * 60 * 60 * 1000)
+
+            const { error: listingError } = await supabaseAdmin
+                .from('listings')
+                .update({
+                    is_premium: true,
+                    premium_until: premiumUntil.toISOString(),
+                })
+                .eq('id', transaction.listing_id)
+
+            if (listingError) {
+                console.error('Error boosting listing:', listingError)
+                // Don't throw here - transaction is still marked as success
+            } else {
+                console.log(`Listing ${transaction.listing_id} boosted until ${premiumUntil}`)
+            }
+
+            // TODO: Send notification to user
+            // await sendNotification(transaction.user_id, {
+            //   title: 'Annonce boostée !',
+            //   body: `Votre annonce est maintenant en vedette pour ${boostDurationDays} jours.`,
+            // })
+        }
+
+        return new Response(
+            JSON.stringify({
+                success: true,
+                transaction_id: transaction.id,
+                status: newStatus,
+            }),
+            {
+                headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                status: 200,
+            }
+        )
+    } catch (error) {
+        console.error('Error in paygate-webhook:', error)
+        return new Response(
+            JSON.stringify({
+                success: false,
+                error: error.message || 'Une erreur est survenue',
+            }),
+            {
+                headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                status: 400,
+            }
+        )
+    }
+})
