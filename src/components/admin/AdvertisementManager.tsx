@@ -212,10 +212,10 @@ export default function AdvertisementManager() {
           {/* Desktop Image Upload */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Image Desktop * <span className="text-xs text-gray-500">(1920x630px - Paysage)</span>
+              Image Desktop * <span className="text-xs text-gray-500">(1920x640px - Panoramique 21:7)</span>
             </label>
             <div className="flex items-center space-x-4">
-              <div className="relative w-48 h-28 bg-gray-100 rounded-lg overflow-hidden">
+              <div className="relative w-56 h-[75px] bg-gray-100 rounded-lg overflow-hidden">
                 {(desktopPreview || editingAd?.image_url) && (
                   <img
                     src={desktopPreview || editingAd?.image_url}
@@ -234,8 +234,9 @@ export default function AdvertisementManager() {
                 </label>
               </div>
               <div className="text-sm text-gray-500">
-                <p className="font-medium">Format paysage</p>
-                <p className="text-xs">Recommandé : 1920x630px</p>
+                <p className="font-medium">Format panoramique</p>
+                <p className="text-xs">Standard : 1920x640px</p>
+                <p className="text-xs text-gray-400">Optimisé : 1280x427px</p>
               </div>
             </div>
           </div>
@@ -243,10 +244,10 @@ export default function AdvertisementManager() {
           {/* Mobile Image Upload */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Image Mobile <span className="text-xs text-gray-500">(800x1000px - Portrait/Carré - Optionnel)</span>
+              Image Mobile <span className="text-xs text-gray-500">(1050x450px - Panoramique 21:9 - Optionnel)</span>
             </label>
             <div className="flex items-center space-x-4">
-              <div className="relative w-32 h-40 bg-gray-100 rounded-lg overflow-hidden">
+              <div className="relative w-48 h-[83px] bg-gray-100 rounded-lg overflow-hidden">
                 {(mobilePreview || editingAd?.image_mobile_url) && (
                   <img
                     src={mobilePreview || editingAd?.image_mobile_url}
@@ -265,8 +266,9 @@ export default function AdvertisementManager() {
                 </label>
               </div>
               <div className="text-sm text-gray-500">
-                <p className="font-medium">Format portrait/carré</p>
-                <p className="text-xs">Recommandé : 800x1000px ou 800x800px</p>
+                <p className="font-medium">Format panoramique ultra-compact</p>
+                <p className="text-xs">Standard : 1050x450px</p>
+                <p className="text-xs text-gray-400">Optimisé : 800x343px</p>
                 <p className="text-xs mt-1 text-amber-600">Si vide, l\'image desktop sera utilisée</p>
               </div>
             </div>
