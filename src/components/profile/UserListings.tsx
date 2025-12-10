@@ -4,6 +4,7 @@ import { supabase } from '../../lib/supabase';
 import { useSupabase } from '../../contexts/SupabaseContext';
 import type { Database } from '../../types/supabase';
 import toast from 'react-hot-toast';
+import BoostModal from '../boost/BoostModal';
 import '../../product-card.css';
 
 type Listing = Database['public']['Tables']['listings']['Row'];
@@ -23,39 +24,15 @@ export default function UserListings({
   const [loading, setLoading] = useState(true);
 
   const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [requestingBoostId, setRequestingBoostId] = useState<string | null>(null);
-  const [pendingRequests, setPendingRequests] = useState<Set<string>>(new Set());
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+
+  // PayGate Boost Modal state
+  const [boostModalOpen, setBoostModalOpen] = useState(false);
+  const [selectedListingId, setSelectedListingId] = useState<string | null>(null);
 
   const { user } = useSupabase();
 
-  useEffect(() => {
-    if (!user) return;
-
-    const fetchPendingRequests = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('premium_requests')
-          .select('listing_id')
-          .eq('user_id', user.id)
-          .eq('status', 'pending');
-
-        if (error) {
-          // Silently fail if table doesn't exist or other error
-          console.warn('Could not fetch pending requests:', error.message);
-          return;
-        }
-
-        if (data) {
-          setPendingRequests(new Set(data.map(r => r.listing_id)));
-        }
-      } catch (error) {
-        console.error('Error fetching pending requests:', error);
-      }
-    };
-
-    fetchPendingRequests();
-  }, [user]);
+  // Removed: old premium_requests fetching - now using PayGate transactions
 
   useEffect(() => {
     if (!user) return;
@@ -137,7 +114,7 @@ export default function UserListings({
 
 
 
-  const [confirmAction, setConfirmAction] = useState<{ type: 'delete' | 'boost', id: string } | null>(null);
+  const [confirmAction, setConfirmAction] = useState<{ type: 'delete', id: string } | null>(null);
 
   const handleDeleteClick = (e: React.MouseEvent, listingId: string) => {
     e.stopPropagation();
@@ -146,7 +123,8 @@ export default function UserListings({
 
   const handleBoostClick = (e: React.MouseEvent, listingId: string) => {
     e.stopPropagation();
-    setConfirmAction({ type: 'boost', id: listingId });
+    setSelectedListingId(listingId);
+    setBoostModalOpen(true);
   };
 
   const confirmDelete = async () => {
@@ -190,87 +168,7 @@ export default function UserListings({
     }
   };
 
-  const confirmBoost = async () => {
-    if (!confirmAction || confirmAction.type !== 'boost') return;
-    const listingId = confirmAction.id;
-    setConfirmAction(null);
-
-    try {
-      setRequestingBoostId(listingId);
-
-      const boostData = {
-        listing_id: listingId,
-        user_id: user!.id,  // Fixed: use user_id instead of seller_id
-        duration: 30,
-        price: 5000
-      };
-
-      try {
-        const timeoutPromise = new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('Query timeout')), 5000)
-        );
-
-        const insertQuery = supabase
-          .from('premium_requests')
-          .insert(boostData);
-
-        const { error } = await Promise.race([
-          insertQuery,
-          timeoutPromise
-        ]) as any;
-
-        if (error) throw error;
-      } catch (error) {
-        console.error('Error creating boost request:', error);
-
-        // Fallback to REST API
-        if (error instanceof Error && error.message === 'Query timeout') {
-          console.log('Boost request timed out, using REST API fallback...');
-          const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-          const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-
-          const response = await fetch(`${supabaseUrl}/rest/v1/premium_requests`, {
-            method: 'POST',
-            headers: {
-              'apikey': supabaseAnonKey,
-              'Authorization': `Bearer ${supabaseAnonKey}`,
-              'Content-Type': 'application/json',
-              'Prefer': 'return=minimal'
-            },
-            body: JSON.stringify(boostData)
-          });
-
-          if (!response.ok) {
-            throw new Error(`REST API fallback failed: ${response.statusText}`);
-          }
-        } else {
-          throw error;
-        }
-      }
-
-      toast.success('Demande de boost envoyée avec succès');
-    } catch (error) {
-      console.error('Error requesting boost:', error);
-
-      // Check if error is duplicate boost attempt
-      const errorMessage = error instanceof Error ? error.message.toLowerCase() : '';
-      const isDuplicateError =
-        errorMessage.includes('duplicate') ||
-        errorMessage.includes('already exists') ||
-        errorMessage.includes('pending') ||
-        errorMessage.includes('unique');
-
-      if (isDuplicateError) {
-        toast('Cette annonce bénéficie déjà d\'un boost ou une demande est en cours.', {
-          icon: 'ℹ️',
-        });
-      } else {
-        toast.error('Erreur lors de la demande de boost');
-      }
-    } finally {
-      setRequestingBoostId(null);
-    }
-  };
+  // Removed confirmBoost - now using PayGate BoostModal
 
   if (loading) {
     return (
@@ -329,12 +227,7 @@ export default function UserListings({
                   </div>
                 )}
 
-                {pendingRequests.has(listing.id) && !listing.is_premium && (
-                  <div className="absolute top-3 left-3 bg-gray-100 text-gray-600 text-xs font-semibold px-2 py-1 rounded-full shadow-sm z-10 flex items-center gap-1">
-                    <Sparkles size={12} />
-                    <span>En attente</span>
-                  </div>
-                )}
+                {/* Removed pending badge - now handled by PayGate transactions */}
               </div>
 
               <div className="product-content">
@@ -394,40 +287,28 @@ export default function UserListings({
                       setOpenMenuId(null);
                       handleBoostClick(e, selectedListing.id);
                     }}
-                    disabled={
-                      requestingBoostId === selectedListing.id ||
-                      pendingRequests.has(selectedListing.id) ||
-                      selectedListing.is_premium
-                    }
-                    className={`w-full text-left px-4 py-4 font-medium flex items-center gap-4 rounded-xl transition-colors ${pendingRequests.has(selectedListing.id)
-                      ? 'bg-gray-50 text-gray-500 cursor-not-allowed'
-                      : selectedListing.is_premium
-                        ? 'bg-emerald-50 text-emerald-600 cursor-not-allowed'
-                        : 'text-gray-800 hover:bg-amber-50'
+                    disabled={selectedListing.is_premium}
+                    className={`w-full text-left px-4 py-4 font-medium flex items-center gap-4 rounded-xl transition-colors ${selectedListing.is_premium
+                      ? 'bg-emerald-50 text-emerald-600 cursor-not-allowed'
+                      : 'text-gray-800 hover:bg-amber-50'
                       } disabled:opacity-75`}
                   >
-                    <div className={`p-2 rounded-full ${pendingRequests.has(selectedListing.id)
-                      ? 'bg-gray-200 text-gray-500'
-                      : selectedListing.is_premium
-                        ? 'bg-emerald-100 text-emerald-600'
-                        : 'bg-amber-100 text-amber-600'
+                    <div className={`p-2 rounded-full ${selectedListing.is_premium
+                      ? 'bg-emerald-100 text-emerald-600'
+                      : 'bg-amber-100 text-amber-600'
                       }`}>
                       <Zap className="w-5 h-5" />
                     </div>
                     <div>
                       <span className="block text-base">
-                        {pendingRequests.has(selectedListing.id)
-                          ? 'En attente'
-                          : selectedListing.is_premium
-                            ? 'Boost Actif'
-                            : 'Booster l\'annonce'}
+                        {selectedListing.is_premium
+                          ? 'Boost Actif'
+                          : 'Booster l\'annonce'}
                       </span>
                       <span className="block text-xs text-gray-400 font-normal">
-                        {pendingRequests.has(selectedListing.id)
-                          ? 'Demande en cours de traitement'
-                          : selectedListing.is_premium
-                            ? 'Annonce déjà boostée'
-                            : 'Vendez plus vite'}
+                        {selectedListing.is_premium
+                          ? 'Annonce déjà boostée'
+                          : 'Paiement Mobile Money'}
                       </span>
                     </div>
                   </button>
@@ -482,18 +363,13 @@ export default function UserListings({
         );
       })()}
 
-      {/* Confirmation Modal */}
+      {/* Confirmation Modal - Delete Only */}
       {confirmAction && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg max-w-md w-full p-6 shadow-xl">
-            <h3 className="text-lg font-bold mb-4">
-              {confirmAction.type === 'delete' ? 'Supprimer l\'annonce' : 'Booster l\'annonce'}
-            </h3>
+            <h3 className="text-lg font-bold mb-4">Supprimer l'annonce</h3>
             <p className="text-gray-600 mb-6">
-              {confirmAction.type === 'delete'
-                ? 'Êtes-vous sûr de vouloir supprimer cette annonce ? Cette action est irréversible.'
-                : 'Le boost d\'annonce est un service payant qui coûte 5000 FCFA pour 30 jours. Votre annonce sera mise en avant. Voulez-vous continuer ?'
-              }
+              Êtes-vous sûr de vouloir supprimer cette annonce ? Cette action est irréversible.
             </p>
             <div className="flex justify-end space-x-3">
               <button
@@ -503,17 +379,37 @@ export default function UserListings({
                 Annuler
               </button>
               <button
-                onClick={confirmAction.type === 'delete' ? confirmDelete : confirmBoost}
-                className={`px-6 py-3 text-white font-bold rounded-lg transition-colors ${confirmAction.type === 'delete'
-                  ? 'bg-red-500 hover:bg-red-600'
-                  : 'bg-green-600 hover:bg-green-700'
-                  }`}
+                onClick={confirmDelete}
+                className="px-6 py-3 bg-red-500 text-white font-bold rounded-lg hover:bg-red-600 transition-colors"
               >
-                {confirmAction.type === 'delete' ? 'Supprimer' : 'Booster pour 5000 FCFA'}
+                Supprimer
               </button>
             </div>
           </div>
         </div>
+      )}
+
+      {/* PayGate Boost Modal */}
+      {boostModalOpen && selectedListingId && (
+        <BoostModal
+          isOpen={boostModalOpen}
+          listingId={selectedListingId}
+          onClose={() => {
+            setBoostModalOpen(false);
+            setSelectedListingId(null);
+            // Refresh listings to show updated premium status
+            if (user) {
+              supabase
+                .from('listings')
+                .select('*')
+                .eq('seller_id', user.id)
+                .order('created_at', { ascending: false })
+                .then(({ data }) => {
+                  if (data) setListings(data);
+                });
+            }
+          }}
+        />
       )}
     </div>
   );
