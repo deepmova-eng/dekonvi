@@ -257,35 +257,36 @@ export default function Navbar() {
                             <Link
                                 to="/messages"
                                 className={`nav-link ${isActive('/messages') ? 'active' : ''}`}
-                                style={{ position: 'relative' }}
                                 onMouseEnter={handleMessagesPrefetch}
                             >
-                                <MessageCircle size={18} />
+                                <span style={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }}>
+                                    <MessageCircle size={18} />
+                                    {unreadMessagesCount > 0 && (
+                                        <span
+                                            style={{
+                                                position: 'absolute',
+                                                top: '-6px',
+                                                right: '-8px',
+                                                backgroundColor: '#ef4444',
+                                                color: 'white',
+                                                borderRadius: '10px',
+                                                padding: '2px 6px',
+                                                fontSize: '11px',
+                                                fontWeight: '600',
+                                                minWidth: '18px',
+                                                height: '18px',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                border: '2px solid white',
+                                                boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                                            }}
+                                        >
+                                            {unreadMessagesCount > 9 ? '9+' : unreadMessagesCount}
+                                        </span>
+                                    )}
+                                </span>
                                 <span>Messages</span>
-                                {unreadMessagesCount > 0 && (
-                                    <span
-                                        style={{
-                                            position: 'absolute',
-                                            top: '-4px',
-                                            right: '-4px',
-                                            backgroundColor: '#ef4444',
-                                            color: 'white',
-                                            borderRadius: '10px',
-                                            padding: '2px 6px',
-                                            fontSize: '11px',
-                                            fontWeight: '600',
-                                            minWidth: '18px',
-                                            height: '18px',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            border: '2px solid white',
-                                            boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-                                        }}
-                                    >
-                                        {unreadMessagesCount > 9 ? '9+' : unreadMessagesCount}
-                                    </span>
-                                )}
                             </Link>
                         </>
                     )}
