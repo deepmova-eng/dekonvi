@@ -60,12 +60,20 @@ LANGUAGE plpgsql
 SECURITY DEFINER
 AS $$
 BEGIN
+    -- UPDATE with WHERE clause (required by PostgreSQL to avoid error 21000)
     UPDATE public.ticker_spot
     SET 
         current_listing_id = p_listing_id,
         owner_id = p_owner_id,
         claimed_at = NOW(),
-        updated_at = NOW();
+        updated_at = NOW()
+    WHERE true;  -- Required: WHERE clause prevents PostgreSQL error
+    
+    -- If no row exists, INSERT new one
+    IF NOT FOUND THEN
+        INSERT INTO public.ticker_spot (id, current_listing_id, owner_id, claimed_at, updated_at)
+        VALUES (gen_random_uuid(), p_listing_id, p_owner_id, NOW(), NOW());
+    END IF;
 END;
 $$;
 
