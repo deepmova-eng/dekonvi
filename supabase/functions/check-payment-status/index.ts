@@ -153,23 +153,48 @@ serve(async (req) => {
                 .eq('id', transaction_id)
         }
 
-        // Boost listing if successful
+        // Apply boost or update ticker based on package type
         if (shouldBoost) {
+            const packageName = transaction.boost_packages?.name
             const boostDurationDays = transaction.boost_packages?.duration_days || 1
-            const premiumUntil = new Date(Date.now() + boostDurationDays * 24 * 60 * 60 * 1000)
 
-            const { error: listingError } = await supabase
-                .from('listings')
-                .update({
-                    is_premium: true,
-                    premium_until: premiumUntil.toISOString(),
-                })
-                .eq('id', transaction.listing_id)
+            console.log(`✅ Payment confirmed - Package: ${packageName}`)
 
-            if (listingError) {
-                console.error('❌ Error boosting listing:', listingError)
-            } else {
-                console.log(`🚀 Listing ${transaction.listing_id} boosted until ${premiumUntil}`)
+            // CASE 1: Ticker Star - Update ticker spot
+            if (packageName === 'Ticker Star') {
+                console.log('🎯 TICKER STAR detected - Updating ticker...')
+
+                const { error: tickerError } = await supabase
+                    .rpc('update_ticker_spot', {
+                        p_listing_id: transaction.listing_id,
+                        p_owner_id: transaction.user_id
+                    })
+
+                if (tickerError) {
+                    console.error('❌ Error updating ticker:', tickerError)
+                } else {
+                    console.log(`👑 Ticker updated with listing ${transaction.listing_id}`)
+                }
+            }
+            // CASE 2: Regular Boost - Boost listing
+            else {
+                console.log('⚡ REGULAR BOOST - Boosting listing...')
+
+                const premiumUntil = new Date(Date.now() + boostDurationDays * 24 * 60 * 60 * 1000)
+
+                const { error: listingError } = await supabase
+                    .from('listings')
+                    .update({
+                        is_premium: true,
+                        premium_until: premiumUntil.toISOString(),
+                    })
+                    .eq('id', transaction.listing_id)
+
+                if (listingError) {
+                    console.error('❌ Error boosting listing:', listingError)
+                } else {
+                    console.log(`🚀 Listing ${transaction.listing_id} boosted until ${premiumUntil}`)
+                }
             }
         }
 
