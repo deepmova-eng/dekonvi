@@ -111,7 +111,9 @@ export function ConversationSidebar({ conversations, activeId, onSelect, current
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 8px 0 24px' }}>
                         <h2>Messages</h2>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <TickerDisplayOnly />
+                            <div className="md:hidden">
+                                <TickerDisplayOnly />
+                            </div>
                             <button
                                 className="header-menu-btn"
                                 onClick={() => setShowMenu(!showMenu)}

@@ -32,6 +32,9 @@ export default function Favorites({ onProductSelect }: FavoritesProps) {
             <ChevronLeft className="w-6 h-6 text-gray-600" />
           </button>
           <h1 className="text-2xl font-bold">Favoris</h1>
+          <div className="md:hidden">
+            <TickerDisplayOnly />
+          </div>
         </div>
         <div className="px-4 py-4">
           <div className="grid grid-cols-2 gap-2 md:grid-cols-3 md:gap-4 lg:grid-cols-4 xl:grid-cols-5">
@@ -59,6 +62,9 @@ export default function Favorites({ onProductSelect }: FavoritesProps) {
             <ChevronLeft className="w-6 h-6 text-gray-600" />
           </button>
           <h1 className="text-2xl font-bold">Favoris</h1>
+          <div className="md:hidden">
+            <TickerDisplayOnly />
+          </div>
         </div>
         <div className="px-4 py-4">
           <div className="flex flex-col items-center justify-center py-20 text-center">
@@ -93,7 +99,9 @@ export default function Favorites({ onProductSelect }: FavoritesProps) {
           <ChevronLeft className="w-6 h-6 text-gray-600" />
         </button>
         <h1 className="text-2xl font-bold">Favoris</h1>
-        <TickerDisplayOnly />
+        <div className="md:hidden">
+          <TickerDisplayOnly />
+        </div>
       </div>
 
       <div className="px-4 py-4 relative">

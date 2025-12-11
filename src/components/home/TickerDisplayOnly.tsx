@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, memo } from 'react';
 import { Crown } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
@@ -12,7 +12,7 @@ type TickerData = {
     } | null;
 };
 
-export default function TickerDisplayOnly() {
+function TickerDisplayOnly() {
     const [tickerData, setTickerData] = useState<TickerData | null>(null);
     const [loading, setLoading] = useState(true);
 
@@ -73,13 +73,16 @@ export default function TickerDisplayOnly() {
     // Check if text is long (needs scrolling)
     const isLongText = displayText.length > 40;
 
+    // Create stable key to prevent re-creation of animation DOM elements
+    const animationKey = hasListing ? `ticker-${hasListing.id}` : 'ticker-empty';
+
     // Render capsule content
     const CapsuleContent = ({ isMobile = false }: { isMobile?: boolean }) => (
         <>
             <Crown className={`${isMobile ? 'w-3 h-3' : 'w-3.5 h-3.5'} text-yellow-400 ${isMobile ? 'mr-1' : 'mr-2'} flex-shrink-0 animate-pulse z-10`} />
             <div className={`${isMobile ? 'text-[10px]' : 'text-xs'} font-medium min-w-0 flex-1 overflow-hidden whitespace-nowrap`}>
                 {isLongText ? (
-                    <div className={isMobile ? 'ticker-scroll-mobile' : 'ticker-scroll'}>
+                    <div key={animationKey} className={isMobile ? 'ticker-scroll-mobile' : 'ticker-scroll'}>
                         {displayText}
                     </div>
                 ) : (
@@ -129,6 +132,9 @@ export default function TickerDisplayOnly() {
                     display: inline-block;
                     padding-left: 100%;
                     animation: ticker-scroll 15s linear infinite;
+                    will-change: transform;
+                    -webkit-backface-visibility: hidden;
+                    backface-visibility: hidden;
                 }
 
                 .ticker-scroll:hover {
@@ -139,8 +145,14 @@ export default function TickerDisplayOnly() {
                     display: inline-block;
                     padding-left: 100%;
                     animation: ticker-scroll 12s linear infinite;
+                    will-change: transform;
+                    -webkit-backface-visibility: hidden;
+                    backface-visibility: hidden;
                 }
             `}</style>
         </>
     );
 }
+
+// Wrap with memo to prevent re-renders during scroll (which restarts CSS animation)
+export default memo(TickerDisplayOnly);
