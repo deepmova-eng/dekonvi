@@ -3,8 +3,8 @@ import { supabase } from '../lib/supabase';
 import type { Listing } from '../types/listing';
 
 /**
- * Hook to fetch premium listings with Realtime subscription
- * Automatically updates when listings are boosted/unboosted
+ * Hook to fetch premium listings with polling (migrated from Realtime)
+ * Automatically updates every 20s when tab is active
  */
 export function usePremiumListings() {
     const [listings, setListings] = useState<Listing[]>([]);
@@ -14,8 +14,16 @@ export function usePremiumListings() {
     useEffect(() => {
         let mounted = true;
 
-        // Initial fetch
+        // Fetch premium listings
         const fetchPremiumListings = async () => {
+            // Skip if tab inactive (smart polling)
+            if (document.hidden) {
+                console.log('💤 [PREMIUM] Tab inactive, skipping poll');
+                return;
+            }
+
+            console.log('🔄 [PREMIUM] Polling for premium listings...');
+
             try {
                 const { data, error: fetchError } = await supabase
                     .from('listings')
@@ -40,61 +48,29 @@ export function usePremiumListings() {
             }
         };
 
+        // Initial fetch
         fetchPremiumListings();
 
-        // Subscribe to realtime changes
-        const subscription = supabase
-            .channel('premium-listings-changes')
-            .on(
-                'postgres_changes',
-                {
-                    event: '*', // Listen to all events (INSERT, UPDATE, DELETE)
-                    schema: 'public',
-                    table: 'listings',
-                    filter: 'is_premium=eq.true', // Only premium listings
-                },
-                (payload) => {
-                    console.log('Premium listing changed:', payload);
+        // Poll every 20 seconds
+        console.log('⏱️ [PREMIUM] Setting up polling (20s)...');
+        const pollingInterval = setInterval(fetchPremiumListings, 20000); // 20s
 
-                    if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
-                        const newListing = payload.new as any; // Use any to handle DB snake_case
+        // Poll when tab becomes active
+        const handleVisibilityChange = () => {
+            if (!document.hidden) {
+                console.log('👀 [PREMIUM] Tab active, polling immediately...');
+                fetchPremiumListings();
+            }
+        };
 
-                        // Only add/update if it's premium AND active
-                        if (newListing.is_premium && newListing.status === 'active') {
-                            setListings((current) => {
-                                // Check if listing already exists
-                                const exists = current.find((l) => l.id === newListing.id);
-
-                                if (exists) {
-                                    // Update existing
-                                    return current.map((l) =>
-                                        l.id === newListing.id ? (newListing as Listing) : l
-                                    );
-                                } else {
-                                    // Add new (prepend to top)
-                                    return [newListing as Listing, ...current];
-                                }
-                            });
-                        } else if (!newListing.is_premium) {
-                            // If premium was removed, delete from list
-                            setListings((current) =>
-                                current.filter((l) => l.id !== newListing.id)
-                            );
-                        }
-                    } else if (payload.eventType === 'DELETE') {
-                        const oldListing = payload.old as { id: string };
-                        setListings((current) =>
-                            current.filter((l) => l.id !== oldListing.id)
-                        );
-                    }
-                }
-            )
-            .subscribe();
+        document.addEventListener('visibilitychange', handleVisibilityChange);
 
         // Cleanup
         return () => {
             mounted = false;
-            subscription.unsubscribe();
+            console.log('🛑 [PREMIUM] Cleaning up polling');
+            clearInterval(pollingInterval);
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
         };
     }, []);
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Edit, Trash2, Sparkles, MoreVertical, Zap } from 'lucide-react';
+import { Plus, Edit, Trash2, Sparkles, MoreVertical, Zap, Crown } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useSupabase } from '../../contexts/SupabaseContext';
 import type { Database } from '../../types/supabase';
@@ -29,6 +29,7 @@ export default function UserListings({
   // PayGate Boost Modal state
   const [boostModalOpen, setBoostModalOpen] = useState(false);
   const [selectedListingId, setSelectedListingId] = useState<string | null>(null);
+  const [tickerModalOpen, setTickerModalOpen] = useState(false);
 
   const { user } = useSupabase();
 
@@ -125,6 +126,12 @@ export default function UserListings({
     e.stopPropagation();
     setSelectedListingId(listingId);
     setBoostModalOpen(true);
+  };
+
+  const handleTickerClick = (e: React.MouseEvent, listingId: string) => {
+    e.stopPropagation();
+    setSelectedListingId(listingId);
+    setTickerModalOpen(true);
   };
 
   const confirmDelete = async () => {
@@ -314,6 +321,30 @@ export default function UserListings({
                   </button>
                 )}
 
+                {/* Option METTRE EN TICKER - King of the Hill */}
+                {selectedListing.status === 'active' && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setOpenMenuId(null);
+                      handleTickerClick(e, selectedListing.id);
+                    }}
+                    className="w-full text-left px-4 py-4 font-medium flex items-center gap-4 rounded-xl transition-colors text-gray-800 hover:bg-yellow-50"
+                  >
+                    <div className="p-2 bg-black rounded-full text-yellow-400">
+                      <Crown className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <span className="block text-base">
+                        👑 Mettre en Ticker
+                      </span>
+                      <span className="block text-xs text-gray-400 font-normal">
+                        200 FCFA - Visibilité maximale
+                      </span>
+                    </div>
+                  </button>
+                )}
+
                 {/* Option MODIFIER */}
                 <button
                   onClick={(e) => {
@@ -398,6 +429,30 @@ export default function UserListings({
             setBoostModalOpen(false);
             setSelectedListingId(null);
             // Refresh listings to show updated premium status
+            if (user) {
+              supabase
+                .from('listings')
+                .select('*')
+                .eq('seller_id', user.id)
+                .order('created_at', { ascending: false })
+                .then(({ data }) => {
+                  if (data) setListings(data);
+                });
+            }
+          }}
+        />
+      )}
+
+      {/* Ticker Modal - Same as Boost but will show Ticker package */}
+      {tickerModalOpen && selectedListingId && (
+        <BoostModal
+          isOpen={tickerModalOpen}
+          listingId={selectedListingId}
+          tickerOnly={true}
+          onClose={() => {
+            setTickerModalOpen(false);
+            setSelectedListingId(null);
+            // Refresh listings
             if (user) {
               supabase
                 .from('listings')

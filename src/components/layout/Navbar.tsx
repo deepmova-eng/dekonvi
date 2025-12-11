@@ -20,6 +20,7 @@ import UserAvatar from '../common/UserAvatar'
 import { useUnreadMessagesCount } from '../../hooks/useMessages'
 import { useAdminStats } from '../../hooks/useAdmin'
 import { supabase } from '../../lib/supabase'
+import TickerDisplayOnly from '../home/TickerDisplayOnly'
 import './Navbar.css'
 
 export default function Navbar() {
@@ -292,6 +293,9 @@ export default function Navbar() {
                     )}
                 </div>
 
+                {/* TICKER DISPLAY - Minimalist (no buttons) */}
+                <TickerDisplayOnly />
+
                 {/* ACTIONS (droite) - Ordre: Vendre → 🔔 → Avatar */}
                 <div className="flex items-center gap-6">
 
@@ -300,10 +304,10 @@ export default function Navbar() {
                             {/* Bouton CTA - Large & Prominent */}
                             <Link
                                 to="/create-premium"
-                                className="btn-publish hidden md:flex px-6 py-2.5 font-bold text-base min-w-[180px] justify-center"
+                                className="btn-publish hidden md:flex px-6 py-2.5 font-bold text-base min-w-[120px] justify-center whitespace-nowrap"
                             >
                                 <PlusCircle size={20} />
-                                <span>Déposer une annonce</span>
+                                <span>Publier</span>
                             </Link>
 
                             {/* Notifications - Milieu */}

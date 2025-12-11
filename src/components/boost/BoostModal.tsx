@@ -18,11 +18,12 @@ interface BoostModalProps {
     isOpen: boolean;
     listingId: string;
     onClose: () => void;
+    tickerOnly?: boolean; // If true, show only Ticker Star package
 }
 
 type PaymentStep = 'selection' | 'payment' | 'processing' | 'success' | 'error';
 
-export default function BoostModal({ isOpen, listingId, onClose }: BoostModalProps) {
+export default function BoostModal({ isOpen, listingId, onClose, tickerOnly = false }: BoostModalProps) {
     const [packages, setPackages] = useState<BoostPackage[]>([]);
     const [selectedPackage, setSelectedPackage] = useState<BoostPackage | null>(null);
     const [phoneNumber, setPhoneNumber] = useState('');
@@ -30,6 +31,7 @@ export default function BoostModal({ isOpen, listingId, onClose }: BoostModalPro
     const [countdown, setCountdown] = useState(120); // 120 seconds
     const [transactionId, setTransactionId] = useState<string | null>(null);
     const [errorMessage, setErrorMessage] = useState('');
+    const [loadingPackages, setLoadingPackages] = useState(true); // Prevent flash
 
     // Fetch packages on mount
     useEffect(() => {
@@ -74,19 +76,30 @@ export default function BoostModal({ isOpen, listingId, onClose }: BoostModalPro
     }, [step, transactionId]);
 
     const fetchPackages = async () => {
-        const { data, error } = await supabase
+        setLoadingPackages(true); // Start loading
+
+        // Build query - filter at database level to avoid flash
+        let query = supabase
             .from('boost_packages')
             .select('*')
-            .eq('active', true)
-            .order('price');
+            .eq('active', true);
+
+        // If tickerOnly, filter for Ticker Star at query level (no flash!)
+        if (tickerOnly) {
+            query = query.eq('name', 'Ticker Star');
+        }
+
+        const { data, error } = await query.order('price');
 
         if (error) {
             console.error('Error fetching packages:', error);
             toast.error('Erreur lors du chargement des offres');
+            setLoadingPackages(false);
             return;
         }
 
         setPackages(data || []);
+        setLoadingPackages(false); // Done loading
     };
 
     const resetModal = () => {
@@ -220,34 +233,40 @@ export default function BoostModal({ isOpen, listingId, onClose }: BoostModalPro
                                 Choisissez une offre pour mettre votre annonce en vedette
                             </p>
 
-                            <div className="grid gap-4">
-                                {packages.map((pkg) => (
-                                    <button
-                                        key={pkg.id}
-                                        onClick={() => {
-                                            setSelectedPackage(pkg);
-                                            setStep('payment');
-                                        }}
-                                        className={`relative p-4 border-2 rounded-xl text-left transition-all hover:border-primary-500 hover:shadow-lg ${selectedPackage?.id === pkg.id
-                                            ? 'border-primary-500 bg-primary-50'
-                                            : 'border-gray-200'
-                                            }`}
-                                    >
-                                        <div className="flex justify-between items-start">
-                                            <div>
-                                                <h3 className="font-bold text-lg">{pkg.name}</h3>
-                                                <p className="text-sm text-gray-600 mt-1">{pkg.description}</p>
-                                            </div>
-                                            <div className="text-right">
-                                                <div className="text-2xl font-bold text-primary-600">
-                                                    {pkg.price} FCFA
+                            {loadingPackages ? (
+                                <div className="flex justify-center py-8">
+                                    <Loader className="w-8 h-8 animate-spin text-primary-500" />
+                                </div>
+                            ) : (
+                                <div className="grid gap-4">
+                                    {packages.map((pkg) => (
+                                        <button
+                                            key={pkg.id}
+                                            onClick={() => {
+                                                setSelectedPackage(pkg);
+                                                setStep('payment');
+                                            }}
+                                            className={`relative p-4 border-2 rounded-xl text-left transition-all hover:border-primary-500 hover:shadow-lg ${selectedPackage?.id === pkg.id
+                                                ? 'border-primary-500 bg-primary-50'
+                                                : 'border-gray-200'
+                                                }`}
+                                        >
+                                            <div className="flex justify-between items-start">
+                                                <div>
+                                                    <h3 className="font-bold text-lg">{pkg.name}</h3>
+                                                    <p className="text-sm text-gray-600 mt-1">{pkg.description}</p>
                                                 </div>
-                                                <div className="text-sm text-gray-500">{pkg.duration_days} jour{pkg.duration_days > 1 ? 's' : ''}</div>
+                                                <div className="text-right">
+                                                    <div className="text-2xl font-bold text-primary-600">
+                                                        {pkg.price} FCFA
+                                                    </div>
+                                                    <div className="text-sm text-gray-500">{pkg.duration_days} jour{pkg.duration_days > 1 ? 's' : ''}</div>
+                                                </div>
                                             </div>
-                                        </div>
-                                    </button>
-                                ))}
-                            </div>
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
                         </div>
                     )}
 

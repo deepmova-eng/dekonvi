@@ -59,24 +59,29 @@ export default function AdvertisingSlider() {
     // Initial fetch
     fetchAdsWithRetry();
 
-    // Subscribe to changes
-    const channel = supabase
-      .channel('advertisements_changes')
-      .on('postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'advertisements',
-          filter: 'active=eq.true'
-        },
-        () => {
-          fetchAdsWithRetry();
-        }
-      )
-      .subscribe();
+    // Poll every 60 seconds (ads change rarely)
+    console.log('⏱️ [ADS] Setting up polling for ads (60s)...');
+
+    const pollAds = () => {
+      if (document.hidden) {
+        console.log('💤 [ADS] Tab inactive, skipping poll');
+        return;
+      }
+      console.log('🔄 [ADS] Polling for ad updates...');
+      fetchAdsWithRetry();
+    };
+
+    const pollingInterval = setInterval(pollAds, 60000); // 60s
+
+    const handleVisibilityChange = () => {
+      if (!document.hidden) fetchAdsWithRetry();
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
 
     return () => {
-      supabase.removeChannel(channel);
+      clearInterval(pollingInterval);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, [fetchAdsWithRetry]);
 
