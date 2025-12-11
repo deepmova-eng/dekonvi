@@ -3,7 +3,9 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const corsHeaders = {
     'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-application-name',
+    'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
+    'Access-Control-Allow-Credentials': 'true',
 }
 
 interface PaymentRequest {
@@ -58,7 +60,7 @@ serve(async (req) => {
         // Check listing exists and belongs to user
         const { data: listing, error: listingError } = await supabaseClient
             .from('listings')
-            .select('id, user_id')
+            .select('id, seller_id')
             .eq('id', listing_id)
             .single()
 
@@ -66,7 +68,7 @@ serve(async (req) => {
             throw new Error('Annonce introuvable')
         }
 
-        if (listing.user_id !== user.id) {
+        if (listing.seller_id !== user.id) {
             throw new Error('Cette annonce ne vous appartient pas')
         }
 
@@ -102,27 +104,27 @@ serve(async (req) => {
             throw new Error('Erreur lors de la création de la transaction')
         }
 
-        // Call PayGate API
+        // Call PayGate API (using official documentation format)
         const paygateApiKey = Deno.env.get('PAYGATE_API_KEY')
-        const paygateApiUrl = Deno.env.get('PAYGATE_API_URL') || 'https://api.paygateglobal.com/v1'
 
         if (!paygateApiKey) {
             throw new Error('Configuration PayGate manquante')
         }
 
-        const paygateResponse = await fetch(`${paygateApiUrl}/pay`, {
+        // PayGate expects auth_token in body, not as Bearer header
+        // URL is https://paygateglobal.com/api/v1/pay (not api.paygateglobal.com)
+        const paygateResponse = await fetch('https://paygateglobal.com/api/v1/pay', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${paygateApiKey}`,
             },
             body: JSON.stringify({
+                auth_token: paygateApiKey,
+                phone_number: phone_number,
                 amount: pkg.price,
-                currency: 'XOF', // FCFA
-                phone: phone_number,
+                identifier: transaction.id, // Unique identifier required by PayGate
                 network: network === 'tmoney' ? 'TMONEY' : 'FLOOZ',
-                description: `Boost ${pkg.name} - ${listing_id}`,
-                webhook_url: `${Deno.env.get('SUPABASE_URL')}/functions/v1/paygate-webhook`,
+                description: `Boost ${pkg.name} - Dekonvi`,
             }),
         })
 
@@ -143,6 +145,27 @@ serve(async (req) => {
         }
 
         const paygateData = await paygateResponse.json()
+
+        // PayGate returns: { tx_reference, status }
+        // status = 0: Success, 2: Invalid token, 4: Invalid params, 6: Duplicate
+        if (paygateData.status !== 0) {
+            const errorMessages: Record<number, string> = {
+                2: 'Jeton d\'authentification invalide',
+                4: 'Paramètres invalides',
+                6: 'Transaction déjà existante',
+            }
+            const errorMsg = errorMessages[paygateData.status] || 'Erreur inconnue'
+
+            await supabaseClient
+                .from('transactions')
+                .update({
+                    status: 'failed',
+                    error_message: errorMsg,
+                })
+                .eq('id', transaction.id)
+
+            throw new Error(errorMsg)
+        }
 
         // Update transaction with PayGate reference
         const { error: updateError } = await supabaseClient

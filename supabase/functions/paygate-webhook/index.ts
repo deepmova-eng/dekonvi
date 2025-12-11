@@ -3,7 +3,9 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const corsHeaders = {
     'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-application-name',
+    'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
+    'Access-Control-Allow-Credentials': 'true',
 }
 
 interface PayGateWebhookPayload {
@@ -15,16 +17,38 @@ interface PayGateWebhookPayload {
 }
 
 serve(async (req) => {
+    // 🔔 WEBHOOK CALLED - Log everything for debugging
+    console.log('🔔 ========== PAYGATE WEBHOOK CALLED ==========')
+    console.log('📅 Timestamp:', new Date().toISOString())
+    console.log('🌐 Method:', req.method)
+    console.log('📍 URL:', req.url)
+
     // Handle CORS preflight
     if (req.method === 'OPTIONS') {
+        console.log('✅ CORS Preflight - returning OK')
         return new Response('ok', { headers: corsHeaders })
     }
 
     try {
-        // Parse webhook payload
-        const payload: PayGateWebhookPayload = await req.json()
+        // Log all headers
+        const headers: Record<string, string> = {}
+        req.headers.forEach((value, key) => {
+            headers[key] = value
+        })
+        console.log('📨 Headers:', JSON.stringify(headers, null, 2))
 
-        console.log('PayGate Webhook received:', payload)
+        // Parse webhook payload
+        const rawBody = await req.text()
+        console.log('📦 Raw Body:', rawBody)
+
+        let payload: PayGateWebhookPayload
+        try {
+            payload = JSON.parse(rawBody)
+            console.log('✅ Parsed Payload:', JSON.stringify(payload, null, 2))
+        } catch (parseError) {
+            console.error('❌ JSON Parse Error:', parseError)
+            throw new Error('Invalid JSON payload')
+        }
 
         // TODO: Verify webhook signature (PayGate security)
         // const signature = req.headers.get('X-PayGate-Signature')
@@ -109,13 +133,13 @@ serve(async (req) => {
                 console.error('Error boosting listing:', listingError)
                 // Don't throw here - transaction is still marked as success
             } else {
-                console.log(`Listing ${transaction.listing_id} boosted until ${premiumUntil}`)
+                console.log(`Listing ${transaction.listing_id} boosted until ${premiumUntil} `)
             }
 
             // TODO: Send notification to user
             // await sendNotification(transaction.user_id, {
             //   title: 'Annonce boostée !',
-            //   body: `Votre annonce est maintenant en vedette pour ${boostDurationDays} jours.`,
+            //   body: `Votre annonce est maintenant en vedette pour ${ boostDurationDays } jours.`,
             // })
         }
 

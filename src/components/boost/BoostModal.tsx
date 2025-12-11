@@ -47,34 +47,29 @@ export default function BoostModal({ isOpen, listingId, onClose }: BoostModalPro
             }, 1000);
 
             return () => clearInterval(timer);
-        } else if (countdown === 0 && step === 'processing') {
-            // Timeout reached
-            setStep('error');
-            setErrorMessage('Délai expiré. Vérifiez votre téléphone ou réessayez.');
+        } else if (countdown === 0 && step === 'processing' && transactionId) {
+            // Countdown expired - check PayGate API as fallback
+            checkPaymentStatusFallback();
         }
-    }, [step, countdown]);
+    }, [step, countdown, transactionId]);
 
-    // Poll transaction status while processing
+    // Poll PayGate API status while processing (every 10 seconds)
     useEffect(() => {
         if (step === 'processing' && transactionId) {
-            const pollInterval = setInterval(async () => {
-                const { data } = await supabase
-                    .from('transactions')
-                    .select('status')
-                    .eq('id', transactionId)
-                    .single();
+            // First check immediately after 5 seconds (give time for PayGate to process)
+            const initialCheck = setTimeout(() => {
+                checkPaymentStatusFallback();
+            }, 5000);
 
-                if (data?.status === 'success') {
-                    setStep('success');
-                    clearInterval(pollInterval);
-                } else if (data?.status === 'failed' || data?.status === 'expired') {
-                    setStep('error');
-                    setErrorMessage('Paiement échoué ou expiré');
-                    clearInterval(pollInterval);
-                }
-            }, 3000); // Poll every 3 seconds
+            // Then check every 10 seconds
+            const pollInterval = setInterval(() => {
+                checkPaymentStatusFallback();
+            }, 10000); // Every 10 seconds
 
-            return () => clearInterval(pollInterval);
+            return () => {
+                clearTimeout(initialCheck);
+                clearInterval(pollInterval);
+            };
         }
     }, [step, transactionId]);
 
@@ -137,6 +132,57 @@ export default function BoostModal({ isOpen, listingId, onClose }: BoostModalPro
             setStep('error');
             setErrorMessage(error.message || 'Une erreur est survenue');
             toast.error(error.message || 'Erreur lors du paiement');
+        }
+    };
+
+    const checkPaymentStatusFallback = async () => {
+        if (!transactionId) return;
+
+        console.log('🔍 Checking payment status with PayGate...', transactionId);
+
+        try {
+            const { data, error } = await supabase.functions.invoke('check-payment-status', {
+                body: { transaction_id: transactionId },
+            });
+
+            if (error) {
+                console.error('Payment check error:', error);
+                // Don't show error during active polling, only log it
+                if (countdown === 0) {
+                    setStep('error');
+                    setErrorMessage('Impossible de vérifier le paiement. Contactez le support.');
+                }
+                return;
+            }
+
+            console.log('✅ Payment status from PayGate:', data.status);
+
+            if (data.status === 'success') {
+                setStep('success');
+                toast.success('Paiement confirmé ! Votre annonce est maintenant boostée.');
+            } else if (data.status === 'expired') {
+                setStep('error');
+                setErrorMessage('Délai de paiement expiré. Veuillez réessayer.');
+            } else if (data.status === 'cancelled') {
+                setStep('error');
+                setErrorMessage('Paiement annulé.');
+            } else if (data.status === 'pending') {
+                // Still pending - continue polling, don't show error
+                console.log('⏳ Payment still pending on PayGate, will check again...');
+
+                // Only show error if countdown expired
+                if (countdown === 0) {
+                    setStep('error');
+                    setErrorMessage('Délai expiré. Si vous avez payé, votre boost sera activé sous peu.');
+                }
+            }
+        } catch (err) {
+            console.error('Error checking payment status:', err);
+            // Only show error if countdown expired
+            if (countdown === 0) {
+                setStep('error');
+                setErrorMessage('Erreur lors de la vérification. Veuillez rafraîchir la page.');
+            }
         }
     };
 
