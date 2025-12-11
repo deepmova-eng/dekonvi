@@ -123,8 +123,8 @@ serve(async (req) => {
 
             console.log(`✅ Payment SUCCESS - Package: ${packageName}, Duration: ${durationDays} days`)
 
-            // CASE 1: Ticker Star (duration_days = 0)
-            if (packageName === 'Ticker Star' || durationDays === 0) {
+            // CASE 1: Ticker Star (detect by name only - duration_days is 1 in DB, not 0!)
+            if (packageName === 'Ticker Star') {
                 console.log('🎯 TICKER STAR detected - Updating ticker spot...')
 
                 // Call SQL function to update ticker spot
@@ -141,7 +141,7 @@ serve(async (req) => {
                     console.log(`👑 Ticker updated with listing ${transaction.listing_id}`)
                 }
             }
-            // CASE 2: Regular Boost (duration_days > 0)
+            // CASE 2: Regular Boost (all other packages)
             else {
                 console.log('⚡ REGULAR BOOST detected - Boosting listing...')
 
