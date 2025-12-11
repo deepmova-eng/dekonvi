@@ -116,30 +116,59 @@ serve(async (req) => {
             throw new Error('Erreur lors de la mise à jour de la transaction')
         }
 
-        // If payment success, boost the listing
+        // If payment success, apply boost or update ticker based on package type
         if (payload.status === 'success') {
-            const boostDurationDays = transaction.boost_packages?.duration_days || 1
-            const premiumUntil = new Date(Date.now() + boostDurationDays * 24 * 60 * 60 * 1000)
+            const packageName = transaction.boost_packages?.name
+            const durationDays = transaction.boost_packages?.duration_days || 0
 
-            const { error: listingError } = await supabaseAdmin
-                .from('listings')
-                .update({
-                    is_premium: true,
-                    premium_until: premiumUntil.toISOString(),
-                })
-                .eq('id', transaction.listing_id)
+            console.log(`✅ Payment SUCCESS - Package: ${packageName}, Duration: ${durationDays} days`)
 
-            if (listingError) {
-                console.error('Error boosting listing:', listingError)
-                // Don't throw here - transaction is still marked as success
-            } else {
-                console.log(`Listing ${transaction.listing_id} boosted until ${premiumUntil} `)
+            // CASE 1: Ticker Star (duration_days = 0)
+            if (packageName === 'Ticker Star' || durationDays === 0) {
+                console.log('🎯 TICKER STAR detected - Updating ticker spot...')
+
+                // Call SQL function to update ticker spot
+                const { error: tickerError } = await supabaseAdmin
+                    .rpc('update_ticker_spot', {
+                        p_listing_id: transaction.listing_id,
+                        p_owner_id: transaction.user_id
+                    })
+
+                if (tickerError) {
+                    console.error('❌ Error updating ticker:', tickerError)
+                    // Don't throw - transaction is still marked success
+                } else {
+                    console.log(`👑 Ticker updated with listing ${transaction.listing_id}`)
+                }
+            }
+            // CASE 2: Regular Boost (duration_days > 0)
+            else {
+                console.log('⚡ REGULAR BOOST detected - Boosting listing...')
+
+                const premiumUntil = new Date(Date.now() + durationDays * 24 * 60 * 60 * 1000)
+
+                const { error: listingError } = await supabaseAdmin
+                    .from('listings')
+                    .update({
+                        is_premium: true,
+                        premium_until: premiumUntil.toISOString(),
+                    })
+                    .eq('id', transaction.listing_id)
+
+                if (listingError) {
+                    console.error('❌ Error boosting listing:', listingError)
+                    // Don't throw here - transaction is still marked as success
+                } else {
+                    console.log(`⬆️ Listing ${transaction.listing_id} boosted until ${premiumUntil}`)
+                }
             }
 
             // TODO: Send notification to user
             // await sendNotification(transaction.user_id, {
-            //   title: 'Annonce boostée !',
-            //   body: `Votre annonce est maintenant en vedette pour ${ boostDurationDays } jours.`,
+            //   title: packageName === 'Ticker Star' ? 'Ticker Star activé !' : 'Annonce boostée !',
+            //   body: packageName === 'Ticker Star' 
+            //     ? 'Votre annonce est maintenant affichée dans le ticker !'
+            //     : `Votre annonce est maintenant en vedette pour ${durationDays} jours.`,
             // })
         }
 
