@@ -2,6 +2,7 @@ import React from 'react';
 import ProductCard from '../components/home/ProductCard';
 import { useFavoriteListings } from '../hooks/useFavorites';
 import { ChevronLeft, Heart } from 'lucide-react';
+import TickerDisplayOnly from '../components/home/TickerDisplayOnly';
 import { useNavigate } from 'react-router-dom';
 import { useSupabase } from '../contexts/SupabaseContext';
 import { ProductCardSkeleton } from '../components/common/ProductCardSkeleton';
@@ -92,6 +93,7 @@ export default function Favorites({ onProductSelect }: FavoritesProps) {
           <ChevronLeft className="w-6 h-6 text-gray-600" />
         </button>
         <h1 className="text-2xl font-bold">Favoris</h1>
+        <TickerDisplayOnly />
       </div>
 
       <div className="px-4 py-4 relative">

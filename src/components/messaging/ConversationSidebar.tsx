@@ -4,6 +4,7 @@ import { SidebarMenu } from './SidebarMenu'
 import { ConversationItem } from './ConversationItem'
 import { ConfirmDialog } from '../shared/ConfirmDialog'
 import { ConversationSkeleton } from '../common/ConversationSkeleton'
+import TickerDisplayOnly from '../home/TickerDisplayOnly'
 import './ConversationSidebar.css'
 
 interface Props {
@@ -109,12 +110,15 @@ export function ConversationSidebar({ conversations, activeId, onSelect, current
                 <div className="sidebar-header">
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 8px 0 24px' }}>
                         <h2>Messages</h2>
-                        <button
-                            className="header-menu-btn"
-                            onClick={() => setShowMenu(!showMenu)}
-                        >
-                            <MoreVertical size={20} />
-                        </button>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <TickerDisplayOnly />
+                            <button
+                                className="header-menu-btn"
+                                onClick={() => setShowMenu(!showMenu)}
+                            >
+                                <MoreVertical size={20} />
+                            </button>
+                        </div>
 
                         {/* Menu dropdown */}
                         {showMenu && (
