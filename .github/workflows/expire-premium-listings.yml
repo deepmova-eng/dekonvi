@@ -1,0 +1,54 @@
+name: Expire Premium Listings (Cron)
+
+# This workflow runs daily to expire premium listings
+# It calls the Supabase Edge Function that removes expired boosts
+
+on:
+  schedule:
+    # Run every day at 00:00 UTC
+    - cron: '0 0 * * *'
+  
+  # Allow manual trigger for testing
+  workflow_dispatch:
+
+jobs:
+  expire-premium-listings:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Call Supabase API to Expire Premium Listings
+        run: |
+          echo "🔄 Triggering premium listings expiration..."
+          
+          response=$(curl -s -w "\n%{http_code}" -X POST \
+            "${{ secrets.SUPABASE_URL }}/rest/v1/rpc/api_expire_premium_listings" \
+            -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
+            -H "Content-Type: application/json")
+          
+          http_code=$(echo "$response" | tail -n1)
+          body=$(echo "$response" | head -n-1)
+          
+          echo "📊 Response Status: $http_code"
+          echo "📦 Response Body: $body"
+          
+          if [ "$http_code" -eq 200 ]; then
+            echo "✅ Premium listings expiration completed successfully"
+            echo "$body" | jq '.'
+            exit 0
+          else
+            echo "❌ Failed to expire premium listings (HTTP $http_code)"
+            echo "$body"
+            exit 1
+          fi
+        env:
+          # These secrets must be configured in GitHub Settings > Secrets
+          # SUPABASE_URL: Your Supabase project URL (e.g., https://xxxxx.supabase.co)
+          # SUPABASE_ANON_KEY: Your Supabase anon/public API key
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+
+      - name: Log Execution
+        if: always()
+        run: |
+          echo "⏰ Execution time: $(date -u)"
+          echo "🎯 Task: Expire premium listings with premium_until < now()"
