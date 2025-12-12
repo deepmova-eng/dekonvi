@@ -18,6 +18,7 @@ import { StepPhotos } from '../components/create-listing/StepPhotos'
 import { StepPricing } from '../components/create-listing/StepPricing'
 import { StepReview } from '../components/create-listing/StepReview'
 import { uploadImages } from '../utils/uploadImages'
+import { PremiumPublishingModal } from '../components/common/PremiumPublishingModal'
 import './CreateListingPremium.css'
 import toast from 'react-hot-toast'
 
@@ -228,31 +229,6 @@ export default function CreateListingPremium() {
         try {
             setIsLoading(true)
 
-            // Message de progression pendant upload
-            const loadingMessage = document.createElement('div')
-            loadingMessage.id = 'upload-progress'
-            loadingMessage.style.cssText = `
-              position: fixed;
-              top: 50%;
-              left: 50%;
-              transform: translate(-50%, -50%);
-              background: white;
-              padding: 32px 48px;
-              border-radius: 16px;
-              box-shadow: 0 20px 60px rgba(0,0,3);\n              z-index: 9999;
-              text-align: center;
-            `
-            loadingMessage.innerHTML = `
-              <div style="font-size: 48px; margin-bottom: 16px;">📤</div>
-              <div style="font-size: 18px; font-weight: 600; color: #111827; margin-bottom: 8px;">
-                ${isEditing ? 'Envoi des modifications...' : 'Upload des photos en cours...'}
-              </div>
-              <div style="font-size: 14px; color: #6B7280;">
-                ${isEditing ? 'Sauvegarde en cours' : `Envoi de ${formData.images.length} photo(s) vers le serveur`}
-              </div>
-            `
-            document.body.appendChild(loadingMessage)
-
             // Vérifier authentification
             if (!user) {
                 alert('Vous devez être connecté pour publier une annonce')
@@ -320,10 +296,6 @@ export default function CreateListingPremium() {
 
                 if (error) throw error
 
-                // Remove loading message
-                const msg = document.getElementById('upload-progress')
-                if (msg) msg.remove()
-
                 // User feedback about re-moderation
                 toast('⏳ Vos modifications ont été envoyées pour validation.', {
                     duration: 6000,
@@ -352,10 +324,6 @@ export default function CreateListingPremium() {
 
                 if (error) throw error
 
-                // Remove loading message
-                const msg = document.getElementById('upload-progress')
-                if (msg) msg.remove()
-
                 // Success : clear draft et redirection (with replace to avoid back button loop)
                 localStorage.removeItem('draft_listing')
                 navigate(`/listings/${listing.id}`, { replace: true })
@@ -363,8 +331,6 @@ export default function CreateListingPremium() {
 
         } catch (error: any) {
             console.error('Error:', error)
-            const msg = document.getElementById('upload-progress')
-            if (msg) msg.remove()
             alert(`Erreur lors de ${isEditing ? 'la mise à jour' : 'la création'} de l'annonce: ${error.message || 'Erreur inconnue'}`)
         } finally {
             setIsLoading(false)
@@ -484,6 +450,9 @@ export default function CreateListingPremium() {
                     </div>
                 </div>
             </div>
+
+            {/* Premium Publishing Modal */}
+            {isLoading && <PremiumPublishingModal />}
         </div >
     )
 }
