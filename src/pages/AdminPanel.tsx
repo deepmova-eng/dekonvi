@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ChevronLeft, Grid, Star, Users, AlertTriangle, Settings, Sparkles, UserPlus, MessageCircle } from 'lucide-react';
+import { ChevronLeft, Grid, Star, Users, AlertTriangle, Settings, Sparkles, UserPlus, MessageCircle, Zap } from 'lucide-react';
 import PendingListings from '../components/admin/PendingListings';
 import PremiumRequests from '../components/admin/PremiumRequests';
 import UserManagement from '../components/admin/UserManagement';
@@ -8,11 +8,12 @@ import AdminSettings from '../components/admin/AdminSettings';
 import AdvertisementManager from '../components/admin/AdvertisementManager';
 import ReviewModeration from '../components/admin/ReviewModeration';
 import TicketsList from '../components/admin/TicketsList';
+import BoostMonitoring from '../components/admin/BoostMonitoring';
 import { useSupabase } from '../contexts/SupabaseContext';
 import { useNavigate, Link, Navigate } from 'react-router-dom';
 import { useAdminStats } from '../hooks/useAdmin';
 
-type TabType = 'pending' | 'premium' | 'users' | 'pending_users' | 'reports' | 'support' | 'settings' | 'ads' | 'reviews';
+type TabType = 'pending' | 'premium' | 'users' | 'pending_users' | 'reports' | 'support' | 'settings' | 'ads' | 'reviews' | 'boosts';
 
 export default function AdminPanel() {
   const [activeTab, setActiveTab] = useState<TabType>('pending');
@@ -58,6 +59,8 @@ export default function AdminPanel() {
         return <ReportedListings />;
       case 'support':
         return <TicketsList />;
+      case 'boosts':
+        return <BoostMonitoring />;
       case 'settings':
         return <AdminSettings />;
       case 'ads':
@@ -213,6 +216,16 @@ export default function AdminPanel() {
             >
               <Sparkles className="w-5 h-5 mr-2" />
               Publicités
+            </button>
+            <button
+              onClick={() => setActiveTab('boosts')}
+              className={`flex items-center py-4 border-b-2 ${activeTab === 'boosts'
+                ? 'border-primary-500 text-primary-500'
+                : 'border-transparent text-gray-500 hover:text-gray-700'
+                }`}
+            >
+              <Zap className="w-5 h-5 mr-2" />
+              Boosts
             </button>
             <button
               onClick={() => setActiveTab('reviews')}
