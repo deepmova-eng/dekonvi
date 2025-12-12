@@ -33,8 +33,8 @@ export function useIsFavorite(listingId: string | undefined) {
             return !!data
         },
         enabled: !!listingId && !!user,
-        staleTime: 1000 * 30, // ✅ Cache 30 seconds (was 0)
-        gcTime: 1000 * 60 * 5, // ✅ Keep in cache 5 minutes (was 10 min)
+        staleTime: 0, // ✅ Always refetch - ensures instant Realtime updates
+        gcTime: 1000 * 60 * 10, // ✅ Keep in cache 10 minutes
         refetchOnMount: 'always', // ✅ FORCE refetch EVERY time
         refetchOnWindowFocus: false, // ✅ Don't refetch on window focus
     })
@@ -123,8 +123,8 @@ export function useFavoriteListings(userId: string | undefined) {
             return listings || []
         },
         enabled: !!userId,
-        staleTime: 1000 * 30, // ✅ Cache 30 seconds (was 0)
-        gcTime: 1000 * 60 * 5, // ✅ Keep in cache 5 minutes
+        staleTime: 0, // ✅ Always refetch for instant updates
+        gcTime: 1000 * 60 * 10, // ✅ Keep in cache 10 minutes
         refetchOnMount: 'always', // ✅ ALWAYS refetch when navigating to Favorites page
         refetchOnWindowFocus: false,
     })

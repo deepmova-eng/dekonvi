@@ -135,7 +135,7 @@ export function useConversations(userId: string | undefined) {
     enabled: !!userId,
     staleTime: 0, // Always fetch fresh
     gcTime: 0, // Don't cache
-    refetchInterval: 5000, // ✅ Polling every 5 seconds (was 3s)
+    refetchInterval: 3000, // Polling every 3 seconds
     refetchOnMount: true,
     refetchOnWindowFocus: true,
   })
@@ -243,7 +243,7 @@ export function useMessages(conversationId: string | undefined) {
     enabled: !!conversationId,
     staleTime: 0, // Toujours fetch fresh
     gcTime: 0, // Pas de cache
-    refetchInterval: 5000, // ✅ Polling toutes les 5 secondes (was 2s)
+    refetchInterval: 2000, // Polling toutes les 2 secondes (plus rapide)
     refetchOnMount: true,
     refetchOnWindowFocus: true,
   })
@@ -450,7 +450,7 @@ export function useUnreadMessagesCount(
     },
     enabled: !!userId,
     staleTime: 0, // Always consider data stale so refetchInterval works properly
-    refetchInterval: options?.refetchInterval ?? 5000, // ✅ 5 seconds (was 3s)
+    refetchInterval: options?.refetchInterval ?? 3000, // 3 seconds for better responsiveness
     refetchOnWindowFocus: true, // Refetch when window regains focus
     refetchOnReconnect: true, // Refetch when internet reconnects
   })

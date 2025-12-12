@@ -3,7 +3,6 @@ import { supabase } from '../lib/supabase'
 import { toast } from 'react-hot-toast'
 import type { Database } from '../types/supabase'
 import { ListingService, CreateListingData } from '../services/listingService'
-import { queryKeys } from '../lib/queryKeys'
 
 type Listing = Database['public']['Tables']['listings']['Row'] & {
   profiles?: Database['public']['Tables']['profiles']['Row'] | Database['public']['Tables']['profiles']['Row'][] | null
@@ -26,7 +25,7 @@ export const fetchListing = async (id: string) => {
 // Hook pour récupérer toutes les annonces (avec filtres)
 export function useListings(filters?: ListingFilters) {
   return useQuery({
-    queryKey: queryKeys.listings.list(filters),
+    queryKey: ['listings', filters],
     queryFn: async () => {
       let query = supabase
         .from('listings')
@@ -74,7 +73,7 @@ export function useListings(filters?: ListingFilters) {
 // Hook pour une annonce spécifique
 export function useListing(id: string | undefined) {
   return useQuery({
-    queryKey: queryKeys.listings.detail(id!),
+    queryKey: ['listing', id],
     queryFn: () => fetchListing(id!),
     enabled: !!id,
     staleTime: 1000 * 60 * 10, // 10 minutes pour un listing individuel
@@ -97,7 +96,7 @@ const LISTINGS_PER_PAGE = 20;
 
 export function useInfiniteListings(filters?: ListingFilters) {
   return useInfiniteQuery({
-    queryKey: queryKeys.listings.infinite(filters),
+    queryKey: ['listings', 'infinite', filters],
     queryFn: async ({ pageParam = 0 }) => {
       let query = supabase
         .from('listings')
@@ -160,7 +159,7 @@ export function useInfiniteListings(filters?: ListingFilters) {
 // Hook pour les annonces d'un vendeur
 export function useSellerListings(sellerId: string | undefined) {
   return useQuery({
-    queryKey: queryKeys.listings.seller(sellerId!),
+    queryKey: ['listings', 'seller', sellerId],
     queryFn: async () => {
       if (!sellerId) throw new Error('Seller ID requis')
 
@@ -187,7 +186,7 @@ export function useCreateListing() {
     },
     onSuccess: () => {
       // Invalide tous les caches de listings
-      queryClient.invalidateQueries({ queryKey: queryKeys.listings.all })
+      queryClient.invalidateQueries({ queryKey: ['listings'] })
       // toast.success('Annonce créée avec succès !') // Déjà géré dans CreateListing.tsx ou ListingService
     },
     onError: (error: Error) => {
@@ -213,13 +212,13 @@ export function useUpdateListing() {
     },
     onMutate: async ({ id, updates }) => {
       // Cancel outgoing refetches
-      await queryClient.cancelQueries({ queryKey: queryKeys.listings.detail(id) })
+      await queryClient.cancelQueries({ queryKey: ['listing', id] })
 
       // Snapshot previous value
-      const previousListing = queryClient.getQueryData(queryKeys.listings.detail(id))
+      const previousListing = queryClient.getQueryData(['listing', id])
 
       // Optimistically update
-      queryClient.setQueryData(queryKeys.listings.detail(id), (old: any) => ({
+      queryClient.setQueryData(['listing', id], (old: any) => ({
         ...old,
         ...updates,
       }))
@@ -230,7 +229,7 @@ export function useUpdateListing() {
       // Rollback on error
       if (context?.previousListing) {
         queryClient.setQueryData(
-          queryKeys.listings.detail(variables.id),
+          ['listing', variables.id],
           context.previousListing
         )
       }
@@ -238,9 +237,9 @@ export function useUpdateListing() {
     },
     onSuccess: (data: any) => {
       if (data) {
-        queryClient.setQueryData(queryKeys.listings.detail(data.id), data)
+        queryClient.setQueryData(['listing', data.id], data)
       }
-      queryClient.invalidateQueries({ queryKey: queryKeys.listings.all })
+      queryClient.invalidateQueries({ queryKey: ['listings'] })
       toast.success('Annonce mise à jour !')
     },
   })
@@ -255,7 +254,7 @@ export function useDeleteListing() {
       await ListingService.delete(id)
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.listings.all })
+      queryClient.invalidateQueries({ queryKey: ['listings'] })
       toast.success('Annonce supprimée')
     },
     onError: () => {

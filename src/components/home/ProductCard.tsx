@@ -5,8 +5,6 @@ import { fr } from 'date-fns/locale';
 import { useQueryClient } from '@tanstack/react-query';
 import { useIsFavorite, useToggleFavorite } from '../../hooks/useFavorites';
 import { useSupabase } from '../../contexts/SupabaseContext';
-import { fetchListing } from '../../hooks/useListings'; // ✅ Centralized fetch
-import { queryKeys } from '../../lib/queryKeys';
 import { supabase } from '../../lib/supabase';
 import OptimizedImage from '../common/OptimizedImage';
 import type { Listing } from '../../types/listing';
@@ -24,14 +22,23 @@ export default function ProductCard({ listing }: ProductCardProps) {
 
     // ⚡ Prefetch au hover pour navigation instantanée
     const handleMouseEnter = () => {
-        // ✅ Prefetch listing details (using centralized function)
+        // Prefetch listing details
         queryClient.prefetchQuery({
-            queryKey: queryKeys.listings.detail(listing.id),
-            queryFn: () => fetchListing(listing.id),
+            queryKey: ['listing', listing.id],
+            queryFn: async () => {
+                const { data, error } = await supabase
+                    .from('listings')
+                    .select('*')
+                    .eq('id', listing.id)
+                    .single();
+
+                if (error) throw error;
+                return data;
+            },
             staleTime: 1000 * 60 * 5, // 5 minutes
         });
 
-        // ✅ Prefetch seller profile
+        // Prefetch seller profile
         const sellerId = (listing as any).seller_id || listing.sellerId;
         if (sellerId) {
             queryClient.prefetchQuery({
