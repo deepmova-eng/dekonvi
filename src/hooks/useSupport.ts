@@ -100,7 +100,7 @@ export function useTicketMessages(ticketId: string) {
             return data as TicketMessage[];
         },
         enabled: !!ticketId,
-        refetchInterval: 3000 // Auto-refresh every 3 seconds
+        refetchInterval: 5000 // ✅ Auto-refresh every 5 seconds (was 3s)
     });
 }
 

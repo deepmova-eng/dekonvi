@@ -301,30 +301,32 @@ export function usePremiumRequests() {
             if (error) throw error;
             if (!requests || requests.length === 0) return [];
 
-            // Fetch related data manually (PostgREST join syntax doesn't work in this config)
-            const enrichedRequests = await Promise.all(
-                requests.map(async (request) => {
-                    // Fetch user profile
-                    const { data: user } = await supabase
-                        .from('profiles')
-                        .select('name, email')
-                        .eq('id', request.user_id)
-                        .single();
+            // ✅ OPTIMIZED: Batch fetch instead of N+1 queries
+            // Collect unique IDs
+            const userIds = [...new Set(requests.map(r => r.user_id))];
+            const listingIds = [...new Set(requests.map(r => r.listing_id))];
 
-                    // Fetch listing
-                    const { data: listing } = await supabase
-                        .from('listings')
-                        .select('title')
-                        .eq('id', request.listing_id)
-                        .single();
+            // Batch fetch profiles and listings in parallel
+            const [profilesResult, listingsResult] = await Promise.all([
+                supabase
+                    .from('profiles')
+                    .select('id, name, email')
+                    .in('id', userIds),
+                supabase
+                    .from('listings')
+                    .select('id, title')
+                    .in('id', listingIds)
+            ]);
 
-                    return {
-                        ...request,
-                        user,
-                        listing
-                    };
-                })
-            );
+            const profiles = profilesResult.data || [];
+            const listings = listingsResult.data || [];
+
+            // Merge data in JavaScript (no additional queries)
+            const enrichedRequests = requests.map(request => ({
+                ...request,
+                user: profiles.find(p => p.id === request.user_id),
+                listing: listings.find(l => l.id === request.listing_id)
+            }));
 
             return enrichedRequests;
         },
