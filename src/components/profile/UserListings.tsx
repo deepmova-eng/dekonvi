@@ -177,12 +177,9 @@ export default function UserListings({
 
   // Removed confirmBoost - now using PayGate BoostModal
 
+  // Loading now handled by PageLoader in App.tsx
   if (loading) {
-    return (
-      <div className="flex justify-center items-center h-40">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500"></div>
-      </div>
-    );
+    return null; // PageLoader shows instead
   }
 
   if (!listings?.length) {

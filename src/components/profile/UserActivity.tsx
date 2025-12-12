@@ -10,14 +10,9 @@ export default function UserActivity() {
     const { stats, loading: statsLoading } = useUserStats(user?.id);
     const { activities, loading: activitiesLoading } = useUserActivity(user?.id);
 
-    const loading = statsLoading || activitiesLoading;
-
+    const loading = statsLoading || activitiesLoading;    // Loading handled by PageLoader
     if (loading) {
-        return (
-            <div className="flex items-center justify-center py-16">
-                <div className="w-8 h-8 border-4 border-primary-500 border-t-transparent rounded-full animate-spin"></div>
-            </div>
-        );
+        return null;
     }
 
     const hasActivity = activities.length > 0;

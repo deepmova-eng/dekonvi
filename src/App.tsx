@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { trackPageview } from './lib/analytics';
+import { useFaviconLoader } from './hooks/useFaviconLoader';
+import { PageLoader } from './components/common/PageLoader';
 import BottomNav from './components/layout/BottomNav';
 import Navbar from './components/layout/Navbar';
 import { useSupabase } from './contexts/SupabaseContext';
@@ -41,6 +43,37 @@ export default function App() {
   useEffect(() => {
     trackPageview();
   }, [location]);
+
+  // ✨ Animation favicon premium au retour sur l'onglet
+  useFaviconLoader();
+
+  // 🎨 Smart Page Loading - Affiche le loader uniquement si nécessaire
+  const [isLoading, setIsLoading] = useState(false);
+  const [shouldShowLoader, setShouldShowLoader] = useState(false);
+
+  useEffect(() => {
+    // Reset states
+    setIsLoading(true);
+    setShouldShowLoader(false);
+
+    // Si le chargement prend plus de 100ms, on affiche le loader
+    const showLoaderTimer = setTimeout(() => {
+      if (isLoading) {
+        setShouldShowLoader(true);
+      }
+    }, 100); // Délai avant d'afficher le loader
+
+    // Simule le temps de chargement de la page
+    const loadingTimer = setTimeout(() => {
+      setIsLoading(false);
+      setShouldShowLoader(false);
+    }, 800);
+
+    return () => {
+      clearTimeout(showLoaderTimer);
+      clearTimeout(loadingTimer);
+    };
+  }, [location.pathname]);
 
   // Fix viewport height mobile (clavier)
   useEffect(() => {
@@ -112,183 +145,194 @@ export default function App() {
     ));
 
   return (
-    <div className="min-h-screen bg-white pb-16 md:pb-0">
-      <Toaster
-        position="top-center"
-        toastOptions={{
-          duration: 4000,
-          style: {
-            background: '#FFFFFF',
-            color: '#1F2937',
-            border: '1px solid #E5E7EB',
-            borderRadius: '12px',
-            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
-            padding: '16px 20px',
-            fontSize: '14px',
-            fontWeight: '500',
-          },
-          success: {
-            iconTheme: {
-              primary: '#10B981',
-              secondary: '#FFFFFF',
-            },
-          },
-          error: {
-            iconTheme: {
-              primary: '#EF4444',
-              secondary: '#FFFFFF',
-            },
-          },
-          loading: {
-            iconTheme: {
-              primary: '#3B82F6',
-              secondary: '#FFFFFF',
-            },
-          },
+    <>
+      {/* Page Loader - Affiche uniquement si chargement > 200ms */}
+      {shouldShowLoader && <PageLoader />}
+
+      <div
+        className="min-h-screen bg-white pb-16 md:pb-0"
+        style={{
+          opacity: shouldShowLoader ? 0 : 1,
+          transition: 'opacity 0.4s ease-in-out'
         }}
-      />
+      >
+        <Toaster
+          position="top-center"
+          toastOptions={{
+            duration: 4000,
+            style: {
+              background: '#FFFFFF',
+              color: '#1F2937',
+              border: '1px solid #E5E7EB',
+              borderRadius: '12px',
+              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+              padding: '16px 20px',
+              fontSize: '14px',
+              fontWeight: '500',
+            },
+            success: {
+              iconTheme: {
+                primary: '#10B981',
+                secondary: '#FFFFFF',
+              },
+            },
+            error: {
+              iconTheme: {
+                primary: '#EF4444',
+                secondary: '#FFFFFF',
+              },
+            },
+            loading: {
+              iconTheme: {
+                primary: '#3B82F6',
+                secondary: '#FFFFFF',
+              },
+            },
+          }}
+        />
 
-      {/* Desktop Navigation - Hide on /messages for immersive chat */}
-      {!hideTopNav && <Navbar />}
+        {/* Desktop Navigation - Hide on /messages for immersive chat */}
+        {!hideTopNav && <Navbar />}
 
-      <main className={`${location.pathname.startsWith('/messages')
-        ? 'min-h-[calc(100vh-4rem)]'
-        : 'max-w-7xl mx-auto min-h-[calc(100vh-4rem)]'
-        } ${!hideTopNav ? 'pt-20' : 'pt-0'}`}>
-        <Routes>
-          {/* Public Routes */}
-          <Route path="/" element={<Home onProductSelect={(id) => navigate(`/listings/${id}`)} />} />
-          <Route path="/login" element={<Login onBack={() => navigate(-1)} onRegisterClick={() => navigate('/register')} />} />
-          <Route path="/register" element={<Register onBack={() => navigate(-1)} onLoginClick={() => navigate('/login')} />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/update-password" element={<UpdatePassword />} />
-          <Route path="/pending-validation" element={<PendingValidation />} />
-          <Route path="/my-tickets" element={<MyTickets />} />
-          <Route path="/categories" element={<Categories />} />
-          <Route path="/categories/:slug" element={<CategoryListings />} />
-          <Route path="/category/:categoryId" element={<CategoryPage />} />
-          <Route path="/listings/:id" element={<ProductDetails />} />
-          {/* Redirect old /profile/:id to /seller/:id */}
-          <Route path="/profile/:id" element={<Navigate to={`/seller/${window.location.pathname.split('/').pop()}`} replace />} />
-          <Route path="/seller/:id" element={<SellerPublicProfile />} />
+        <main className={`${location.pathname.startsWith('/messages')
+          ? 'min-h-[calc(100vh-4rem)]'
+          : 'max-w-7xl mx-auto min-h-[calc(100vh-4rem)]'
+          } ${!hideTopNav ? 'pt-20' : 'pt-0'}`}>
+          <Routes>
+            {/* Public Routes */}
+            <Route path="/" element={<Home onProductSelect={(id) => navigate(`/listings/${id}`)} />} />
+            <Route path="/login" element={<Login onBack={() => navigate(-1)} onRegisterClick={() => navigate('/register')} />} />
+            <Route path="/register" element={<Register onBack={() => navigate(-1)} onLoginClick={() => navigate('/login')} />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/update-password" element={<UpdatePassword />} />
+            <Route path="/pending-validation" element={<PendingValidation />} />
+            <Route path="/my-tickets" element={<MyTickets />} />
+            <Route path="/categories" element={<Categories />} />
+            <Route path="/categories/:slug" element={<CategoryListings />} />
+            <Route path="/category/:categoryId" element={<CategoryPage />} />
+            <Route path="/listings/:id" element={<ProductDetails />} />
+            {/* Redirect old /profile/:id to /seller/:id */}
+            <Route path="/profile/:id" element={<Navigate to={`/seller/${window.location.pathname.split('/').pop()}`} replace />} />
+            <Route path="/seller/:id" element={<SellerPublicProfile />} />
 
-          {/* Protected Routes - Require Login */}
-          <Route
-            path="/create-listing"
-            element={
-              <ProtectedRoute>
-                <CreateListing />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/create-premium"
-            element={
-              <ProtectedRoute>
-                <CreateListingPremium />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/messages"
-            element={
-              <ProtectedRoute>
-                <MessagingPremium />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/favorites"
-            element={
-              <ProtectedRoute>
-                <Favorites onProductSelect={(id) => navigate(`/listings/${id}`)} />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/profile"
-            element={
-              <ProtectedRoute>
-                <Profile
-                  onCreateListing={handleCreateListing}
-                  onEditingListing={(listing) => {
-                    if (listing) {
-                      // Navigate to CreateListingPremium.tsx with listing data in state
-                      navigate('/create-premium', { state: { listing } });
-                    }
-                  }}
-                  onProductSelect={(id) => navigate(`/listings/${id}`)}
-                />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/settings"
-            element={
-              <ProtectedRoute>
-                <UserSettings />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/settings/personal-info"
-            element={
-              <ProtectedRoute>
-                <PersonalInfo />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/settings/addresses"
-            element={
-              <ProtectedRoute>
-                <Addresses />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/settings/security"
-            element={
-              <ProtectedRoute>
-                <Security />
-              </ProtectedRoute>
-            }
-          />
+            {/* Protected Routes - Require Login */}
+            <Route
+              path="/create-listing"
+              element={
+                <ProtectedRoute>
+                  <CreateListing />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/create-premium"
+              element={
+                <ProtectedRoute>
+                  <CreateListingPremium />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/messages"
+              element={
+                <ProtectedRoute>
+                  <MessagingPremium />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/favorites"
+              element={
+                <ProtectedRoute>
+                  <Favorites onProductSelect={(id) => navigate(`/listings/${id}`)} />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/profile"
+              element={
+                <ProtectedRoute>
+                  <Profile
+                    onCreateListing={handleCreateListing}
+                    onEditingListing={(listing) => {
+                      if (listing) {
+                        // Navigate to CreateListingPremium.tsx with listing data in state
+                        navigate('/create-premium', { state: { listing } });
+                      }
+                    }}
+                    onProductSelect={(id) => navigate(`/listings/${id}`)}
+                  />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/settings"
+              element={
+                <ProtectedRoute>
+                  <UserSettings />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/settings/personal-info"
+              element={
+                <ProtectedRoute>
+                  <PersonalInfo />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/settings/addresses"
+              element={
+                <ProtectedRoute>
+                  <Addresses />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/settings/security"
+              element={
+                <ProtectedRoute>
+                  <Security />
+                </ProtectedRoute>
+              }
+            />
 
-          {/* Admin Routes - Require Admin Permission */}
-          <Route
-            path="/admin"
-            element={
-              <ProtectedRoute requireAdmin>
-                <AdminPanel />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin/monitoring"
-            element={
-              <ProtectedRoute requireAdmin>
-                <MonitoringDashboard />
-              </ProtectedRoute>
-            }
-          />
+            {/* Admin Routes - Require Admin Permission */}
+            <Route
+              path="/admin"
+              element={
+                <ProtectedRoute requireAdmin>
+                  <AdminPanel />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/monitoring"
+              element={
+                <ProtectedRoute requireAdmin>
+                  <MonitoringDashboard />
+                </ProtectedRoute>
+              }
+            />
 
-          {/* Fallback - 404 */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </main>
+            {/* Fallback - 404 */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </main>
 
-      {/* Mobile Bottom Navigation */}
-      {!hideNavigation && (
-        <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 ios-bottom-bar-fix z-50">
-          <BottomNav
-            activeTab={getActiveTab()}
-            orientation="horizontal"
-            sellerId={user?.id}
-            onCreateListing={handleCreateListing}
-          />
-        </div>
-      )}
-    </div>
+        {/* Mobile Bottom Navigation */}
+        {!hideNavigation && (
+          <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 ios-bottom-bar-fix z-50">
+            <BottomNav
+              activeTab={getActiveTab()}
+              orientation="horizontal"
+              sellerId={user?.id}
+              onCreateListing={handleCreateListing}
+            />
+          </div>
+        )}
+      </div>
+    </>
   );
 }

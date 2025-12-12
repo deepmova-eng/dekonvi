@@ -30,7 +30,7 @@ export default function Profile({
   const [userProfile, setUserProfile] = useState<any>(null);
   const [showLogin, setShowLogin] = useState(false);
   const [showRegister, setShowRegister] = useState(false);
-  const { user } = useSupabaseAuth();
+  const { user, loading: authLoading } = useSupabaseAuth();
   const navigate = useNavigate();
 
   const [uploading, setUploading] = useState(false);
@@ -160,6 +160,11 @@ export default function Profile({
       setShowRegister(false);
       setShowLogin(true);
     }} />;
+  }
+
+  // ⏳ Wait for auth to initialize before showing login prompt
+  if (authLoading) {
+    return null; // PageLoader shows during initial auth check
   }
 
   if (!user) {
