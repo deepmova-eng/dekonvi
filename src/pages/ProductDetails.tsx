@@ -155,11 +155,17 @@ export default function ProductDetails() {
 
   if (!listing) {
     return (
-      <div className="product-details-page">
-        <div className="container">
-          <div className="error-state">Annonce introuvable</div>
+      <>
+        <Helmet>
+          <meta name="robots" content="noindex" />
+          <title>Annonce introuvable | Dekonvi</title>
+        </Helmet>
+        <div className="product-details-page">
+          <div className="container">
+            <div className="error-state">Annonce introuvable</div>
+          </div>
         </div>
-      </div>
+      </>
     );
   }
 
